@@ -87,7 +87,6 @@
 		8019C53529D6CA54008C522F /* libReact-jsi.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libReact-jsi.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C53729D6CA54008C522F /* libReact-jsiexecutor.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libReact-jsiexecutor.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C53929D6CA54008C522F /* libReact-jsinspector.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libReact-jsinspector.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8019C53B29D6CA54008C522F /* libreact-native-photo-manipulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-photo-manipulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C53D29D6CA54008C522F /* libreact-native-safe-area-context.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-safe-area-context.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C53F29D6CA54008C522F /* libReact-perflogger.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libReact-perflogger.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C54129D6CA54008C522F /* libReact-RCTAnimation.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libReact-RCTAnimation.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -212,7 +211,6 @@
 				8019C53529D6CA54008C522F /* libReact-jsi.a */,
 				8019C53729D6CA54008C522F /* libReact-jsiexecutor.a */,
 				8019C53929D6CA54008C522F /* libReact-jsinspector.a */,
-				8019C53B29D6CA54008C522F /* libreact-native-photo-manipulator.a */,
 				8019C53D29D6CA54008C522F /* libreact-native-safe-area-context.a */,
 				8019C53F29D6CA54008C522F /* libReact-perflogger.a */,
 				8019C54129D6CA54008C522F /* libReact-RCTAnimation.a */,

@@ -212,9 +212,6 @@ PODS:
     - React-jsi (= 0.64.1)
     - React-perflogger (= 0.64.1)
   - React-jsinspector (0.64.1)
-  - react-native-photo-manipulator (1.2.7):
-    - React
-    - WCPhotoManipulator (~> 2.0.4)
   - react-native-safe-area-context (4.5.1):
     - RCT-Folly
     - RCTRequired
@@ -290,8 +287,6 @@ PODS:
     - SDWebImageWebPCoder
   - RNFS (2.20.0):
     - React-Core
-  - RNImageMarker (0.6.3):
-    - React
   - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
@@ -301,7 +296,6 @@ PODS:
   - SDWebImageWebPCoder (0.11.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.15)
-  - WCPhotoManipulator (2.0.4)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -322,7 +316,6 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
-  - react-native-photo-manipulator (from `../node_modules/react-native-photo-manipulator`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -338,7 +331,6 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeWebPFormat (from `../node_modules/react-native-webp-format`)
   - RNFS (from `../node_modules/react-native-fs`)
-  - RNImageMarker (from `../node_modules/react-native-image-marker`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -349,7 +341,6 @@ SPEC REPOS:
     - libwebp
     - SDWebImage
     - SDWebImageWebPCoder
-    - WCPhotoManipulator
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -382,8 +373,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
-  react-native-photo-manipulator:
-    :path: "../node_modules/react-native-photo-manipulator"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   React-perflogger:
@@ -414,8 +403,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-webp-format"
   RNFS:
     :path: "../node_modules/react-native-fs"
-  RNImageMarker:
-    :path: "../node_modules/react-native-image-marker"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNSVG:
@@ -427,7 +414,7 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: 7b423f9e248eae65987838148c36eec1dbfe0b53
-  FBReactNativeSpec: 7030bc47409cc708f5de47c09dd956ef52a7bb50
+  FBReactNativeSpec: b0a9695bf3ed1bdfa91f7882b34becaa9bb7de19
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
@@ -441,7 +428,6 @@ SPEC CHECKSUMS:
   React-jsi: 5de8204706bd872b78ea646aee5d2561ca1214b6
   React-jsiexecutor: 124e8f99992490d0d13e0649d950d3e1aae06fe9
   React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
-  react-native-photo-manipulator: dce015c4d602abb529931a40d9d34c277ee478b8
   react-native-safe-area-context: f5549f36508b1b7497434baa0cd97d7e470920d4
   React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
   React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a
@@ -457,14 +443,12 @@ SPEC CHECKSUMS:
   ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
   ReactNativeWebPFormat: f5f043cc9ded052e535c3869ec341f91ba5a67c5
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNImageMarker: 76cd113306bcfad2f74f78d83d5accfd50b4434a
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNSVG: c1e76b81c76cdcd34b4e1188852892dc280eb902
   SDWebImage: fd7e1a22f00303e058058278639bf6196ee431fe
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
-  WCPhotoManipulator: 45b7be19b75c9edf6d2b44f2f61dbc3673862a8f
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
 
-PODFILE CHECKSUM: 4bc8f94bd8c4f3d3b9488f3970364f9f303ad1e8
+PODFILE CHECKSUM: 926d24476ba670c9e0e2df9a45498b22561b123c
 
 COCOAPODS: 1.11.2
