@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-import { Alert, Image, NativeModules, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { NativeModules, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { downloadFile, DownloadFileOptions  } from 'react-native-fs';
-import ImageMarker from 'react-native-image-marker';
-import RNPhotoManipulator from 'react-native-photo-manipulator';
 
 
 
@@ -337,14 +335,3 @@ const DownloadFiles = async () => {
     console.log('res: ', res, path);
 })
 }
-
-const OverLayImgae = ()=> {
-const image = 'https://www.galvanizeaction.org/wp-content/uploads/2022/06/Wow-gif.gif';
-const overlay = '/Users/nouman/Downloads/Compressed/rn-input-extensions-blog-main/src/assets/watermark.jpeg';
-const position = { x: 5, y: 20 };
-
-RNPhotoManipulator.overlayImage(image, overlay, position).then(path => {
-    console.log(`Result image path: ${path}`);
-});
-}
-  

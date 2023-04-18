@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, SafeAreaView, TouchableOpacity, TextInput, FlatList, KeyboardAvoidingView, StatusBar, Platform, } from 'react-native';
+import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Downlad from "../assets/svgs/downlad.svg";
 import Pro from "../assets/svgs/pro.svg";
