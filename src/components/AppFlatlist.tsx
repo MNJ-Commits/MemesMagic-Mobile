@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, Image, Animated, Easing, } from 'react-native';
+import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 
@@ -14,12 +14,12 @@ import { RFValue } from 'react-native-responsive-fontsize';
       refreshControlProps={{ title:'Pull to refresh', titleColor:'#7C7E81', tintColor:'transparent'}}
       refreshing={response?.isFetching || isLoader}
       loading={response?.isFetching || isLoader }
-      LoadingView={
-        <Image
-          source={require('../assets/gifs/loader.gif')}
-          style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -80} : null]}
-        />
-      }
+      // LoadingView={
+      //   <Image
+      //     source={require('../assets/gifs/loader.gif')}
+      //     style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -70} : null]}
+      //   />
+      // }
       
       onRefresh={() => refresh() }
       contentContainerStyle={{margin:RFValue(10)}}
@@ -33,61 +33,57 @@ export default AppFlatlist
 
 const RenderItems = ({item, giphy, text, textPosition, textBackground, color, font, navigation}:any)=>{
   
-  
-  const uri: any =  giphy ? item?.template : 
-                    item?.template ? `http://18.143.157.105:3000${item?.template}` : 
-                    `http://18.143.157.105:3000${item.render}`
+  const customURI: any =  giphy ? item?.template : 
+                          item?.template ? `http://18.143.157.105:3000${item?.template}` : 
+                          `http://18.143.157.105:3000${item.render}`
   const width: number = item.size[0]
   const height: number = item.size[1]
-  const id: number = item.uid
+  const id: number = item.uid  
   
-  // &color=${color}
+  console.log('color: ', color);
+  
+  let BannerURI: string = ''
+    text ? BannerURI += `?text=${text}` : ''
+    BannerURI += `&w=${RFValue(400)}&h=${RFValue(400/width*height)}`
+    textBackground ? BannerURI += `&textBackground=${textBackground}` : ''
+    textPosition ? BannerURI += `&location=${textPosition}` : ''
+    font ? BannerURI += `&font=${font}` : ''
+    color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''    
+    console.log('color: ', color);
   return(
     <TouchableOpacity 
       key={item.index}
-      onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:uri, width:width, height:height, uid: id } )}} 
+      onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id } )}} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
-      
-      <View style={{width:'100%', height: RFValue(200/width*height),}} >               
+      < >               
         <Image
           key={item.index}
-          source={{ uri: uri }}
-          resizeMode={'cover'}
+          source={{ uri: customURI }}
+          resizeMode={'contain'}
           style={{ 
             width:'100%', 
-            height: RFValue(200/width*height),
-            borderRadius:RFValue(10), }}
+            height: RFValue(150/width*height),
+            borderRadius:RFValue(10),   
+          }}
         />
         {
           giphy && 
-            // <Image
-            //   key={item.index}
-            //   source={require('../assets/pngs/watermark.png')}
-            //   resizeMode={'contain'}
-            //   style={{ 
-            //     width:RFValue(20), 
-            //     height:RFValue(10),
-            //     position:'absolute',
-            //     bottom:RFValue(5),
-            //     left:RFValue(5),
-            //   }}
-            // />
             <Image 
               key={item.index}
-              source={{uri: `http://18.143.157.105:3000/renderer/banner?text=${text}&w=${180}&h=${RFValue(200/width*height)}&textBackground=${textBackground}&location=${textPosition}`}}
-              style={{width:'100%', height:RFValue(200/width*height), position:'absolute'}}
+              source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`}}
+              resizeMode={'contain'}
+              style={{
+                width:'100%', 
+                height:RFValue(150/width*height), 
+                position:'absolute',
+                borderRadius:RFValue(10),
+               }}
             />
 
           }
-      </View>
-      {/* <View style={
-        [{height: 30, alignItems:'center', position: 'absolute'},
-          textPosition=='top' ? {top:20, } :
-          {bottom:20}
-        ]}>
-        {giphy && <Text  style={{color:'#ffffff', fontSize:12, fontWeight:'bold' }}>{text}</Text>}
-      </View> */}
+          <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+      </>
 
     </TouchableOpacity>
   )

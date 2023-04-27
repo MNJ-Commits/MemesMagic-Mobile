@@ -89,27 +89,30 @@ const CustomScreen = ({navigation}:any) => {
         <View style={{ backgroundColor:'#FF439E', padding:RFValue(10), }}>
           {
             visibleSearch ?          
-              <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'100%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35)  }} >
-                  <TextInput
-                    ref={searchRef}
-                    editable={true}
-                    placeholderTextColor={'#ffffff'}
-                    onChangeText={(e: any) => { setText(e) }}
-                    placeholder={'Search'}
-                    style= {{ 
-                      fontSize: RFValue(15),
-                      fontFamily:'arial',
-                      width:'85%',
-                      alignSelf:'center',
-                      height: RFValue(40), 
-                      marginLeft: RFValue(10),
-                      color:'#000000',
-                    }}            
-                  />
-                  <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} >
-                    <Search width={RFValue(20)} height={RFValue(20)}  />
-                  </TouchableOpacity>
+            <View style={{flexDirection:'row', alignItems:'center', width:'100%', alignSelf:'center', }}>     
+              <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center', width:'80%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35.5)  }} >
+                {/* <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} > */}
+                  <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
+                {/* </TouchableOpacity> */}
+                <TextInput
+                  editable={true}
+                  placeholderTextColor={'#ffffff'}
+                  // onChangeText={(e: any) => { setText(e) }}
+                  placeholder={'Search'}
+                  style= {{ 
+                    fontSize: RFValue(15),
+                    fontFamily:'arial',
+                    width:'85%',
+                    alignSelf:'center',
+                    height: RFValue(40), 
+                    color:'#000000',
+                  }}            
+                />
               </View> 
+              <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} >
+                <Text style={{fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
+              </TouchableOpacity>
+            </View> 
               :
               <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',}} >
                 <TouchableOpacity onPress={()=>setVisibleSearch(true)} style={{borderWidth:1, borderColor:"#ffffff", width:RFValue(35), height:RFValue(35), padding:RFValue(6), borderRadius:RFValue(20), marginRight:RFValue(10) }}  >
@@ -148,11 +151,11 @@ const CustomScreen = ({navigation}:any) => {
             ref={inputRef}
             editable={true}
             multiline={true}
-            placeholderTextColor={'#25282D'}
+            placeholderTextColor={'#8d8d8d'}
             showSoftInputOnFocus={true}
             onTouchStart={()=>inputRef.current.focus()}
             onChangeText={(e: any) => { setText(e) }}
-            placeholder={'Your text here'}
+            placeholder={'Type your text here'}
             returnKeyType='next'
             style= {{ 
               width:'82%',
@@ -171,11 +174,11 @@ const CustomScreen = ({navigation}:any) => {
               getCustomRenders.mutate({ text:[`${text}`] })
             }}
           >
-            <RightTick width={RFValue(20)} height={RFValue(20)} />
-           {/* {loader ?
+           {loader ?
             <ActivityIndicator size={'small'} />
             :
-           } */}
+            <RightTick width={RFValue(20)} height={RFValue(20)} />
+           }
           </TouchableOpacity>
         </View> 
       </KeyboardAvoidingView>
