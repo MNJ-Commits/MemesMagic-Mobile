@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="79.48" height="85.204" viewBox="0 0 79.48 85.204">
-  <g id="Stroke_ON" data-name="Stroke ON" transform="translate(-709.55 -188.12)">
-    <ellipse id="Ellipse_2" data-name="Ellipse 2" cx="39.74" cy="41.13" rx="39.74" ry="41.13" transform="translate(709.55 188.12)" fill="#8733ff"/>
-    <text id="S" transform="translate(736.189 211.324)" fill="#fff" stroke="#000" stroke-linejoin="round" stroke-width="2" font-size="43.266" font-family="Helvetica" letter-spacing="0.075em"><tspan x="0" y="33">S</tspan></text>
+<svg xmlns="http://www.w3.org/2000/svg" width="79.48" height="82.26" viewBox="0 0 79.48 82.26">
+  <g id="Stroke_OFF" data-name="Stroke OFF" transform="translate(-709.55 -188.12)">
+    <ellipse id="Ellipse_2" data-name="Ellipse 2" cx="39.74" cy="41.13" rx="39.74" ry="41.13" transform="translate(709.55 188.12)" fill="#a8a9ab"/>
+    <text id="S" transform="translate(734.421 208.722)" fill="#fff" font-size="43.266" font-family="Helvetica" letter-spacing="0.075em"><tspan x="0" y="33">S</tspan></text>
   </g>
 </svg>

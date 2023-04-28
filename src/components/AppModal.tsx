@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 15,
     minHeight: 100,
+    marginTop: 20,
   },
   footer: {
     justifyContent: "center",

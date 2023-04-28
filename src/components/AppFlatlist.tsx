@@ -3,7 +3,7 @@ import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 
-  const AppFlatlist = ({data, giphy, refresh, isLoader, response, navigation, text, textPosition, textBackground, color, font }:any) =>{ 
+  const AppFlatlist = ({data, giphy, refresh, isLoader, response, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
       
   return (
     <MasonryList
@@ -24,14 +24,25 @@ import { RFValue } from 'react-native-responsive-fontsize';
       onRefresh={() => refresh() }
       contentContainerStyle={{margin:RFValue(10)}}
       showsVerticalScrollIndicator={false}
-      renderItem={ ({item}:any) => <RenderItems item={item} giphy={giphy} text={text} textPosition={textPosition} textBackground={textBackground} color={color} font={font} navigation={navigation} /> }
+      renderItem={ ({item}:any) =>
+       <RenderItems 
+        item={item} 
+        giphy={giphy} 
+        text={text} 
+        textPosition={textPosition}
+        textBackground={textBackground} 
+        textStroke={textStroke} 
+        color={color} 
+        font={font} 
+        navigation={navigation} />
+      }
     />
   )}
 
 export default AppFlatlist
 
 
-const RenderItems = ({item, giphy, text, textPosition, textBackground, color, font, navigation}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation}:any)=>{
   
   const customURI: any =  giphy ? item?.template : 
                           item?.template ? `http://18.143.157.105:3000${item?.template}` : 
@@ -39,18 +50,17 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, color, fo
   const width: number = item.size[0]
   const height: number = item.size[1]
   const id: number = item.uid  
-  
-  console.log('color: ', color);
-  
+    
   let BannerURI: string = ''
     text ? BannerURI += `?text=${text}` : ''
     BannerURI += `&w=${RFValue(400)}&h=${RFValue(400/width*height)}`
     textBackground ? BannerURI += `&textBackground=${textBackground}` : ''
+    textStroke ? BannerURI += `&s=${textStroke}` : ''
     textPosition ? BannerURI += `&location=${textPosition}` : ''
     font ? BannerURI += `&font=${font}` : ''
-    color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''    
-    console.log('color: ', color);
-  return(
+    color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
+
+    return(
     <TouchableOpacity 
       key={item.index}
       onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id } )}} 

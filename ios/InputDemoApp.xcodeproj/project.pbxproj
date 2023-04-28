@@ -12,7 +12,6 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3754C651AD98175508279987 /* libPods-InputDemoApp-InputDemoAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 12617D4F6E4DC2E016EB82FD /* libPods-InputDemoApp-InputDemoAppTests.a */; };
-		80B7248C29DC28050034B3E1 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 80B7248B29DC28050034B3E1 /* fonts */; };
 		80DF56F529CD863A0014E737 /* Mappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F429CD863A0014E737 /* Mappers.swift */; };
 		80DF56F729CD86860014E737 /* MessagesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F629CD86860014E737 /* MessagesManager.swift */; };
 		80DF56F929CD877B0014E737 /* MessagesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F829CD877B0014E737 /* MessagesManager.m */; };
@@ -104,7 +103,6 @@
 		8019C55929D6CA54008C522F /* libRNSVG.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libRNSVG.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C55B29D6CA54008C522F /* libWCPhotoManipulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libWCPhotoManipulator.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8019C55D29D6CA54008C522F /* libYoga.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libYoga.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		80B7248B29DC28050034B3E1 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
 		80DF56F429CD863A0014E737 /* Mappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mappers.swift; sourceTree = "<group>"; };
 		80DF56F629CD86860014E737 /* MessagesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesManager.swift; sourceTree = "<group>"; };
 		80DF56F829CD877B0014E737 /* MessagesManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessagesManager.m; sourceTree = "<group>"; };
@@ -247,7 +245,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				80B7248B29DC28050034B3E1 /* fonts */,
 				13B07FAE1A68108700A75B9A /* InputDemoApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* InputDemoAppTests */,
@@ -255,6 +252,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				21353B340489FD2B5FD8F421 /* Pods */,
+				E1A3426330614866922DB135 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -288,6 +286,13 @@
 			path = MessagesExtension;
 			sourceTree = "<group>";
 		};
+		E1A3426330614866922DB135 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -300,7 +305,6 @@
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
 				8BD8D9CF0782B18CED3F74DD /* [CP] Copy Pods Resources */,
-				3ABA51285CA7A0211F94A2D9 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -324,7 +328,6 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				96E3545926A752E20019AD0E /* Embed App Extensions */,
 				B0E8007484FC410032AE756E /* [CP] Copy Pods Resources */,
-				2C8AC36FC1C258EDD57996DB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -410,7 +413,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				80B7248C29DC28050034B3E1 /* fonts in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
@@ -461,40 +463,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		2C8AC36FC1C258EDD57996DB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp/Pods-InputDemoApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp/Pods-InputDemoApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp/Pods-InputDemoApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3ABA51285CA7A0211F94A2D9 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp-InputDemoAppTests/Pods-InputDemoApp-InputDemoAppTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp-InputDemoAppTests/Pods-InputDemoApp-InputDemoAppTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp-InputDemoAppTests/Pods-InputDemoApp-InputDemoAppTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		7762BB5699993E103FC19610 /* [CP] Copy Pods Resources */ = {

@@ -7,7 +7,10 @@ const usePostCustomRendersRequest = async (text: any)=>{
         const response = await fetch('http://18.143.157.105:3000/renderer/render', 
             {
                 method: 'POST',
-                body: JSON.stringify({ "text": text.text, "uids": [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" ] }),
+                body: JSON.stringify({
+                    "HQ": true, 
+                    "animated_sequence": true,
+                    "text": text.text, "uids": [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" ] }),
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
             })    
         const data = await response?.json()        

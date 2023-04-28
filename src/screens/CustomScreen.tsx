@@ -29,7 +29,7 @@ const CustomScreen = ({navigation}:any) => {
   });
   
   const getCustomRenders: any = usePostCustomRenders({
-    onSuccess(res) {
+    onSuccess(res) {      
       setAllGIF(res) 
       setLoader(false)
     },
@@ -40,8 +40,8 @@ const CustomScreen = ({navigation}:any) => {
 
   const refresh = () => {
     setAllGIF([]);    
+    setLoader(true)
     if(text.length!=0){
-      setLoader(true)
       getCustomRenders.mutate({ text:[`${text}`] })
     }
     else{
@@ -178,7 +178,8 @@ const CustomScreen = ({navigation}:any) => {
             <ActivityIndicator size={'small'} />
             :
             <RightTick width={RFValue(20)} height={RFValue(20)} />
-           }
+          }
+          {/* <RightTick width={RFValue(20)} height={RFValue(20)} /> */}
           </TouchableOpacity>
         </View> 
       </KeyboardAvoidingView>

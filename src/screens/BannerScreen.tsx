@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, } from 'react-native';
+import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Downlad from "../assets/svgs/downlad.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -8,10 +8,10 @@ import TextIcon from "../assets/svgs/text.svg";
 import BgColors from "../assets/svgs/bg-colors.svg";
 import STextEnable from "../assets/svgs/s-text-enable.svg";
 import STextDisable from "../assets/svgs/s-text-disable.svg";
-import GreenBoxB from "../assets/svgs/green-box-b.svg";
-import GreenBoxR from "../assets/svgs/green-box-r.svg";
-import GreenBoxL from "../assets/svgs/green-box-l.svg";
-import GreenBoxT from "../assets/svgs/green-box-t.svg";
+import YellowBoxB from "../assets/svgs/green-box-b.svg";
+import YellowBoxBB from "../assets/svgs/green-box-bb.svg";
+import YellowBoxT from "../assets/svgs/green-box-t.svg";
+import YellowBoxTB from "../assets/svgs/green-box-tb.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
 import AppFlatlist from '../components/AppFlatlist';
@@ -19,6 +19,7 @@ import { useGetBannerTemplates } from '../hooks/useGetBannerTemplates';
 import { useGetFonts } from '../hooks/useGetFonts';
 import { AppModal } from '../components/AppModal';
 import {Colors} from '../utils/colors'
+import { Fonts } from '../utils/Fonts';
 
 
 const BannerScreen = ({navigation}:any) => {
@@ -27,7 +28,7 @@ const BannerScreen = ({navigation}:any) => {
   const [sText, setSText] = useState<Boolean>(false)
   const [fontFamily, setFontFamily] = useState<string>('')  
   const [fontcolor, setFontcolor] = useState<string>('')  
-  const [textPosition, setTextPosition] = useState('bottom')
+  const [textPosition, setTextPosition] = useState('YellowBoxB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
   const [text, setText] = useState<string>('')
   const [loader, setLoader] = useState<Boolean>(false)
@@ -51,10 +52,12 @@ const BannerScreen = ({navigation}:any) => {
 
   const refresh = () => {
     setAllGIF([]); 
+    // setText('');
     setLoader(true)   
     getBannerTemplates.refetch()
   };
   
+  // console.log('TextPosition: ',textPosition);
   
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
@@ -134,14 +137,23 @@ const BannerScreen = ({navigation}:any) => {
               </TouchableOpacity>
               
               { 
-              textPosition=='top' ?  
-                <TouchableOpacity onPress={()=> setTextPosition('bottom')} >
-                  <GreenBoxT width={RFValue(25)} height={RFValue(25)} />
+              textPosition=='YellowBoxB' ?  
+                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxBB')} >
+                  <YellowBoxB width={RFValue(25)} height={RFValue(25)} />
                 </TouchableOpacity>
-                : 
-                <TouchableOpacity onPress={()=> setTextPosition('top')} >
-                  <GreenBoxB width={RFValue(25)} height={RFValue(25)} />
+              : textPosition=='YellowBoxBB' ?  
+                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxT')} >
+                  <YellowBoxBB width={RFValue(25)} height={RFValue(25)} />
                 </TouchableOpacity>
+              : textPosition=='YellowBoxT' ?  
+                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxTB')} >
+                  <YellowBoxT width={RFValue(25)} height={RFValue(25)} />
+                </TouchableOpacity>
+              : textPosition=='YellowBoxTB' ?
+                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxB')} >
+                  <YellowBoxTB width={RFValue(25)} height={RFValue(25)} />
+                </TouchableOpacity>
+              : null
               }
             
             </View>
@@ -159,7 +171,8 @@ const BannerScreen = ({navigation}:any) => {
           navigation={navigation}
           text={text}
           textPosition={textPosition}
-          textBackground = {sText} 
+          textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
+          textStroke={sText}
           color = {fontcolor} 
           font = {fontFamily}
         />
@@ -171,6 +184,7 @@ const BannerScreen = ({navigation}:any) => {
           <TextInput
             editable={true}
             multiline={true}
+            // value={text}
             placeholderTextColor={'#25282D'}
             onChangeText={(e: any) => { setText(e) }}
             placeholder={'Type your text here'}
@@ -185,15 +199,19 @@ const BannerScreen = ({navigation}:any) => {
               color:'#000000',  
             }}          
           />
-          <TouchableOpacity onPress={()=> {
-            setLoader(true);
-            getBannerTemplates.refetch()}} 
+          <TouchableOpacity 
+            disabled={text.length==0}
+            onPress={()=> {
+              setLoader(true);
+              getBannerTemplates.refetch()
+            }} 
           >
             {loader ?
               <ActivityIndicator size={'small'} />
               :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
             }
+            {/* <RightTick width={RFValue(20)} height={RFValue(20)} /> */}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -204,7 +222,7 @@ const BannerScreen = ({navigation}:any) => {
           <AppModal.Header title="Select a font style" />
           <AppModal.Body>
             <ScrollView 
-              style={{padding:RFValue(10), height: RFValue(200)}} showsVerticalScrollIndicator={false} >
+              style={{paddingLeft:RFValue(10), height: RFValue(200)}} showsVerticalScrollIndicator={false} >
               {/* <Text style={[{fontFamily:'arial', fontSize: RFValue(16), color:'#ffffff', fontWeight:'bold'} ]}>{fontFamily.split('.')[0]}</Text>               */}
               {fontsArray.map((data:any)=>{  
                 return(
@@ -215,8 +233,7 @@ const BannerScreen = ({navigation}:any) => {
                         setTimeout(()=>setFontModalVisible(false), 500)
                       }}
                     style={{padding:10}} >
-                    {/* <Text style={[{fontFamily:'arial', fontSize: RFValue(14), color:'#ffffff'}]}>{data.fontname}</Text> */}
-                    <Text style={[{fontFamily:'arial', fontSize: RFValue(14), color:'#ffffff'}, fontFamily.split('.')[0] == data.fontname.toLowerCase() && {fontWeight:'bold', fontSize: RFValue(16) } ]}>{data.fontname}</Text>
+                    <Text style={[{fontFamily: data.fontname, fontSize: RFValue(14), color:'#ffffff', }, fontFamily.split('.')[0] == data.fontname.toLowerCase() && {fontWeight:'bold', fontSize: RFValue(16) } ]}>{data.fontname}</Text>
                   </TouchableOpacity>
                 )}
               )}
@@ -232,9 +249,10 @@ const BannerScreen = ({navigation}:any) => {
         <AppModal.Container>
           <AppModal.Header title="Select a font color" />
           <AppModal.Body>
-            <ScrollView 
-              style={{padding:RFValue(10), height: RFValue(200)}} showsVerticalScrollIndicator={false} >
-              {/* <Text style={[{fontFamily:'arial', fontSize: RFValue(16), color:'#ffffff', fontWeight:'bold'} ]}>{fontFamily.split('.')[0]}</Text>               */}
+             <ScrollView 
+              style={{ height: RFValue(200) }} 
+              contentContainerStyle={{flexDirection:'row', flexWrap:'wrap', justifyContent:'center', }}
+              showsVerticalScrollIndicator={false} >
               {Colors.map((data:any)=>{  
                 return(
                   <TouchableOpacity 
@@ -243,14 +261,13 @@ const BannerScreen = ({navigation}:any) => {
                         setFontcolor(data.hex)
                         setTimeout(()=>setColorModalVisible(false), 500)
                       }}
-                    style={{flexDirection:"row", justifyContent:"space-between", alignItems:'center', padding:10, }} >
-                    {/* <Text style={[{fontFamily:'arial', fontSize: RFValue(14), color:'#ffffff'}]}>{data.fontname}</Text> */}
-                    <Text style={[{fontFamily:'arial', fontSize: RFValue(14), color:'#ffffff'}, fontcolor == data.hex && {fontWeight:'bold', fontSize: RFValue(16) } ]}>{data.colorName }</Text>
-                    <View style={{width:RFValue(15), height:RFValue(15), backgroundColor: data.hex }} ></View>
+                      style={{ width:RFValue(45), height:RFValue(45), justifyContent:'center', alignItems:'center'}} >
+                    <View style={{width:RFValue(25), height:RFValue(25), backgroundColor: data.hex, borderRadius:3 }} ></View>
+                    <Text style={[{fontFamily:'arial', fontSize: RFValue(5), padding: RFValue(2), color:'#ffffff'}]}>{data.hex}</Text>
                   </TouchableOpacity>
                 )}
               )}
-            </ScrollView>
+            </ScrollView>  
           </AppModal.Body>
           <AppModal.Footer>
           </AppModal.Footer>
