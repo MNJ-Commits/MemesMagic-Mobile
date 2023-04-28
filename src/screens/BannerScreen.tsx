@@ -26,7 +26,7 @@ const BannerScreen = ({navigation}:any) => {
  
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [sText, setSText] = useState<Boolean>(false)
-  const [fontFamily, setFontFamily] = useState<string>('')  
+  const [fontFile, setFontFile] = useState<string>('')  
   const [fontcolor, setFontcolor] = useState<string>('')  
   const [textPosition, setTextPosition] = useState('YellowBoxB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
@@ -35,6 +35,7 @@ const BannerScreen = ({navigation}:any) => {
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
+  const [fontNameList, setFontNameList] = useState<any>([])  
 
   const getBannerTemplates: any = useGetBannerTemplates({
     onSuccess: (res: any) => {
@@ -43,8 +44,16 @@ const BannerScreen = ({navigation}:any) => {
     },
     onError: (res: any) => console.log('onError: ',res),
   });
+
+  
   const getFonts: any = useGetFonts({
     onSuccess: (res: any) => {
+      // let fontList: {fontname:string; name:string, fontFamily:string}[] = []
+      // for (var i=0; i<res.length; i++){
+      //   if( staticFonts.includes(res[i].fontname) ) 
+      //     fontList.push({'fontname': res[i].fontname, 'name': res[i].name, 'fontFamily':'' })
+      // }
+      // setFontNameList(fontList)
       setFontsArray(res);
     },
     onError: (res: any) => console.log('onError: ',res),
@@ -57,8 +66,27 @@ const BannerScreen = ({navigation}:any) => {
     getBannerTemplates.refetch()
   };
   
-  // console.log('TextPosition: ',textPosition);
-  
+  const staticFontsPair = [
+    {fontname:"Arial",              fontFamily:"ARIAL",             fontFile:"arial.ttf"}, 
+    // {fontname:"Arial bold",         fontFamily:"ARIALBD",           fontFile:"arialb.ttf"}, 
+    // {fontname:"Arial bold italic",  fontFamily:"ARIALBI",           fontFile:"arialbi.ttf"}, 
+    // {fontname:"Arial italic",       fontFamily:"ARIALLGT",          fontFile:"ariall.ttf"}, 
+    // {fontname:"Arial light italic", fontFamily:"ARIALLGTITL",       fontFile:"arialli.ttf"}, 
+    // {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"robotor.ttf"}, 
+    // {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
+    // {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
+    // {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
+    // {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
+    {fontname:"Times New Roman",    fontFamily:"times",             fontFile:"times.ttf"}, 
+    {fontname:"Bahnschrift",        fontFamily:"Bahnschrift",       fontFile:"bahnschrift.ttf"}, 
+    // {fontname:"Calibri",            fontFamily:"Calibri Regular",   fontFile:"calibri.ttf"}, 
+    {fontname:"Calibr bold",        fontFamily:"Calibri Bold",      fontFile:"calibrib.ttf"}, 
+    {fontname:"Calibri bold italic", fontFamily:"Calibri Bold Italic", fontFile:"calibribi.ttf"}, 
+    {fontname:"Calibri light",      fontFamily:"Calibri Light",     fontFile:"calibril.ttf"}, 
+    {fontname:"Calibri italic",     fontFamily:"Calibri Italic",    fontFile:"calibrii.ttf"}, 
+    {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
+  ]
+
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
@@ -174,7 +202,7 @@ const BannerScreen = ({navigation}:any) => {
           textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
           textStroke={sText}
           color = {fontcolor} 
-          font = {fontFamily}
+          font = {fontFile}
         />
 
         {/* Apply Text */}
@@ -223,17 +251,19 @@ const BannerScreen = ({navigation}:any) => {
           <AppModal.Body>
             <ScrollView 
               style={{paddingLeft:RFValue(10), height: RFValue(200)}} showsVerticalScrollIndicator={false} >
-              {/* <Text style={[{fontFamily:'arial', fontSize: RFValue(16), color:'#ffffff', fontWeight:'bold'} ]}>{fontFamily.split('.')[0]}</Text>               */}
-              {fontsArray.map((data:any)=>{  
+              {staticFontsPair.map((data:any)=>{  
                 return(
                   <TouchableOpacity 
                     onPress={()=> 
                       {
-                        setFontFamily(data.font)
+                        setFontFile(data.fontFile)
                         setTimeout(()=>setFontModalVisible(false), 500)
                       }}
                     style={{padding:10}} >
-                    <Text style={[{fontFamily: data.fontname, fontSize: RFValue(14), color:'#ffffff', }, fontFamily.split('.')[0] == data.fontname.toLowerCase() && {fontWeight:'bold', fontSize: RFValue(16) } ]}>{data.fontname}</Text>
+                    <Text style={[{fontFamily: data.fontFamily, fontSize: RFValue(16), color:'#ffffff', }, 
+                      fontFile.split('.')[0] == data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16) } ]}>
+                      {data.fontname}
+                    </Text>
                   </TouchableOpacity>
                 )}
               )}
