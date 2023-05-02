@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Downlad from "../assets/svgs/downlad.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -14,6 +14,7 @@ const CustomScreen = ({navigation}:any) => {
  
   const [memeType, setMemeType] = useState('')
   const [allGif, setAllGIF] = useState<any>([])
+  const [UIDs, setUIDs] = useState<any>([])
   const [text, setText] = useState<string>('')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)
@@ -23,7 +24,12 @@ const CustomScreen = ({navigation}:any) => {
 
   const getCustomTemplates: any = useGetCustomTemplates({
     onSuccess: (res: any) => {
+      setLoader(false)
       setAllGIF(res) 
+      const uids = res?.map((items: any) => {
+        return  items.uid
+      });
+      setUIDs(uids)
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -51,7 +57,8 @@ const CustomScreen = ({navigation}:any) => {
   
   useEffect(()=>{
     setLoader(false)
-  },[])
+  },[])  
+  
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
@@ -142,6 +149,7 @@ const CustomScreen = ({navigation}:any) => {
             refresh = {refresh}
             isLoader={loader}
             response = {getCustomTemplates}
+            text={text}
             navigation={navigation}
           />
           
@@ -168,10 +176,17 @@ const CustomScreen = ({navigation}:any) => {
             }}            
           />
           <TouchableOpacity 
-            disabled={text.length==0}
+            // disabled={text.length==0}
+            // disabled={getCustomRenders?.isLoading}
             onPress={()=> { 
               setLoader(true)
-              getCustomRenders.mutate({ text:[`${text}`] })
+              Keyboard.dismiss()
+              getCustomRenders.mutate({ 
+                text:[`${text}`],
+                "HQ": false,
+                "animated_sequence": false,
+                "uids": UIDs,
+              })
             }}
           >
            {loader ?

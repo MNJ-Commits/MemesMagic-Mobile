@@ -51,5 +51,27 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>ARIAL.TTF</string>
+		<string>ARIALBD.TTF</string>
+		<string>ARIALBI.TTF</string>
+		<string>ARIALLGT.TTF</string>
+		<string>ARIALLGTITL.TTF</string>
+		<string>Bahnschrift.ttf</string>
+		<string>Calibri Bold Italic.ttf</string>
+		<string>Calibri Bold.TTF</string>
+		<string>Calibri Italic.ttf</string>
+		<string>Calibri Light Italic.ttf</string>
+		<string>Calibri Light.ttf</string>
+		<string>Calibri Regular.ttf</string>
+		<string>Lucita-Regular.otf</string>
+		<string>Roboto-Bold.ttf</string>
+		<string>Roboto-BoldItalic.ttf</string>
+		<string>Roboto-Italic.ttf</string>
+		<string>Roboto-Light.ttf</string>
+		<string>Roboto-Regular.ttf</string>
+		<string>times.ttf</string>
+	</array>
 </dict>
 </plist>

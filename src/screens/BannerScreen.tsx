@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, } from 'react-native';
+import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Downlad from "../assets/svgs/downlad.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -28,19 +28,18 @@ const BannerScreen = ({navigation}:any) => {
   const [sText, setSText] = useState<Boolean>(false)
   const [fontFile, setFontFile] = useState<string>('')  
   const [fontcolor, setFontcolor] = useState<string>('')  
-  const [textPosition, setTextPosition] = useState('YellowBoxB')
+  const [textPosition, setTextPosition] = useState('YellowBoxBB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
   const [text, setText] = useState<string>('')
-  const [loader, setLoader] = useState<Boolean>(false)
+  const [loader, setLoader] = useState<Boolean>(true)
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
-  const [fontNameList, setFontNameList] = useState<any>([])  
 
   const getBannerTemplates: any = useGetBannerTemplates({
     onSuccess: (res: any) => {
-      setAllGIF(res) 
       setLoader(false)
+      setAllGIF(res) 
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -72,11 +71,11 @@ const BannerScreen = ({navigation}:any) => {
     // {fontname:"Arial bold italic",  fontFamily:"ARIALBI",           fontFile:"arialbi.ttf"}, 
     // {fontname:"Arial italic",       fontFamily:"ARIALLGT",          fontFile:"ariall.ttf"}, 
     // {fontname:"Arial light italic", fontFamily:"ARIALLGTITL",       fontFile:"arialli.ttf"}, 
-    // {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"robotor.ttf"}, 
-    // {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
-    // {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
-    // {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
-    // {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
+    {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"robotor.ttf"}, 
+    {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
+    {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
+    {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
+    {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
     {fontname:"Times New Roman",    fontFamily:"times",             fontFile:"times.ttf"}, 
     {fontname:"Bahnschrift",        fontFamily:"Bahnschrift",       fontFile:"bahnschrift.ttf"}, 
     // {fontname:"Calibri",            fontFamily:"Calibri Regular",   fontFile:"calibri.ttf"}, 
@@ -87,6 +86,11 @@ const BannerScreen = ({navigation}:any) => {
     {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
   ]
 
+  // console.log('textPosition: ',textPosition);
+  useEffect(()=>{
+    setLoader(false)
+  },[])
+  
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
@@ -198,7 +202,7 @@ const BannerScreen = ({navigation}:any) => {
           response = {getBannerTemplates }
           navigation={navigation}
           text={text}
-          textPosition={textPosition}
+          textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
           textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
           textStroke={sText}
           color = {fontcolor} 
@@ -213,7 +217,7 @@ const BannerScreen = ({navigation}:any) => {
             editable={true}
             multiline={true}
             // value={text}
-            placeholderTextColor={'#25282D'}
+            placeholderTextColor={'#8d8d8d'}
             onChangeText={(e: any) => { setText(e) }}
             placeholder={'Type your text here'}
             returnKeyType='next'
@@ -228,9 +232,11 @@ const BannerScreen = ({navigation}:any) => {
             }}          
           />
           <TouchableOpacity 
-            disabled={text.length==0}
+            // disabled={text.length==0}
+            // disabled={getBannerTemplates?.isFetching }
             onPress={()=> {
               setLoader(true);
+              Keyboard.dismiss()
               getBannerTemplates.refetch()
             }} 
           >
@@ -250,7 +256,7 @@ const BannerScreen = ({navigation}:any) => {
           <AppModal.Header title="Select a font style" />
           <AppModal.Body>
             <ScrollView 
-              style={{paddingLeft:RFValue(10), height: RFValue(200)}} showsVerticalScrollIndicator={false} >
+              style={{paddingLeft:RFValue(10), height: RFValue(300)}} showsVerticalScrollIndicator={false} >
               {staticFontsPair.map((data:any)=>{  
                 return(
                   <TouchableOpacity 
@@ -280,7 +286,7 @@ const BannerScreen = ({navigation}:any) => {
           <AppModal.Header title="Select a font color" />
           <AppModal.Body>
              <ScrollView 
-              style={{ height: RFValue(200) }} 
+              style={{ height: RFValue(300) }} 
               contentContainerStyle={{flexDirection:'row', flexWrap:'wrap', justifyContent:'center', }}
               showsVerticalScrollIndicator={false} >
               {Colors.map((data:any)=>{  
@@ -291,9 +297,9 @@ const BannerScreen = ({navigation}:any) => {
                         setFontcolor(data.hex)
                         setTimeout(()=>setColorModalVisible(false), 500)
                       }}
-                      style={{ width:RFValue(45), height:RFValue(45), justifyContent:'center', alignItems:'center'}} >
-                    <View style={{width:RFValue(25), height:RFValue(25), backgroundColor: data.hex, borderRadius:3 }} ></View>
-                    <Text style={[{fontFamily:'arial', fontSize: RFValue(5), padding: RFValue(2), color:'#ffffff'}]}>{data.hex}</Text>
+                      style={{ width:RFValue(55), height:RFValue(55), justifyContent:'center', alignItems:'center'}} >
+                    <View style={{width:RFValue(35), height:RFValue(35), backgroundColor: data.hex, borderRadius:3 }} ></View>
+                    <Text style={[{fontFamily:'arial', fontSize: RFValue(8), padding: RFValue(3), color:'#ffffff'}]}>{data.hex}</Text>
                   </TouchableOpacity>
                 )}
               )}

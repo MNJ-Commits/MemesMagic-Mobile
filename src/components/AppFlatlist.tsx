@@ -11,15 +11,15 @@ import { RFValue } from 'react-native-responsive-fontsize';
       numColumns={2}
       keyExtractor={(item: { id: string; }): string => item.id}
       keyboardDismissMode={"on-drag"}
-      refreshControlProps={{ title:'Pull to refresh', titleColor:'#7C7E81', tintColor:'transparent'}}
+      refreshControlProps={{ title:'Loading...', titleColor:'#7C7E81', tintColor:'transparent',  }}
       refreshing={response?.isFetching || isLoader}
       loading={response?.isFetching || isLoader }
-      // LoadingView={
-      //   <Image
-      //     source={require('../assets/gifs/loader.gif')}
-      //     style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -70} : null]}
-      //   />
-      // }
+      LoadingView={
+        <Image
+          source={require('../assets/gifs/loader.gif')}
+          style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -70} : null]}
+        />
+      }
       
       onRefresh={() => refresh() }
       contentContainerStyle={{margin:RFValue(10)}}
@@ -59,11 +59,12 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     textPosition ? BannerURI += `&location=${textPosition}` : ''
     font ? BannerURI += `&font=${font}` : ''
     color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
+        
 
     return(
     <TouchableOpacity 
       key={item.index}
-      onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id } )}} 
+      onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text } )}} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
       < >               
