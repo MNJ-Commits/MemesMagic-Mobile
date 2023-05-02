@@ -59,12 +59,15 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     textPosition ? BannerURI += `&location=${textPosition}` : ''
     font ? BannerURI += `&font=${font}` : ''
     color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
-        
 
+    // console.log(BannerURI);
+    
     return(
     <TouchableOpacity 
       key={item.index}
-      onPress={()=>{!giphy && navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text } )}} 
+      onPress={()=>{giphy ?
+          navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, giphy: giphy, src2:BannerURI })
+        : navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text }) }} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
       < >               
