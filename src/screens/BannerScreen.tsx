@@ -26,11 +26,11 @@ const BannerScreen = ({navigation}:any) => {
  
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [sText, setSText] = useState<Boolean>(false)
-  const [fontFile, setFontFile] = useState<string>('')  
-  const [fontcolor, setFontcolor] = useState<string>('')  
+  const [fontFile, setFontFile] = useState<string>("")  
+  const [fontcolor, setFontcolor] = useState<string>("")  
   const [textPosition, setTextPosition] = useState('YellowBoxBB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
-  const [text, setText] = useState<string>('')
+  const [text, setText] = useState<string>("")
   const [loader, setLoader] = useState<Boolean>(true)
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
@@ -71,11 +71,11 @@ const BannerScreen = ({navigation}:any) => {
     // {fontname:"Arial bold italic",  fontFamily:"ARIALBI",           fontFile:"arialbi.ttf"}, 
     // {fontname:"Arial italic",       fontFamily:"ARIALLGT",          fontFile:"ariall.ttf"}, 
     // {fontname:"Arial light italic", fontFamily:"ARIALLGTITL",       fontFile:"arialli.ttf"}, 
-    {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"robotor.ttf"}, 
-    {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
-    {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
-    {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
-    {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
+    // {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"roboto.ttf"}, 
+    // {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
+    // {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
+    // {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
+    // {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
     {fontname:"Times New Roman",    fontFamily:"times",             fontFile:"times.ttf"}, 
     {fontname:"Bahnschrift",        fontFamily:"Bahnschrift",       fontFile:"bahnschrift.ttf"}, 
     // {fontname:"Calibri",            fontFamily:"Calibri Regular",   fontFile:"calibri.ttf"}, 
@@ -86,10 +86,12 @@ const BannerScreen = ({navigation}:any) => {
     {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
   ]
 
-  // console.log('textPosition: ',textPosition);
+  // console.log('fontsArray: ',fontsArray);
+
   useEffect(()=>{
     setLoader(false)
   },[])
+  
   
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >

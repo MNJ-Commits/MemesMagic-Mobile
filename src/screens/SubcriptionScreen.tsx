@@ -62,7 +62,7 @@ const SubcriptionScreen = ({navigation}:any) => {
             </View> 
           </ScrollView>  
           <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
-            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
+            <TouchableOpacity onPress={() => navigation.navigate('ApplePayScreen')} style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontWeight:'bold' }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(8), fontWeight:'bold' }} >$19.99</Text>
             </TouchableOpacity>

@@ -52,15 +52,14 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
   const id: number = item.uid  
     
   let BannerURI: string = ''
-    text ? BannerURI += `?text=${text}` : ''
+    text ? BannerURI += `?text=${encodeURIComponent(text)}` : ''
     BannerURI += `&w=${RFValue(400)}&h=${RFValue(400/width*height)}`
     textBackground ? BannerURI += `&textBackground=${textBackground}` : ''
     textStroke ? BannerURI += `&s=${textStroke}` : ''
     textPosition ? BannerURI += `&location=${textPosition}` : ''
     font ? BannerURI += `&font=${font}` : ''
     color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
-
-    // console.log(BannerURI);
+    // console.log('BannerURI: ', BannerURI);
     
     return(
     <TouchableOpacity 

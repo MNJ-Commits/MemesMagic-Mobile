@@ -9,6 +9,7 @@ import IndividualGiphScreen from './screens/IndividualGiphScreen';
 import ActivityIndicator from './components/ActivityIndicator';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import ApplePayScreen from './screens/ApplePayScreen';
 
 const Stack = createNativeStackNavigator(); 
 // Create a client
@@ -16,6 +17,7 @@ const queryClient = new QueryClient()
 
 
 const App = () => {
+
   return (
 
     <NavigationContainer>
@@ -36,11 +38,11 @@ const AppBootStrap = React.memo(function () {
           headerShown: false,
         }}
       >
-        {/* <Stack.Screen name="ActivityIndicator" component={ActivityIndicator} /> */}
         <Stack.Screen name="CustomScreen" component={CustomScreen} />
         <Stack.Screen name="BannerScreen" component={BannerScreen} />
         <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
         <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />
+        <Stack.Screen name="ApplePayScreen" component={ApplePayScreen} />
       </Stack.Navigator>
     </SafeAreaProvider>
   )
