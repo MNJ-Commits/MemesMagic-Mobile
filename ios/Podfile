@@ -17,6 +17,8 @@ target 'InputDemoApp' do
   
   pod 'react-native-payments', :path => '../node_modules/react-native-payments'
 
+  pod 'react-native-cameraroll', :path => '../node_modules/@react-native-camera-roll/camera-roll'
+
   target 'InputDemoAppTests' do
     inherit! :complete
     # Pods for testing

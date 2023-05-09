@@ -1,9 +1,12 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 
-const useGetCustomTemplatesRequest = async<T>()=>{
+const useGetCustomTemplatesRequest = async<T>(tag:string)=>{
+  
+let URI: string = 'http://18.143.157.105:3000/assets/templates'
+tag ? URI += `?tag=${tag}` : ''
 
   try {
-    const response = await fetch('http://18.143.157.105:3000/assets/templates', 
+    const response = await fetch(URI, 
       {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
@@ -18,10 +21,11 @@ const useGetCustomTemplatesRequest = async<T>()=>{
 
 
 export function useGetCustomTemplates<T>( 
+  tag: string,
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
     ['assets/templates'] as QueryKey, 
-    () => useGetCustomTemplatesRequest<T>(), 
+    () => useGetCustomTemplatesRequest<T>(tag), 
     options)
 }

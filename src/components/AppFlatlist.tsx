@@ -3,7 +3,7 @@ import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 
-  const AppFlatlist = ({data, giphy, refresh, isLoader, response, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+  const AppFlatlist = ({data, giphy, refresh, isLoader, response, renderData, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
       
   return (
     <MasonryList
@@ -34,6 +34,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
         textStroke={textStroke} 
         color={color} 
         font={font} 
+        renderData={renderData}
         navigation={navigation} />
       }
     />
@@ -42,7 +43,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 export default AppFlatlist
 
 
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, renderData, navigation}:any)=>{
   
   const customURI: any =  giphy ? item?.template : 
                           item?.template ? `http://18.143.157.105:3000${item?.template}` : 
@@ -64,9 +65,10 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     return(
     <TouchableOpacity 
       key={item.index}
-      onPress={()=>{giphy ?
+      onPress={()=>{giphy && text ?
           navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, giphy: giphy, src2:BannerURI })
-        : navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text }) }} 
+        : renderData && text ? navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text }) 
+        : null}} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
       < >               

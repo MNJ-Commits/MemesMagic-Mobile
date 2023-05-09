@@ -9,15 +9,55 @@ import NoWatermarks from "../assets/svgs/no-watermarks.svg";
 import NoAds from "../assets/svgs/no-ad's.svg";
 import Information from "../assets/svgs/information.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
+import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifier } from "react-native-apple-payment";
 
 
 
 const SubcriptionScreen = ({navigation}:any) => {
 
+  
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
     {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
   ]
+
+  const Method: MethodData = {
+    countryCode: 'US',
+    currencyCode: 'USD',
+    merchantIdentifier: 'merchant.com.MemesWork',
+    supportedNetworks: ['Visa', 'MasterCard', 'AmEx'],
+  };
+  
+  const DataDetails: DetailsData = {
+    total: {
+      label: 'Memes Magic',
+      amount: 19.99,
+    },
+  };
+
+  const payment: any = new ApplePay(Method, DataDetails, );
+
+  const pay = () => {
+    payment.canMakePayments().then(async (canMakePayment: any) => {
+      if (canMakePayment) {
+        console.log('Can Make Payment')
+        await payment.initApplePay()
+          .then((paymentResponse: any) => {
+            // Your payment processing code goes here
+            () => navigation.navigate('ApplePayScreen')
+            console.log('paymentResponse: ', paymentResponse);
+          }).catch((e:any)=>{
+            console.log('error 1: ', e);
+          });
+      }
+      else {
+        console.log('Cant Make Payment')
+      }
+    }).catch((e:any)=>{
+      console.log('error 2: ', e);
+      
+    })
+  }
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -55,14 +95,18 @@ const SubcriptionScreen = ({navigation}:any) => {
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
               
-              <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
+              <TouchableOpacity onPress={() => {pay
+              // navigation.navigate('ApplePayScreen')
+              }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontWeight:'bold' }} >Try Free & Subscribe</Text>
               </TouchableOpacity>
               <Text style={{color:'white', fontSize:RFValue(12), marginTop:RFValue(2), fontWeight:'bold', alignSelf:'center' }} >3 day free trial. Then $9.99 monthly</Text>
             </View> 
           </ScrollView>  
           <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
-            <TouchableOpacity onPress={() => navigation.navigate('ApplePayScreen')} style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
+            <TouchableOpacity 
+              onPress={pay} 
+              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontWeight:'bold' }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(8), fontWeight:'bold' }} >$19.99</Text>
             </TouchableOpacity>

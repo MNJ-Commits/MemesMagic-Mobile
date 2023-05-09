@@ -20,11 +20,11 @@ const App = () => {
 
   return (
 
-    <NavigationContainer>
+
       <QueryClientProvider client={queryClient}>
         <AppBootStrap />
       </QueryClientProvider>
-    </NavigationContainer>
+
   );
 };
 
@@ -32,19 +32,21 @@ const App = () => {
 const AppBootStrap = React.memo(function () {
 
   return(
-    <SafeAreaProvider>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="CustomScreen" component={CustomScreen} />
-        <Stack.Screen name="BannerScreen" component={BannerScreen} />
-        <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
-        <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />
-        <Stack.Screen name="ApplePayScreen" component={ApplePayScreen} />
-      </Stack.Navigator>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <SafeAreaProvider>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="CustomScreen" component={CustomScreen} />
+          <Stack.Screen name="BannerScreen" component={BannerScreen} />
+          <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
+          <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />
+          <Stack.Screen name="ApplePayScreen" component={ApplePayScreen} />
+        </Stack.Navigator>
+      </SafeAreaProvider>
+    </NavigationContainer>
   )
 })
 export default App;

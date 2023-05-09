@@ -18,8 +18,9 @@ import AppFlatlist from '../components/AppFlatlist';
 import { useGetBannerTemplates } from '../hooks/useGetBannerTemplates';
 import { useGetFonts } from '../hooks/useGetFonts';
 import { AppModal } from '../components/AppModal';
-import {Colors} from '../utils/colors'
+
 import { Fonts } from '../utils/Fonts';
+import { Colors } from '../utils/colors';
 
 
 const BannerScreen = ({navigation}:any) => {
@@ -66,25 +67,30 @@ const BannerScreen = ({navigation}:any) => {
   };
   
   const staticFontsPair = [
-    {fontname:"Arial",              fontFamily:"ARIAL",             fontFile:"arial.ttf"}, 
-    // {fontname:"Arial bold",         fontFamily:"ARIALBD",           fontFile:"arialb.ttf"}, 
-    // {fontname:"Arial bold italic",  fontFamily:"ARIALBI",           fontFile:"arialbi.ttf"}, 
-    // {fontname:"Arial italic",       fontFamily:"ARIALLGT",          fontFile:"ariall.ttf"}, 
-    // {fontname:"Arial light italic", fontFamily:"ARIALLGTITL",       fontFile:"arialli.ttf"}, 
-    // {fontname:"Roboto",             fontFamily:"Roboto-Regular",       fontFile:"roboto.ttf"}, 
-    // {fontname:"Roboto bold",        fontFamily:"Roboto-Bold",       fontFile:"robotob.ttf"}, 
-    // {fontname:"Roboto bold italic", fontFamily:"Roboto-BoldItalic", fontFile:"robotobi.ttf"}, 
-    // {fontname:"Roboto light",       fontFamily:"Roboto-Light",      fontFile:"robotol.ttf"}, 
-    // {fontname:"Roboto italic",      fontFamily:"Roboto-Italic",     fontFile:"robotoi.ttf"}, 
+    {fontname:"Arial",              fontFamily:"Arial",             fontFile:"arial.ttf"}, 
+    // {fontname:"Arial Black",         fontFamily:"Arial Black",           fontFile:"arialb.ttf"}, 
     {fontname:"Times New Roman",    fontFamily:"times",             fontFile:"times.ttf"}, 
     {fontname:"Bahnschrift",        fontFamily:"Bahnschrift",       fontFile:"bahnschrift.ttf"}, 
+    {fontname:"Lucita-Regular",        fontFamily:"Lucita-Regular",       fontFile: "Lucita-Regular.otf"}, 
     // {fontname:"Calibri",            fontFamily:"Calibri Regular",   fontFile:"calibri.ttf"}, 
     {fontname:"Calibr bold",        fontFamily:"Calibri Bold",      fontFile:"calibrib.ttf"}, 
     {fontname:"Calibri bold italic", fontFamily:"Calibri Bold Italic", fontFile:"calibribi.ttf"}, 
     {fontname:"Calibri light",      fontFamily:"Calibri Light",     fontFile:"calibril.ttf"}, 
     {fontname:"Calibri italic",     fontFamily:"Calibri Italic",    fontFile:"calibrii.ttf"}, 
     {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
+    
+    {fontname:"Capture it", fontFamily:"Capture it", fontFile: `${encodeURIComponent("Capture it.ttf")}`}, 
+    {fontname:"Cibola", fontFamily:"cibola", fontFile:"cibola.ttf"}, 
+    {fontname:"Lazer84", fontFamily:"Lazer84", fontFile:"Lazer84.ttf"}, 
+    {fontname:"Netigen", fontFamily:"Netigen", fontFile:"Netigen.ttf"}, 
+    {fontname:"Cooper Std", fontFamily:"Cooper Std", fontFile:`${encodeURIComponent("Cooper Std")}`}, 
+    {fontname:"Helvetica", fontFamily:"Helvetica", fontFile:"Helvetica"}, 
+    {fontname:"KaushanScript", fontFamily:"KaushanScript-Regular", fontFile:"KaushanScript-Regular.otf"}, 
+    {fontname:"Rounds Black", fontFamily:"Rounds Black", fontFile: `${encodeURIComponent("Rounds Black.otf")}`}, 
+    // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:""}, 
   ]
+
+
 
   // console.log('fontsArray: ',fontsArray);
 
@@ -163,12 +169,12 @@ const BannerScreen = ({navigation}:any) => {
               <TouchableOpacity onPress={()=>{setColorModalVisible(!isColorModalVisible)}} >
                 <BgColors width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{setSText(!sText)}} >
+              {/* <TouchableOpacity onPress={()=>{setSText(!sText)}} >
                 {sText ? 
                   <STextEnable width={RFValue(25)} height={RFValue(25)}/>
                   : <STextDisable width={RFValue(25)} height={RFValue(25)}/>
                 }
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               
               { 
               textPosition=='YellowBoxB' ?  
@@ -218,7 +224,6 @@ const BannerScreen = ({navigation}:any) => {
           <TextInput
             editable={true}
             multiline={true}
-            // value={text}
             placeholderTextColor={'#8d8d8d'}
             onChangeText={(e: any) => { setText(e) }}
             placeholder={'Type your text here'}
@@ -234,8 +239,6 @@ const BannerScreen = ({navigation}:any) => {
             }}          
           />
           <TouchableOpacity 
-            // disabled={text.length==0}
-            // disabled={getBannerTemplates?.isFetching }
             onPress={()=> {
               setLoader(true);
               Keyboard.dismiss()
@@ -267,9 +270,11 @@ const BannerScreen = ({navigation}:any) => {
                         setFontFile(data.fontFile)
                         setTimeout(()=>setFontModalVisible(false), 500)
                       }}
-                    style={{padding:10}} >
-                    <Text style={[{fontFamily: data.fontFamily, fontSize: RFValue(16), color:'#ffffff', }, 
-                      fontFile.split('.')[0] == data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16) } ]}>
+                    style={{paddingVertical:10}} >
+                    <Text style={[{fontFamily: data.fontFamily, padding:10, fontSize: RFValue(16), color:'#ffffff', }, 
+                      fontFile.split('.')[0] === data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16), 
+                      // borderWidth:1, borderColor:"#fff"
+                      } ]}>
                       {data.fontname}
                     </Text>
                   </TouchableOpacity>

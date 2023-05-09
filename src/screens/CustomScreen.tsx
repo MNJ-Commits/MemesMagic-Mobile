@@ -12,18 +12,16 @@ import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 
 const CustomScreen = ({navigation}:any) => {
  
-  const [memeType, setMemeType] = useState('')
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
   const [text, setText] = useState<string>('')
+  const [tag, setTag] = useState<string>('')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)
 
-  const inputRef:any = useRef()
-  const searchRef:any = useRef()
-
-  const getCustomTemplates: any = useGetCustomTemplates({
+  const getCustomTemplates: any = useGetCustomTemplates(tag,{
     onSuccess: (res: any) => {
+      // console.log('res: ', res);      
       setLoader(false)
       setAllGIF(res) 
       const uids = res?.map((items: any) => {
@@ -35,7 +33,8 @@ const CustomScreen = ({navigation}:any) => {
   });
   
   const getCustomRenders: any = usePostCustomRenders({
-    onSuccess(res) {      
+    onSuccess(res) { 
+      // console.log('res: ', res);
       setAllGIF(res) 
       setLoader(false)
     },
@@ -48,7 +47,7 @@ const CustomScreen = ({navigation}:any) => {
     setAllGIF([]);    
     setLoader(true)
     if(text.length!=0){
-      getCustomRenders.mutate({ text:[`${text}`] })
+      getCustomRenders.mutate({ text:[text], "uids": UIDs})
     }
     else{
       getCustomTemplates.refetch()
@@ -58,7 +57,12 @@ const CustomScreen = ({navigation}:any) => {
   useEffect(()=>{
     setLoader(false)
   },[])  
-  
+
+  useEffect(()=>{
+    getCustomTemplates.refetch()
+  },[tag])  
+    
+
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
@@ -98,13 +102,13 @@ const CustomScreen = ({navigation}:any) => {
             visibleSearch ?          
             <View style={{flexDirection:'row', alignItems:'center', width:'100%', alignSelf:'center', }}>     
               <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center', width:'80%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35.5)  }} >
-                {/* <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} > */}
+                {/* <TouchableOpacity onPress={()=> { tag && getCustomTemplates.refetch() }} > */}
                   <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
                 {/* </TouchableOpacity> */}
                 <TextInput
                   editable={true}
                   placeholderTextColor={'#ffffff'}
-                  // onChangeText={(e: any) => { setText(e) }}
+                  onChangeText={(e: any) => { setTag(e) }}
                   placeholder={'Search'}
                   style= {{ 
                     fontSize: RFValue(15),
@@ -112,11 +116,11 @@ const CustomScreen = ({navigation}:any) => {
                     width:'85%',
                     alignSelf:'center',
                     height: RFValue(40), 
-                    color:'#000000',
+                    color:'#ffffff',
                   }}            
                 />
               </View> 
-              <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} >
+              <TouchableOpacity onPress={()=> { setVisibleSearch(false); setTag('') }} >
                 <Text style={{fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
               </TouchableOpacity>
             </View> 
@@ -130,10 +134,16 @@ const CustomScreen = ({navigation}:any) => {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor:'#FF439E' }} >
                 {
-                  ['Random', 'TV', 'Movies', 'Sports', 'Screens'].map((data:string, index: number)=>{
+                  // ['Random', 'TV', 'Movies', 'Sports', 'Screens']
+                  ["Crowd", "Banner", "Stage", "Cardboard", "Surprised", "Ironman", "Painting", "Tony Stark", "Car", "Road", "Crash", "Board", "Siblings", "Pencil", "Table", "The Office", "Rock", "call", "Notice Board", "Sticky Note", "Check", "Nurse", "Laser", "Road Sign"].map((data:string, index: number)=>{
                   return(
-                      <TouchableOpacity onPress={()=>{setMemeType(data)}} key={index} style={[{ alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, memeType==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
-                        <Text style={[memeType==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:14, fontWeight:'normal' }]} >{data}</Text>
+                      <TouchableOpacity 
+                        onPress={()=>{ 
+                          if(data==tag){setTag('')} 
+                          else{ setTag(data); setLoader(true);} }} 
+                          key={index} 
+                          style={[{ alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
+                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:14, fontWeight:'normal' }]} >{data}</Text>
                       </TouchableOpacity>
                     )})
                   }
@@ -149,6 +159,7 @@ const CustomScreen = ({navigation}:any) => {
             refresh = {refresh}
             isLoader={loader}
             response = {getCustomTemplates}
+            renderData = {getCustomRenders.data}
             text={text}
             navigation={navigation}
           />
@@ -156,12 +167,9 @@ const CustomScreen = ({navigation}:any) => {
         {/* Text Ipnut */}
         <View style={{ marginTop:RFValue(5), flexDirection:'row', alignItems:'center',  alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
           <TextInput
-            ref={inputRef}
             editable={true}
             multiline={true}
             placeholderTextColor={'#8d8d8d'}
-            showSoftInputOnFocus={true}
-            onTouchStart={()=>inputRef.current.focus()}
             onChangeText={(e: any) => { setText(e) }}
             placeholder={'Type your text here'}
             returnKeyType='next'
@@ -176,15 +184,11 @@ const CustomScreen = ({navigation}:any) => {
             }}            
           />
           <TouchableOpacity 
-            // disabled={text.length==0}
-            // disabled={getCustomRenders?.isLoading}
             onPress={()=> { 
               setLoader(true)
               Keyboard.dismiss()
               getCustomRenders.mutate({ 
-                text:[`${text}`],
-                "HQ": false,
-                "animated_sequence": false,
+                text:[text],
                 "uids": UIDs,
               })
             }}
@@ -194,7 +198,6 @@ const CustomScreen = ({navigation}:any) => {
             :
             <RightTick width={RFValue(20)} height={RFValue(20)} />
           }
-          {/* <RightTick width={RFValue(20)} height={RFValue(20)} /> */}
           </TouchableOpacity>
         </View> 
       </KeyboardAvoidingView>
@@ -203,4 +206,5 @@ const CustomScreen = ({navigation}:any) => {
 };
 
 export default CustomScreen;
+
 

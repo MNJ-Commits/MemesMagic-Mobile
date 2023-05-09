@@ -63,21 +63,24 @@ import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifi
 // const pay = () => {
 //     paymentRequest.canMakePayments().then((canMakePayment:any) => {
 //     if (canMakePayment) {
-//       console.log('Can Make Payment')
 //       paymentRequest.show()
 //         .then((paymentResponse:any)=> {
 //           // Your payment processing code goes here
-
-//           paymentResponse.complete('success');
+//           console.log('paymentResponse: ',paymentResponse);
+          
+//           // paymentResponse.complete('success');
 //         }).catch((e:any)=>{
-//           console.log('error 1: ', e);
-//         });;
+//           console.log('error show payment: ', e);
+//         })
 //     }
 //     else {
 //       console.log('Cant Make Payment')
 //     }
-//   })
+//   }).catch((e:any)=>{
+//     console.log('error can make payment: ', e);
+//   });
 // }
+
 
 
 // react-native-apple-payment
@@ -91,7 +94,7 @@ const Method: MethodData = {
 const DataDetails: DetailsData = {
   total: {
     label: 'Memes Magic',
-    amount: 10,
+    amount: 19.99,
   },
 };
  
@@ -110,6 +113,7 @@ const ShipmentDetails: ShippingDetails = {
 }
 
 const payment: any = new ApplePay(Method, DataDetails, ShipmentDetails);
+
 
 const check = async () => {    
   await payment.canMakePayments().then((canMakePayment: any) => {

@@ -35,8 +35,18 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
+	<key>NSAppleMusicUsageDescription</key>
 	<string/>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string/>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -53,11 +63,8 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>ARIAL.TTF</string>
-		<string>ARIALBD.TTF</string>
-		<string>ARIALBI.TTF</string>
-		<string>ARIALLGT.TTF</string>
-		<string>ARIALLGTITL.TTF</string>
+		<string>Arial Black.ttf</string>
+		<string>Arial.ttf</string>
 		<string>Bahnschrift.ttf</string>
 		<string>Calibri Bold Italic.ttf</string>
 		<string>Calibri Bold.TTF</string>
@@ -65,12 +72,17 @@
 		<string>Calibri Light Italic.ttf</string>
 		<string>Calibri Light.ttf</string>
 		<string>Calibri Regular.ttf</string>
+		<string>Capture it.ttf</string>
+		<string>cibola.ttf</string>
+		<string>Cooper Std.otf</string>
+		<string>Helvetica.ttc</string>
+		<string>KaushanScript-Regular.otf</string>
+		<string>Lazer84.ttf</string>
 		<string>Lucita-Regular.otf</string>
-		<string>Roboto-Bold.ttf</string>
-		<string>Roboto-BoldItalic.ttf</string>
-		<string>Roboto-Italic.ttf</string>
-		<string>Roboto-Light.ttf</string>
-		<string>Roboto-Regular.ttf</string>
+		<string>Netigen.ttf</string>
+		<string>Rounds Black.otf</string>
+		<string>SF-Pro-Text-Regular.otf</string>
+		<string>Times New Roman.ttf</string>
 		<string>times.ttf</string>
 	</array>
 </dict>

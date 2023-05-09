@@ -1,4 +1,6 @@
 rootProject.name = 'InputDemoApp'
+include ':@react-native-camera-roll_camera-roll'
+project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-camera-roll/camera-roll/android')
 include ':react-native-payments'
 project(':react-native-payments').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-payments/android')
 include ':react-native-payments'
