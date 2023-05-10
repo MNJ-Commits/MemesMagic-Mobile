@@ -142,8 +142,8 @@ const CustomScreen = ({navigation}:any) => {
                           if(data==tag){setTag('')} 
                           else{ setTag(data); setLoader(true);} }} 
                           key={index} 
-                          style={[{ alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
-                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:14, fontWeight:'normal' }]} >{data}</Text>
+                          style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
+                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(12), paddingTop:RFValue(7), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
                       </TouchableOpacity>
                     )})
                   }
