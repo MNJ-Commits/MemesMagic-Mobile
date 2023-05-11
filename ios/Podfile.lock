@@ -317,11 +317,11 @@ PODS:
     - SDWebImageWebPCoder
   - rn-fetch-blob (0.12.0):
     - React-Core
+  - RNAppleAuthentication (2.2.2):
+    - React-Core
   - RNFS (2.20.0):
     - React-Core
   - RNGestureHandler (2.9.0):
-    - React-Core
-  - RNPermissions (3.8.0):
     - React-Core
   - RNReanimated (3.1.0):
     - DoubleConversion
@@ -400,9 +400,9 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeWebPFormat (from `../node_modules/react-native-webp-format`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
+  - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -485,12 +485,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-webp-format"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
+  RNAppleAuthentication:
+    :path: "../node_modules/@invertase/react-native-apple-authentication"
   RNFS:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNPermissions:
-    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -523,7 +523,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
   react-native-apple-pay: f81880cb399276d6bbb6edc38119d562cf1b9c17
   react-native-cameraroll: 8ffb0af7a5e5de225fd667610e2979fc1f0c2151
-  react-native-payments: 8ff9ef4e171867a79331b3dc1b57e49da224d240
+  react-native-payments: 0cb00209f3b25a72d5b614554abf688e2cc53002
   react-native-safe-area-context: f5549f36508b1b7497434baa0cd97d7e470920d4
   React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
   React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a
@@ -539,9 +539,9 @@ SPEC CHECKSUMS:
   ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
   ReactNativeWebPFormat: f5f043cc9ded052e535c3869ec341f91ba5a67c5
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
+  RNAppleAuthentication: 0571c08da8c327ae2afc0261b48b4a515b0286a6
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 071d7a9ad81e8b83fe7663b303d132406a7d8f39
-  RNPermissions: 5ff5ca5fb61e2962b6ece3a70bd05d1a0c527a92
   RNReanimated: 9e89dcc51e5e08c3534da002f194b8d34ccabb53
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNShare: d82e10f6b7677f4b0048c23709bd04098d5aee6c
@@ -551,6 +551,6 @@ SPEC CHECKSUMS:
   Stripe: 5914399ac5878056b985d56b409cb4bb1e7fc7e8
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
 
-PODFILE CHECKSUM: 2d5dff69f7b279ab9b2ab5d4e7b13bb68988e01e
+PODFILE CHECKSUM: 946ecc67abd6ae03f35073ac5fc57e2b487735ec
 
 COCOAPODS: 1.11.2

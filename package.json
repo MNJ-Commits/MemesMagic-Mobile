@@ -11,6 +11,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@invertase/react-native-apple-authentication": "^2.2.2",
     "@react-native-camera-roll/camera-roll": "^5.4.0",
     "@react-native-seoul/masonry-list": "^1.4.1",
     "@react-navigation/native": "^6.1.6",
@@ -24,7 +25,6 @@
     "react-native-gesture-handler": "^2.9.0",
     "react-native-modal": "12.1",
     "react-native-payments": "^0.8.4",
-    "react-native-permissions": "^3.8.0",
     "react-native-reanimated": "^3.1.0",
     "react-native-rename": "^3.2.12",
     "react-native-responsive-fontsize": "^0.5.1",

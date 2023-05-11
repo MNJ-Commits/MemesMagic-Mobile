@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, SafeAreaView, TouchableOpacity, } from 'react-native';
 import AppLogo from "../assets/svgs/app-logo.svg";
 import BackButton from "../assets/svgs/back-button.svg";
@@ -10,11 +10,13 @@ import NoAds from "../assets/svgs/no-ad's.svg";
 import Information from "../assets/svgs/information.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
 import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifier } from "react-native-apple-payment";
+import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
 
 
 
 const SubcriptionScreen = ({navigation}:any) => {
 
+  const [identityToken, setIdentityToken] = useState()
   
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
@@ -58,6 +60,27 @@ const SubcriptionScreen = ({navigation}:any) => {
       
     })
   }
+
+ 
+
+  async function onAppleButtonPress() {
+    // console.log('appleAuth.isSupported: ', appleAuth.isSupported);    
+    if( appleAuth.isSupported){
+    // performs login request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+    }).then((performLoginResponse:any)=>{
+      console.log('performLoginResponse: ', performLoginResponse)
+      setIdentityToken(performLoginResponse.identityToken)
+    }).catch((performLoginrror:any)=>{
+      console.log('performLoginError: ', performLoginrror);
+    });
+    console.log('appleAuthRequestResponse: ', appleAuthRequestResponse);
+    
+    } 
+  }
+
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -94,8 +117,9 @@ const SubcriptionScreen = ({navigation}:any) => {
               </View>
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
-              
-              <TouchableOpacity onPress={() => {pay
+              <TouchableOpacity onPress={() => {
+                // onAppleButtonPress()
+                pay
               // navigation.navigate('ApplePayScreen')
               }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontWeight:'bold' }} >Try Free & Subscribe</Text>
