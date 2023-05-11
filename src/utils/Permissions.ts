@@ -23,7 +23,7 @@ export const checkLibraryPermissions = async ()=>{
 }
 
 
-export const requestLocationPermissions = ()=>{
+export const requestLibraryPermissions = ()=>{
   
         requestMultiple([
           PERMISSIONS.IOS.MEDIA_LIBRARY,

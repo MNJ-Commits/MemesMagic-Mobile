@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
-import Downlad from "../assets/svgs/downlad.svg";
+import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
 import Search from "../assets/svgs/search.svg";
 import TextIcon from "../assets/svgs/text.svg";
@@ -90,10 +90,6 @@ const BannerScreen = ({navigation}:any) => {
     // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:""}, 
   ]
 
-
-
-  // console.log('fontsArray: ',fontsArray);
-
   useEffect(()=>{
     setLoader(false)
   },[])
@@ -122,7 +118,7 @@ const BannerScreen = ({navigation}:any) => {
               <Suggestions width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
             <TouchableOpacity>
-              <Downlad width={RFValue(25)} height={RFValue(25)}/>
+              <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={()=>{navigation.navigate('SubcriptionScreen')}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>

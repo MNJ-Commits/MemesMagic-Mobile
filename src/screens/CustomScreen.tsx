@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
-import Downlad from "../assets/svgs/downlad.svg";
+import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
 import Search from "../assets/svgs/search.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
@@ -88,7 +88,7 @@ const CustomScreen = ({navigation}:any) => {
               <Suggestions width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
             <TouchableOpacity>
-              <Downlad width={RFValue(25)} height={RFValue(25)}/>
+              <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={()=>{navigation.navigate('SubcriptionScreen')}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>

@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, Image, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Refresh from "../assets/svgs/refresh.svg";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import BackButton from "../assets/svgs/back-button.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
 import ShareIcon from "../assets/svgs/shareIcon.svg";
 import DownloadSvg from "../assets/svgs/download.svg";
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
-// import Video from 'react-native-video';
 
 
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
@@ -15,7 +13,7 @@ import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 
-import { DownloadFileOptions, downloadFile } from 'react-native-fs';
+import { DownloadFileOptions, downloadFile, writeFile } from 'react-native-fs';
 import { checkLibraryPermissions, requestLocationPermissions } from '../utils/Permissions';
 var RNFS = require('react-native-fs');
 
@@ -31,25 +29,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
     // console.log('route.params.src: ',route.params.src);
     // console.log('gif: ',gif);
-    
-    let animation = new Animated.Value(0);
-    const rotation = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '360deg']
-      });
-  
-      const spinner = ()=>{
-        animation.setValue(0)
-        Animated.timing(animation, {
-            toValue: 1, 
-            duration: 2000,
-            easing: Easing.linear,
-            useNativeDriver: true,
-        }).start(()=> spinner());
-      }
-      useEffect(()=>{
-        spinner()
-      },[])
 
     const renderRenderById: any = usePostCustomRenders({
         onSuccess(res) { 
@@ -66,13 +45,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         },
     }); 
 
-
     useEffect(()=>{
         if(route?.params?.giphy){
             const textSting = route.params?.src2?.split("&w")[0]
             setText(textSting?.split("=")[1])
         }
-
+        else{
+        // For custom download
         renderRenderById.mutate({ 
             "HQ": true,
             "animated_sequence": true,
@@ -80,7 +59,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             "uids": [ route.params.uid ], 
             text:[route.params?.defaultText],
         }) 
-
+        // For custom render 
         renderRenderById.mutate({ 
             "HQ": true,
             "animated_sequence": true,
@@ -88,7 +67,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             "uids": [ route.params.uid ],
             text:[route.params?.defaultText]
         })
-
+    }
     },[])
 
     const textSting = route.params?.src2?.split("&w")[1] 
@@ -111,52 +90,38 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     //     console.log('error resp: ', error);
     // })
 
-    var today = ""+new Date()
-    const datetime = today.split('GMT')[0].replace(/\:/g, '.').trim().replace(/\ /g, '_')
+    const GiphyGifsToPhotos=async (filePath: string)=>{
+        
+        const payload = {
+            "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+            "giphy_url":  route.params?.src
+        }
+        
+        await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
+            { 'Content-Type': 'application/json' }, 
+            JSON.stringify({...payload }))
+                .then(async (response) =>{ 
+                    if(response.info().status==200)
+                        setGif( response.base64()) 
+                })
+                .catch((error:any)=>{ console.log('error: ', error) });
 
-    // Download Files
-    const Download = async ()=>{
+            writeFile(filePath, gif, 'base64')
+                .then((writeFile)=> {
+                    console.log('writeFile: ', writeFile);
+                    setDownloading(false)})
+                .catch((writeFile:any)=>{console.log('writeFile: ',writeFile) })
+    }
 
-        setDownloading(true)
-        //Define URl to Download from
-        // let fromURL = webp ? webp : route.params.src
-        let fromURL = gif
-        console.log('fromURL: ', fromURL);
-
-        // TO SAVE TO IOS PHOTO
-        await CameraRoll.save(fromURL, { type: 'video', album:'MemeMagic' }).then((res:any)=>{
-            console.log('res: ', res);
-        }).catch((error:any)=>{
-            console.log('error: ', error);
-        })
-
-        //Define dirctory to store file to 
-        const dirPath = RNFS.DocumentDirectoryPath
-        //Define path to store file along with the extension
-        const filePath = dirPath + `/${datetime}.gif`
+    const CustomGifsToPhotos =async (fromURL: string, filePath: string)=>{
         //Define options
         const options: DownloadFileOptions = {
             fromUrl: fromURL,
             toFile: filePath,
             headers: { 'Accept': 'application/json',  'Content-Type': 'application/json' }
-        }
-
-        // // IOS creates a default sub-directory
-        // RNFS.exists(dirPath+"MemeMagic")
-        // .then((result:any) => {
-        //     if(!result)
-        //     {   
-        //         console.log("Directory doesn't exists: ", result);    
-        //         RNFS.mkdir(dirPath)
-        //         .then((result:any) => {
-        //             console.log("Directory Created: ", result);    
-        //         }) 
-        //     }
-        // })
-
-        // TO SAVE TO IOS FILES
-        const response = await downloadFile(options);
-        return response.promise.then(async res => {
+        } 
+       let response = await downloadFile(options);
+       return response.promise.then(async (res: any) => {
             setDownloading(false)
             console.log('res: ', res, filePath);               
         }).catch((error:any)=>{
@@ -165,11 +130,34 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         })
     }
 
+
+    var today = ""+new Date()
+    const datetime = today.split('GMT')[0].replace(/\:/g, '.').trim().replace(/\ /g, '_')
+
+    // Download Files
+    const Download = async ()=>{
+
+        setDownloading(true)
+        //Define URl to Download from
+        let fromURL = gif 
+        //Define path and directory to store files to
+        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
+
+        // TO SAVE TO IOS PHOTO
+        await CameraRoll.save(fromURL, { type: 'video', album:'MemeMagic' }).then((res:any)=>{
+            console.log('res: ', res);
+        }).catch((error:any)=>{
+            console.log('error: ', error);
+        })
+
+        // TO SAVE TO IOS FILES
+        route.params.giphy ? GiphyGifsToPhotos(filePath) : CustomGifsToPhotos(fromURL, filePath)
+    }
+
     // 1. Cache Download,   2. Share,   3. Remove
     const share = () => {
 
-        setLoading(true)
-        
+        setLoading(true)   
         let fileUrl = gif;
         let filePath: any;
         let data: any;
@@ -221,19 +209,18 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 behavior={Platform.OS === 'ios' ? 'padding': undefined }
                 keyboardVerticalOffset={20}
             >
+                {/* Back Button */}
+                <TouchableOpacity onPress={()=>{navigation.goBack()}} style={{margin:20 }} >
+                    <BackButton width={RFValue(25)} height={RFValue(25)}/>
+                </TouchableOpacity>
                 <ScrollView 
-                    style={{flex:1}} 
-                    contentContainerStyle={{ justifyContent:'center' }}
+                    style={{flex:1, }} 
+                    contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20) }}
                  >
-                    {/* Back Button */}
-                    <TouchableOpacity onPress={()=>{navigation.goBack()}} style={{margin:20 }} >
-                        <BackButton width={RFValue(25)} height={RFValue(25)}/>
-                    </TouchableOpacity>
-                
                     {/* Gif */}
                     <Image
                         source={{uri: route.params.giphy ? route.params.src : webp }}
-                        style={[{width: '100%', aspectRatio: route.params.width/route.params.height, resizeMode:'contain' } ]}
+                        style={[{width: '100%', margin:20, aspectRatio: route.params.width/route.params.height, resizeMode:'contain', borderRadius:30 } ]}
                     />        
                     {
                     route.params.giphy && 
@@ -248,21 +235,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             }}
                         />
                     }
-
-                    {/* Loader */}
-                    {/* <View style={{ alignSelf:'center', position:'absolute', zIndex:-1,  }} >
-                        <Animated.View style={{transform: [
-                            {rotate: rotation},
-                            { translateX: -15},
-                            { translateY: -4},
-                            ]
-                        }} >
-                            <Refresh width={RFValue(20)} height={RFValue(20)} style={{marginLeft:RFValue(25), marginTop:RFValue(5)}} />
-                        </Animated.View>
-                    </View> */}
-
                     {/* Text Ipnut */}
-                    <View style={{ marginTop:RFValue(20), flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
+                    <View style={{ marginTop:RFValue(50), flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
                         <TextInput
                             editable={true}
                             placeholderTextColor={'#25282D'}
@@ -302,22 +276,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     </View> 
                     
                     {/* Download/Share */}
-                    {!route.params.giphy && 
                     <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center' }} >
                         <TouchableOpacity 
-                            disabled = {gif=='' ? true : false}
+                            // disabled = {gif=='' ? true : false}
                             onPress={ Download }
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(20)} height={RFValue(20)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            disabled = {gif==''  ? true : false}
+                            // disabled = {gif==''  ? true : false}
                             onPress={share}
                             style={{alignSelf:'center', margin:20 }} >
                             <ShareIcon width={RFValue(20)} height={RFValue(20)} />
                         </TouchableOpacity>
-                    </View>}
-                    <View style={{marginTop:20}} >
+                    </View>
+                    
+                    <View style={{paddingTop:20}} >
                         {
                             downloading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
