@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, Linking, Alert, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -62,6 +62,22 @@ const CustomScreen = ({navigation}:any) => {
     getCustomTemplates.refetch()
   },[tag])  
     
+  useEffect(() => {
+    const getUrlAsync = async () => {
+      // Get the deep link used to open the app
+      await Linking.getInitialURL().then((url) => {
+        console.log('getInitialURL: ',url);
+        Alert.alert("InitialURL: "+JSON.stringify(url));
+      })
+    
+      Linking.addEventListener('url',(url)=>{ 
+        Alert.alert("addEventListener: "+JSON.stringify(url));
+        console.log('Event Listener: ',url);
+      });
+    }
+
+    getUrlAsync();
+  }, [])
 
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
@@ -102,14 +118,16 @@ const CustomScreen = ({navigation}:any) => {
             visibleSearch ?          
             <View style={{flexDirection:'row', alignItems:'center', width:'100%', alignSelf:'center', }}>     
               <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center', width:'80%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35.5)  }} >
-                {/* <TouchableOpacity onPress={()=> { tag && getCustomTemplates.refetch() }} > */}
-                  <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
-                {/* </TouchableOpacity> */}
+                <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
                 <TextInput
                   editable={true}
                   placeholderTextColor={'#ffffff'}
                   onChangeText={(e: any) => { setTag(e) }}
                   placeholder={'Search'}
+                  returnKeyType= {'done'}
+                  onSubmitEditing ={ (e)=>{
+                      Keyboard.dismiss()
+                  }}
                   style= {{ 
                     fontSize: RFValue(15),
                     fontFamily:'arial',

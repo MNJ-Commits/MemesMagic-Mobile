@@ -6,10 +6,10 @@ import CustomScreen from './screens/CustomScreen';
 import BannerScreen from './screens/BannerScreen';
 import SubcriptionScreen from './screens/SubcriptionScreen';
 import IndividualGiphScreen from './screens/IndividualGiphScreen';
-import ActivityIndicator from './components/ActivityIndicator';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
+import { ActivityIndicator } from 'react-native';
 
 const Stack = createNativeStackNavigator(); 
 // Create a client
@@ -31,17 +31,27 @@ const App = () => {
 
 const AppBootStrap = React.memo(function () {
 
+  const linking = {
+    prefixes: ['memeswork://SubcriptionScreen', 'https://memeswork.com'],
+    screens:{
+      SubcriptionScreen:"SubcriptionScreen",
+    }
+  };
+  
   return(
-    <NavigationContainer>
+    <NavigationContainer 
+      linking={linking}
+      fallback={<ActivityIndicator color="blue" size="large" />}
+    >
       <SafeAreaProvider>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
           }}
         >
+          <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
           <Stack.Screen name="CustomScreen" component={CustomScreen} />
           <Stack.Screen name="BannerScreen" component={BannerScreen} />
-          <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
           <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />
           <Stack.Screen name="ApplePayScreen" component={ApplePayScreen} />
         </Stack.Navigator>
@@ -53,3 +63,13 @@ export default App;
 
 
 
+//       CustomScreen:{
+//   screens:{
+//     IndividualGiphScreen:"IndividualGiphScreen"
+//     }
+//   },
+// BannerScreen:{
+//   screens:{
+//       IndividualGiphScreen:"IndividualGiphScreen"
+//     }
+//   },

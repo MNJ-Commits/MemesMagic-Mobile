@@ -13,11 +13,18 @@ target 'InputDemoApp' do
     :hermes_enabled => false
   )
 
+  pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
+
   pod 'RNFS', :path => '../node_modules/react-native-fs'
   
   pod 'react-native-payments', :path => '../node_modules/react-native-payments'
 
   pod 'react-native-cameraroll', :path => '../node_modules/@react-native-camera-roll/camera-roll'
+
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  # pod 'Permission-MediaLibrary', :path => "#{permissions_path}/MediaLibrary"
+  # pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
+  # pod 'Permission-PhotoLibraryAddOnly', :path => "#{permissions_path}/PhotoLibraryAddOnly"
 
   target 'InputDemoAppTests' do
     inherit! :complete

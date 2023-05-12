@@ -78,16 +78,15 @@ const BannerScreen = ({navigation}:any) => {
     {fontname:"Calibri light",      fontFamily:"Calibri Light",     fontFile:"calibril.ttf"}, 
     {fontname:"Calibri italic",     fontFamily:"Calibri Italic",    fontFile:"calibrii.ttf"}, 
     {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
-    
     {fontname:"Capture it", fontFamily:"Capture it", fontFile: `${encodeURIComponent("Capture it.ttf")}`}, 
     {fontname:"Cibola", fontFamily:"cibola", fontFile:"cibola.ttf"}, 
     {fontname:"Lazer84", fontFamily:"Lazer84", fontFile:"Lazer84.ttf"}, 
     {fontname:"Netigen", fontFamily:"Netigen", fontFile:"Netigen.ttf"}, 
-    {fontname:"Cooper Std", fontFamily:"Cooper Std", fontFile:`${encodeURIComponent("Cooper Std")}`}, 
-    {fontname:"Helvetica", fontFamily:"Helvetica", fontFile:"Helvetica"}, 
+    {fontname:"Cooper Std", fontFamily:"Cooper Std", fontFile:`${encodeURIComponent("Cooper Std.otf")}`}, 
+    {fontname:"Helvetica", fontFamily:"Helvetica", fontFile:"Helvetica.ttc"}, 
     {fontname:"KaushanScript", fontFamily:"KaushanScript-Regular", fontFile:"KaushanScript-Regular.otf"}, 
     {fontname:"Rounds Black", fontFamily:"Rounds Black", fontFile: `${encodeURIComponent("Rounds Black.otf")}`}, 
-    // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:""}, 
+    // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:"SF-Pro-Text-Regular.otf"}, 
   ]
 
   useEffect(()=>{
@@ -268,9 +267,7 @@ const BannerScreen = ({navigation}:any) => {
                       }}
                     style={{paddingVertical:10}} >
                     <Text style={[{fontFamily: data.fontFamily, padding:10, fontSize: RFValue(16), color:'#ffffff', }, 
-                      fontFile.split('.')[0] === data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16), 
-                      // borderWidth:1, borderColor:"#fff"
-                      } ]}>
+                      fontFile.split('.')[0] === data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16), borderWidth:1, borderColor:"#fff"} ]}>
                       {data.fontname}
                     </Text>
                   </TouchableOpacity>

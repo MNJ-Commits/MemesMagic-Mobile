@@ -323,6 +323,8 @@ PODS:
     - React-Core
   - RNGestureHandler (2.9.0):
     - React-Core
+  - RNPermissions (3.8.0):
+    - React-Core
   - RNReanimated (3.1.0):
     - DoubleConversion
     - FBLazyVector
@@ -357,7 +359,7 @@ PODS:
     - React-Core
   - RNSVG (13.8.0):
     - React-Core
-  - SDWebImage/Core (5.15.6)
+  - SDWebImage/Core (5.15.7)
   - SDWebImageWebPCoder (0.11.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.15)
@@ -403,6 +405,7 @@ DEPENDENCIES:
   - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -491,6 +494,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -542,15 +547,16 @@ SPEC CHECKSUMS:
   RNAppleAuthentication: 0571c08da8c327ae2afc0261b48b4a515b0286a6
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 071d7a9ad81e8b83fe7663b303d132406a7d8f39
+  RNPermissions: f77b6b4132ae72e2d98e73d3cd7be28cbdfa5852
   RNReanimated: 9e89dcc51e5e08c3534da002f194b8d34ccabb53
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNShare: d82e10f6b7677f4b0048c23709bd04098d5aee6c
   RNSVG: c1e76b81c76cdcd34b4e1188852892dc280eb902
-  SDWebImage: d47d81bea8a77187896b620dc79c3c528e8906b9
+  SDWebImage: 25bac438318faf37e35650619ebc288a9061d292
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   Stripe: 5914399ac5878056b985d56b409cb4bb1e7fc7e8
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
 
-PODFILE CHECKSUM: 946ecc67abd6ae03f35073ac5fc57e2b487735ec
+PODFILE CHECKSUM: a08bf6b3749125c12e65f4c289a9c75abd8a33b2
 
 COCOAPODS: 1.11.2

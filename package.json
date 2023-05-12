@@ -8,7 +8,7 @@
     "start": "react-native start --reset-cache",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package && react-native setup-ios-permissions && pod-install"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.2.2",
@@ -25,6 +25,7 @@
     "react-native-gesture-handler": "^2.9.0",
     "react-native-modal": "12.1",
     "react-native-payments": "^0.8.4",
+    "react-native-permissions": "^3.8.0",
     "react-native-reanimated": "^3.1.0",
     "react-native-rename": "^3.2.12",
     "react-native-responsive-fontsize": "^0.5.1",
@@ -37,6 +38,11 @@
     "rn-fetch-blob": "^0.12.0",
     "typescript": "^3.8.3"
   },
+  "reactNativePermissionsIOS": [
+    "MediaLibrary",
+    "PhotoLibrary",
+    "PhotoLibraryAddOnly"
+  ],
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
@@ -48,7 +54,8 @@
     "metro-react-native-babel-preset": "^0.64.0",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
-    "react-test-renderer": "17.0.1"
+    "react-test-renderer": "17.0.1",
+    "pod-install": "0.1.38"
   },
   "resolutions": {
     "@types/react": "^18.0.30"

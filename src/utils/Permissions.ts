@@ -5,18 +5,21 @@ export const checkLibraryPermissions = async ()=>{
     await checkMultiple([
         PERMISSIONS.IOS.PHOTO_LIBRARY,
         PERMISSIONS.IOS.MEDIA_LIBRARY,
+        PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
     ])
     .then((statuses:any) => {            
-      console.log('statuses: ', statuses);
-      if(statuses[PERMISSIONS.IOS.PHOTO_LIBRARY]==='granted' && statuses[PERMISSIONS.IOS.MEDIA_LIBRARY]==='granted'){
+      // console.log('statuses: ', statuses);
+      if(statuses[PERMISSIONS.IOS.PHOTO_LIBRARY]==='granted' && 
+         statuses[PERMISSIONS.IOS.MEDIA_LIBRARY]==='granted' && 
+         statuses[PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY]==='granted'){
         resolve(true)   // returns to .then in parent
       }
       else{        
         resolve(false) // returns to .catch in parent
       }
-    }).catch((error:any)=>{
+    }).catch((checkMultipleError:any)=>{
         reject(false)
-        console.log('error: ', error);
+        console.log('checkMultipleError: ', checkMultipleError);
       
     })
   })
@@ -27,12 +30,15 @@ export const requestLibraryPermissions = ()=>{
   
         requestMultiple([
           PERMISSIONS.IOS.MEDIA_LIBRARY,
-          PERMISSIONS.IOS.PHOTO_LIBRARY
+          PERMISSIONS.IOS.PHOTO_LIBRARY,
+          PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
         ])
-        .then((statuses:any) => {        
-          console.log('statuses: ', statuses);        
+        .then((requestMultipleReponse:any) => {        
+          console.log('requestMultipleReponse: ', requestMultipleReponse);        
         })
-        .catch(()=>{
+        .catch((requestMultipleError)=>{
+          console.log('requestMultipleError: ', requestMultipleError);
+          
         })    
 }
  

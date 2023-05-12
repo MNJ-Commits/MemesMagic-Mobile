@@ -30,10 +30,10 @@ const OTPinitialState: IOTP = {
 };
 
 // Load Storage 
-const loadMSFromStorage:any = createAsyncThunk('MS/loadFromStorage', () => {
+const loadMSFromStorage:any = createAsyncThunk('MonthlySubscrition/loadFromStorage', () => {
   return AsyncStorage.getItem(MSKey);
 });
-const loadOTFromStorage = createAsyncThunk('OnetimePayment/loadFromStorage', () => {
+const loadOTPFromStorage = createAsyncThunk('OnetimePayment/loadFromStorage', () => {
   return AsyncStorage.getItem(OTPKey);
 });
 
@@ -45,6 +45,7 @@ const setMSToStorage = createAsyncThunk(
     return MSData;
   },
 );
+
 const setOTPToStorage = createAsyncThunk(
   'OTP/setToStorage',
   async (OTPData: IOTP) => {
@@ -55,103 +56,41 @@ const setOTPToStorage = createAsyncThunk(
 
 
 // Remove Storage 
-const removeMonthlySubscription = createAsyncThunk('MS/user/inactive', () => {
+const removeMonthlySubscription = createAsyncThunk('MonthlySubscrition/user/inactive', () => {
   return AsyncStorage.removeItem(MSKey);
 });
 
 
 // Data Slices
-const themeSlice = createSlice({
-  name: 'theme',
-  initialState: initialThemeState,
+const MonthlySubscriptionSlice = createSlice({
+  name: 'MonthlySubscrition',
+  initialState: MSinitialState,
   reducers: {},
   // use the builder pattern its easier to understand
   extraReducers: builder => {
-
-    builder.addCase(
-      loadMSFromStorage.fulfilled,
-      (state: any, action: PayloadAction<any>) => {
-        const {payload} = action;
-        if (payload) {
-          state.theme = payload;
-        } else {
-          state.theme = payload;
-        }
-      },
-    );
-
-  },
-});
-
-const languageSlice = createSlice({
-  name: 'language',
-  initialState: initialLanguageState,
-  reducers: {},
-  // use the builder pattern its easier to understand
-  extraReducers: builder => {
-
     builder
-    .addCase(setLanguageToStorage.fulfilled,
-      (state: any, action: PayloadAction<any>) => {
-        const {payload} = action;                 
-        state.lang = payload;        
-      },
-    )
-    .addCase(setLanguageToStorage.rejected, 
-      state => {
-      console.log('payload: ',state.lang);
-      state.lang = 'en';
-    })
-    .addCase(loadLanguageFromStorage.fulfilled,
+    .addCase(loadMSFromStorage.fulfilled,
       (state: any, action: PayloadAction<any>) => {
         const {payload} = action;
         if (payload) {
-          state.lang = payload;
+          state.MSstatus = true;
         } else {
-          state.lang = 'en';
+          state.MSstatus = false;
         }
-      },
-    )
-    .addCase(loadLanguageFromStorage.rejected, 
-      state => {
-      state.lang = 'en';
+      })
+    .addCase(loadMSFromStorage.rejected,
+      (state: { MSstatus: boolean; }) => {
+      state.MSstatus = false;
     })
-  },
-});
- const filterSlice = createSlice({
-  name: 'filter',
-  initialState: initialFilterState,
-  reducers: {
-      setFilter: (state, action: PayloadAction<any>) => {
-        state.filterArray  = action?.payload
-        },
-      deleteFilter: (state) => {
-          state.filterArray = []
-      }
+
   },
 });
 
 // State Reducers
-const userReducer = userSlice.reducer;
-const themeReducer = themeSlice.reducer;
-const languageReducer = languageSlice.reducer;
-const filterReducer = filterSlice.reducer;
-export const {setFilter, deleteFilter} = filterSlice?.actions
-
-
+const MonthlySubscriptionReducer = MonthlySubscriptionSlice.reducer;
 
 
 export {
-  setThemeToStorage,
-  loadThemeFromStorage,
-  userReducer,
-  themeReducer,
-  loadUserFromStorage,
-  logOutUser,
-  loginUser,
-  filterSlice,
-  filterReducer,
-  setLanguageToStorage,
-  loadLanguageFromStorage,
-  languageReducer
+  MonthlySubscriptionReducer,
+  removeMonthlySubscription
 };

@@ -815,8 +815,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = InputDemoApp/InputDemoApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = GLC52ZXC24;
 				ENABLE_BITCODE = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = InputDemoApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -829,6 +831,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MemesWork;
 				PRODUCT_NAME = InputDemoApp;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -847,7 +850,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = InputDemoApp/InputDemoApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = GLC52ZXC24;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = InputDemoApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -860,6 +865,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MemesWork;
 				PRODUCT_NAME = InputDemoApp;
 				SWIFT_VERSION = 5.0;
@@ -1007,6 +1013,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = GLC52ZXC24;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = MessagesExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
@@ -1048,6 +1055,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = GLC52ZXC24;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = MessagesExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;

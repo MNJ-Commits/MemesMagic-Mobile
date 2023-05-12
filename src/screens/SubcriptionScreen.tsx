@@ -66,18 +66,17 @@ const SubcriptionScreen = ({navigation}:any) => {
   async function onAppleButtonPress() {
     // console.log('appleAuth.isSupported: ', appleAuth.isSupported);    
     if( appleAuth.isSupported){
-    // performs login request
-    const appleAuthRequestResponse = await appleAuth.performRequest({
-      requestedOperation: appleAuth.Operation.LOGIN,
-      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-    }).then((performLoginResponse:any)=>{
-      console.log('performLoginResponse: ', performLoginResponse)
-      setIdentityToken(performLoginResponse.identityToken)
-    }).catch((performLoginrror:any)=>{
-      console.log('performLoginError: ', performLoginrror);
-    });
-    console.log('appleAuthRequestResponse: ', appleAuthRequestResponse);
-    
+      // performs login request
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      }).then((performLoginResponse:any)=>{
+        console.log('performLoginResponse: ', performLoginResponse)
+        setIdentityToken(performLoginResponse.identityToken)
+      }).catch((performLoginrror:any)=>{
+        console.log('performLoginError: ', performLoginrror);
+      });
+      console.log('appleAuthRequestResponse: ', appleAuthRequestResponse);
     } 
   }
 
@@ -118,8 +117,8 @@ const SubcriptionScreen = ({navigation}:any) => {
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
               <TouchableOpacity onPress={() => {
-                // onAppleButtonPress()
-                pay
+                onAppleButtonPress()
+                // pay
               // navigation.navigate('ApplePayScreen')
               }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontWeight:'bold' }} >Try Free & Subscribe</Text>
@@ -131,7 +130,7 @@ const SubcriptionScreen = ({navigation}:any) => {
             <TouchableOpacity 
               onPress={pay} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
-              <Text style={{color:'#622FAE', fontSize:RFValue(12), fontWeight:'bold' }} >No Watermarks   </Text>
+              <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(8), fontWeight:'bold' }} >$19.99</Text>
             </TouchableOpacity>
             <Text style={{color:'#ffffff', fontSize:RFValue(8), fontWeight:'bold', alignSelf:'center' }} >one time purchase</Text>

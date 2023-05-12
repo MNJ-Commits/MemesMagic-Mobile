@@ -1,17 +1,11 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {
-  filterReducer,
-  languageReducer,
-  themeReducer,
-  userReducer,
+  MonthlySubscriptionReducer
 } from './userSlice';
 
 const store = configureStore({
   reducer: {
-    user: userReducer,
-    theme:themeReducer,
-    language:languageReducer,
-    filter: filterReducer
+    subscription: MonthlySubscriptionReducer,
   },
 });
 
