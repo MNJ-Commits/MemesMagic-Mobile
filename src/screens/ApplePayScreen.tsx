@@ -3,7 +3,7 @@ import {SafeAreaView, StyleSheet, ScrollView, View, Text, StatusBar, Button, Ale
 import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 import BackButton from "../assets/svgs/back-button.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
-import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifier } from "react-native-apple-payment";
+// import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifier } from "react-native-apple-payment";
 
 // // react-native-payments
 // const PaymentRequest = require('react-native-payments').PaymentRequest;
@@ -84,70 +84,75 @@ import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifi
 
 
 // react-native-apple-payment
-const Method: MethodData = {
-  countryCode: 'US',
-  currencyCode: 'USD',
-  merchantIdentifier: 'merchant.com.MemesWork',
-  supportedNetworks: ['Visa', 'MasterCard', 'AmEx'],
-};
 
-const DataDetails: DetailsData = {
-  total: {
-    label: 'Memes Magic',
-    amount: 19.99,
-  },
-};
+
+
+
+
+// const Method: MethodData = {
+//   countryCode: 'US',
+//   currencyCode: 'USD',
+//   merchantIdentifier: 'merchant.com.MemesWork',
+//   supportedNetworks: ['Visa', 'MasterCard', 'AmEx'],
+// };
+
+// const DataDetails: DetailsData = {
+//   total: {
+//     label: 'Memes Magic',
+//     amount: 19.99,
+//   },
+// };
  
-const ShipmentDetails: ShippingDetails = {
-  type: 'shipping',
-  contact: {
-    name: 'Yevhenii Onipko',
-    postalAddress: '01111',
-    phoneNumber: '380971234567',
-    emailAddress: 'dummy@gmail.com',
-  },
-  methods: {
-    identifier: 'merchant.com.MemesWork',
-    detail: 'Arrives, Friday 7 Apr.'
-  },
-}
+// const ShipmentDetails: ShippingDetails = {
+//   type: 'shipping',
+//   contact: {
+//     name: 'Yevhenii Onipko',
+//     postalAddress: '01111',
+//     phoneNumber: '380971234567',
+//     emailAddress: 'dummy@gmail.com',
+//   },
+//   methods: {
+//     identifier: 'merchant.com.MemesWork',
+//     detail: 'Arrives, Friday 7 Apr.'
+//   },
+// }
 
-const payment: any = new ApplePay(Method, DataDetails, ShipmentDetails);
+// const payment: any = new ApplePay(Method, DataDetails, ShipmentDetails);
 
 
-const check = async () => {    
-  await payment.canMakePayments().then((canMakePayment: any) => {
-    if (canMakePayment) {
-      Alert.alert(
-        'Apple Pay',
-        'Apple Pay is available in this device'
-      );
-    }
-  })
-}
+// const check = async () => {    
+//   await payment.canMakePayments().then((canMakePayment: any) => {
+//     if (canMakePayment) {
+//       Alert.alert(
+//         'Apple Pay',
+//         'Apple Pay is available in this device'
+//       );
+//     }
+//   })
+// }
 
-const pay = () => {
-  payment.canMakePayments().then(async (canMakePayment: any) => {
-    if (canMakePayment) {
-      console.log('Can Make Payment')
-      await payment.initApplePay()
-        .then((paymentResponse: any) => {
-          // Your payment processing code goes here
-          console.log('paymentResponse: ', paymentResponse);
+// const pay = () => {
+//   payment.canMakePayments().then(async (canMakePayment: any) => {
+//     if (canMakePayment) {
+//       console.log('Can Make Payment')
+//       await payment.initApplePay()
+//         .then((paymentResponse: any) => {
+//           // Your payment processing code goes here
+//           console.log('paymentResponse: ', paymentResponse);
           
-          // paymentResponse.complete('success');
-        }).catch((e:any)=>{
-          console.log('error 1: ', e);
-        });
-    }
-    else {
-      console.log('Cant Make Payment')
-    }
-  }).catch((e:any)=>{
-    console.log('error 2: ', e);
+//           // paymentResponse.complete('success');
+//         }).catch((e:any)=>{
+//           console.log('error 1: ', e);
+//         });
+//     }
+//     else {
+//       console.log('Cant Make Payment')
+//     }
+//   }).catch((e:any)=>{
+//     console.log('error 2: ', e);
     
-  })
-}
+//   })
+// }
 
 
 const ApplePayScreen = ({navigation}:any) => {
@@ -172,7 +177,7 @@ const ApplePayScreen = ({navigation}:any) => {
                 Showing here on button action for demo purpose.
               </Text>
               <Button
-                onPress={check}
+                // onPress={check}
                 title="Check Apple Pay"
               />
             </View>
@@ -218,7 +223,7 @@ const ApplePayScreen = ({navigation}:any) => {
             </View>
             <Button
               title="Pay with Apple Pay"
-              onPress={pay} 
+              // onPress={pay} 
               />
           </View>
         </ScrollView>

@@ -10,7 +10,7 @@ import AppFlatlist from '../components/AppFlatlist';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 
-const CustomScreen = ({navigation}:any) => {
+const CustomScreen = ({navigation, route}:any) => {
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
@@ -39,7 +39,7 @@ const CustomScreen = ({navigation}:any) => {
       setLoader(false)
     },
     onError(error) {
-      console.log(error);
+      console.log('getCustomRenders error: ', error);
     },
   });  
 
@@ -62,22 +62,7 @@ const CustomScreen = ({navigation}:any) => {
     getCustomTemplates.refetch()
   },[tag])  
     
-  useEffect(() => {
-    const getUrlAsync = async () => {
-      // Get the deep link used to open the app
-      await Linking.getInitialURL().then((url) => {
-        console.log('getInitialURL: ',url);
-        Alert.alert("InitialURL: "+JSON.stringify(url));
-      })
-    
-      Linking.addEventListener('url',(url)=>{ 
-        Alert.alert("addEventListener: "+JSON.stringify(url));
-        console.log('Event Listener: ',url);
-      });
-    }
 
-    getUrlAsync();
-  }, [])
 
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
@@ -106,7 +91,7 @@ const CustomScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubcriptionScreen')}} >
+            <TouchableOpacity onPress={()=>{navigation.navigate('SubcriptionScreen',{returnScreen:'CustomScreen'})}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
           </View>
@@ -172,7 +157,7 @@ const CustomScreen = ({navigation}:any) => {
 
         {/* Grid View */}
           <AppFlatlist 
-            data={allGif}
+            data={allGif ? allGif : []}
             giphy={false}
             refresh = {refresh}
             isLoader={loader}

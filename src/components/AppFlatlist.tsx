@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
+import { useFocusEffect } from '@react-navigation/native';
 
   const AppFlatlist = ({data, giphy, refresh, isLoader, response, renderData, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
       
@@ -45,6 +47,24 @@ export default AppFlatlist
 
 const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, renderData, navigation}:any)=>{
   
+
+  const [appleAccessToken, setAppleAccessToken] = useState<string>('')
+  const getter = async () => {
+    
+    const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+        console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    })
+    setAppleAccessToken(access_token) 
+  }
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getter().catch((error:any)=>{
+      console.log('getter Error: ', error);
+      })
+    }, []),
+  );
+
   const customURI: any =  giphy ? item?.template : 
                           item?.template ? `http://18.143.157.105:3000${item?.template}` : 
                           `http://18.143.157.105:3000${item.render}`
@@ -66,8 +86,8 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     <TouchableOpacity 
       key={item.index}
       onPress={()=>{giphy && text ?
-          navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, giphy: giphy, src2:BannerURI })
-        : renderData && text ? navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text }) 
+          navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, giphy: giphy, src2:BannerURI, returnScreen:'BannerScreen'})
+        : renderData && text ? navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text, returnScreen:'CustomScreen' }) 
         : null}} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
@@ -86,7 +106,9 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
           giphy && 
             <Image 
               key={item.index}
-              source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`}}
+              source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                       headers:{ "X-ACCESS-TOKEN": `${appleAccessToken}`}
+                     }}
               resizeMode={'contain'}
               style={{
                 width:'100%', 

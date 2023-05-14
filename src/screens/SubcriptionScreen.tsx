@@ -1,67 +1,63 @@
-import React, { Fragment, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, SafeAreaView, TouchableOpacity, } from 'react-native';
+import React, { Fragment, useEffect, useState } from 'react';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Linking, Alert, } from 'react-native';
 import AppLogo from "../assets/svgs/app-logo.svg";
 import BackButton from "../assets/svgs/back-button.svg";
 import Subcribe from "../assets/svgs/subcribe.svg";
 import ArrowDown from "../assets/svgs/arrow-down.svg";
 import GifsMemes from "../assets/svgs/gifs-memes.svg";
-import NoWatermarks from "../assets/svgs/no-watermarks.svg";
 import NoAds from "../assets/svgs/no-ad's.svg";
 import Information from "../assets/svgs/information.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
-import ApplePay, { MethodData, DetailsData, ShippingDetails, TransactionIdentifier } from "react-native-apple-payment";
-import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
+import { loadAppleAccessTokenFromStorage, loadAppleAuthFromStorage, loadVerifyPaymentFromStorage, storeAppleAccessToken, storeAppleAuth, storeVerifyPayment } from '../store/asyncStorage';
+import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
+import { usePostAppleSubcribe } from '../hooks/usePostAppleSubcribe';
+import { usePostAppleOneTime } from '../hooks/usePostAppleOneTime';
+import { useFocusEffect } from '@react-navigation/native';
+// import { useGetPaymentVerification } from '../hooks/useGetPaymentVerification';
 
 
 
-const SubcriptionScreen = ({navigation}:any) => {
+const SubcriptionScreen = ({navigation, route}:any) => {
 
-  const [identityToken, setIdentityToken] = useState()
+  const returnScreen = route.params?.returnScreen
+  // console.log('route.params: ',route.params);
+  
+  const [authData, setAuthData] = useState<any>({})
+  const [appleAccessToken, setAppleAccessToken] = useState<string>('')
   
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
     {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
   ]
 
-  const Method: MethodData = {
-    countryCode: 'US',
-    currencyCode: 'USD',
-    merchantIdentifier: 'merchant.com.MemesWork',
-    supportedNetworks: ['Visa', 'MasterCard', 'AmEx'],
-  };
-  
-  const DataDetails: DetailsData = {
-    total: {
-      label: 'Memes Magic',
-      amount: 19.99,
-    },
-  };
-
-  const payment: any = new ApplePay(Method, DataDetails, );
-
-  const pay = () => {
-    payment.canMakePayments().then(async (canMakePayment: any) => {
-      if (canMakePayment) {
-        console.log('Can Make Payment')
-        await payment.initApplePay()
-          .then((paymentResponse: any) => {
-            // Your payment processing code goes here
-            () => navigation.navigate('ApplePayScreen')
-            console.log('paymentResponse: ', paymentResponse);
-          }).catch((e:any)=>{
-            console.log('error 1: ', e);
-          });
-      }
-      else {
-        console.log('Cant Make Payment')
-      }
-    }).catch((e:any)=>{
-      console.log('error 2: ', e);
-      
+  const getter = async () => {
+    
+    const appleAuth = await loadAppleAuthFromStorage().catch((error:any)=>{
+      console.log('loadAppleAuthFromStorage Error: ', error);
     })
-  }
+    setAuthData(appleAuth)
+    
+    const accessToken = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+      console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    })
+    setAppleAccessToken(accessToken) 
 
+    const verifyPayment = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+      console.log('loadVerifyPaymentFromStorage Error: ', error);
+    })
+    console.log('verifyPayment: ', verifyPayment);
+  };
  
+  useFocusEffect(
+    React.useCallback(() => {
+      getter().catch((error:any)=>{
+        console.log('getter Error: ', error);
+      })
+      // console.log(authData ? authData : null);
+      // console.log('appleAccessToken: ', appleAccessToken);
+    }, [appleAccessToken]),
+  );
 
   async function onAppleButtonPress() {
     // console.log('appleAuth.isSupported: ', appleAuth.isSupported);    
@@ -71,8 +67,8 @@ const SubcriptionScreen = ({navigation}:any) => {
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
       }).then((performLoginResponse:any)=>{
-        console.log('performLoginResponse: ', performLoginResponse)
-        setIdentityToken(performLoginResponse.identityToken)
+        storeAppleAuth({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
+        getAppleAccessToken.mutate({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
       }).catch((performLoginrror:any)=>{
         console.log('performLoginError: ', performLoginrror);
       });
@@ -80,6 +76,89 @@ const SubcriptionScreen = ({navigation}:any) => {
     } 
   }
 
+  const getAppleAccessToken: any = usePostAppleAccessToken({
+    onSuccess(res) { 
+      // console.log('getAppleAccessToken: ', res.access_token);
+     storeAppleAccessToken(res.access_token)
+     setAppleAccessToken(res.accessToken) 
+    },
+    onError(error) {
+      console.log(error);
+    },
+  }); 
+   
+  const getAppleSubcribe: any = usePostAppleSubcribe({
+    onSuccess(res) { 
+      console.log('getAppleSubcribe: ', res);
+      openURL(encodeURIComponent(res.redirect))
+    },
+    onError(error) {
+      console.log('getAppleSubcribe error: ', error);
+    },
+  });  
+  const getAppleOneTime: any = usePostAppleOneTime({
+    onSuccess(res) { 
+      console.log('getAppleOneTime: ', res);
+      openURL(encodeURIComponent(res.redirect))
+    },
+    onError(error) {
+      console.log(error);
+    },
+  });  
+
+  // Open Redirect Link
+  const openURL = (redirect: string) => {
+
+    Linking.canOpenURL(redirect).then(async supported => {
+      if (supported) {
+        await Linking.openURL(redirect)
+        .catch((error)=>{
+          console.log('Linking openURL error: ', error);
+        });
+      }
+      else {
+        console.log("Don't know how to open URI: " + redirect);
+      }
+    })
+    .catch((error)=>{
+      console.log('Linking canOpenURL error: ', error);
+    })
+  }
+
+  // Open Deep Link
+  useEffect(() => {
+    console.log(authData);
+    getUrlAsync();
+  }, [])
+  const getUrlAsync = async () => {
+
+    // Get the deep link used to open the app
+    await Linking.getInitialURL().then((url) => {
+      console.log('getInitialURL: ',url) 
+      if(url?.includes('paymentType=subcribed') ){ 
+        storeVerifyPayment({one_time: false, subcription: true }) 
+      }
+      else if(url?.includes("paymentType=oneTime") ){
+        storeVerifyPayment({one_time: true, subcription: false })
+      }
+    })
+
+    // Listen to the deep link if app it is already open
+    Linking.addEventListener('url',(url)=>{ 
+      if(url.url?.includes("paymentType=oneTime") )
+        { 
+          storeVerifyPayment({one_time:true, subcription: false })
+        }
+      else if(url.url?.includes('paymentType=subcribed')){
+        storeVerifyPayment({one_time: false, subcription: true })
+      }
+    });
+  }  
+
+  if(!authData)
+    onAppleButtonPress()
+
+    
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -88,7 +167,18 @@ const SubcriptionScreen = ({navigation}:any) => {
           <ScrollView contentContainerStyle={{ marginTop:10 }} >
             
             <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
-              <TouchableOpacity onPress={()=>{navigation.goBack()}} >
+              <TouchableOpacity onPress={()=>{
+                // navigation.goBack()
+
+                navigation.navigate(returnScreen ? returnScreen : 'CustomScreen')
+
+                // navigation.navigate(returnScreen ? returnScreen : 'CustomScreen', 
+                // route.params?.giphy ? {src:route.params.src, width:route.params?.width, height:route.params.height, giphy: route.params.giphy, src2: route.params?.scr2, returnScreen:'BannerScreen'} 
+                // : route.params?.defaultText ? {src:route.params?.src, width:route.params?.width, height:route.params?.height, uid: route.params.uid, defaultText: route.params?.defaultText, returnScreen:'CustomScreen'} 
+                // : null
+                // )
+              }} 
+              >
                 <BackButton width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
               <View style={{flexDirection:'row', alignItems:'center', }}  >
@@ -117,9 +207,11 @@ const SubcriptionScreen = ({navigation}:any) => {
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
               <TouchableOpacity onPress={() => {
+                authData && appleAccessToken ?
+                  getAppleSubcribe.mutate({access_token: appleAccessToken}) :
+                authData ? 
+                  getAppleAccessToken.mutate({ ...authData}) :
                 onAppleButtonPress()
-                // pay
-              // navigation.navigate('ApplePayScreen')
               }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontWeight:'bold' }} >Try Free & Subscribe</Text>
               </TouchableOpacity>
@@ -128,7 +220,13 @@ const SubcriptionScreen = ({navigation}:any) => {
           </ScrollView>  
           <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
             <TouchableOpacity 
-              onPress={pay} 
+              onPress={() => {
+                authData && appleAccessToken ?
+                  getAppleOneTime.mutate({access_token: appleAccessToken}) :
+                authData ? 
+                  getAppleAccessToken.mutate({ ...authData}) :
+                onAppleButtonPress()
+              }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(8), fontWeight:'bold' }} >$19.99</Text>
@@ -144,22 +242,3 @@ const SubcriptionScreen = ({navigation}:any) => {
  
 
 export default SubcriptionScreen;
-
-
-
-
-// <View style={{alignSelf:'center', width:"70%", }} > 
-//   <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:RFValue(50)}} >
-//     <TouchableOpacity style={{borderWidth:RFValue(3), borderColor:'#ffffff', backgroundColor:'#FEB720', padding:RFValue(15), borderRadius:RFValue(15)  }} >
-//       <Text style={{color:'white', fontSize:RFValue(12), fontWeight:'normal' }} >19.99/ year</Text>
-//     </TouchableOpacity>
-//     <SaveBig width={RFValue(50)} height={RFValue(50)} style={{position:'absolute', top:RFValue(-20), left:RFValue(-10) }} />
-//     <TouchableOpacity style={{borderWidth:RFValue(3), borderColor:'#ffffff', backgroundColor:'#FEB720', padding:RFValue(15), borderRadius:RFValue(15)  }} >
-//       <Text style={{color:'white', fontSize:RFValue(12), fontWeight:'normal' }} >4.99/ month</Text>
-//     </TouchableOpacity>
-//   </View>
-//   <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{alignItems:'center', borderWidth:4, borderColor:'#ffffff', backgroundColor:'#FEB720', padding:RFValue(8), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
-//     <Text style={{color:'#8733FF', fontSize:RFValue(20), fontWeight:'400' }} >Subscribe Now!</Text>
-//     <Text style={{color:'white', fontSize:RFValue(10), fontWeight:'normal' }} >With 3days FREE TRIAL!</Text>
-//   </TouchableOpacity>
-// </View>

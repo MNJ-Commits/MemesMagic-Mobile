@@ -1,11 +1,10 @@
 import {configureStore} from '@reduxjs/toolkit';
-import {
-  MonthlySubscriptionReducer
-} from './userSlice';
+import { paymentSliceReducer, userSliceReducer } from './userSlice';
 
 const store = configureStore({
   reducer: {
-    subscription: MonthlySubscriptionReducer,
+    user: userSliceReducer,
+    payment: paymentSliceReducer,
   },
 });
 

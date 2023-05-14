@@ -12,7 +12,7 @@ tag ? URI += `?tag=${tag}` : ''
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
       }
     )    
-    const data = await response?.json()
+    const data = await response?.json()    
     return data?.data
   } catch (err: any) {
     throw new Error(err.response.data.message);

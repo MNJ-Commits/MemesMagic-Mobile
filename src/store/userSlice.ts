@@ -1,96 +1,173 @@
 // Libraries
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {IUserSessionData} from '../interfaces/IAuthData';
-
-// Note:
-// MS: Monthly Subscription
-// OTP: On-Time Payment
 
 // Constants
-export const MSKey = 'MSKey';
-export const OTPKey = 'OTPKey';
-
-
+export const userKey = 'userKey';
+export const verifyPaymentKey = 'verifyPaymentKey';
+export const requestPaymentKey = 'requestPaymentKey';
+export const accessTokenKey = 'accessTokenKey';
 
 // Interfaces
-export interface IMS {
-  MSstatus: boolean;
+export interface IUserState {
+  userData: IUserSessionData | null
+  isLoggedIn: boolean;
+  isLoadingStorageData: boolean;
 }
-export interface IOTP {
-  OTPstatus: boolean;
+
+export interface IUserSessionData {
+  identity_token: string
+  user_id: string
+}
+
+export interface IRequestPayment {
+  accessTokenData: IAccessToken | null 
+  one_time: boolean
+  subcription: boolean
+}
+
+export interface IAccessToken {
+  access_token:string
+  expire: string
 }
 
 // Initial States
-const MSinitialState: IMS = {
-  MSstatus: false,
-};
-const OTPinitialState: IOTP = {
-  OTPstatus: false,
+const userInitialState: IUserState = {
+  userData: null,
+  isLoggedIn: false,
+  isLoadingStorageData: true,
 };
 
+const accessTokenInitialState: IAccessToken = {
+  access_token: '', 
+  expire: ' '
+}
+
+const requestPaymentInitialState: IRequestPayment = {
+  accessTokenData: accessTokenInitialState, 
+  one_time: false,
+  subcription: false
+}
+
 // Load Storage 
-const loadMSFromStorage:any = createAsyncThunk('MonthlySubscrition/loadFromStorage', () => {
-  return AsyncStorage.getItem(MSKey);
-});
-const loadOTPFromStorage = createAsyncThunk('OnetimePayment/loadFromStorage', () => {
-  return AsyncStorage.getItem(OTPKey);
+
+// const loadPaymentAccessFromStorage:any = createAsyncThunk('payment/access-payment/loadFromStorage', () => {
+//   return AsyncStorage.getItem(requestPaymentKey);
+// });
+
+// const loadVerifyPaymentFromStorage:any = createAsyncThunk('payment/verify-payment/loadFromStorage', () => {
+//   return AsyncStorage.getItem(verifyPaymentKey);
+// });
+const loadUserFromStorage:any = createAsyncThunk('user/loadFromStorage', () => {
+  return AsyncStorage.getItem(userKey);
 });
 
 // Set Storage 
-const setMSToStorage = createAsyncThunk(
-  'MS/setToStorage',
-  async (MSData: IMS) => {
-    await AsyncStorage.setItem(MSKey, JSON.stringify(MSData));
-    return MSData;
+const loginUser = createAsyncThunk('auth/sso/apple',
+  async (data: IUserSessionData) => {
+    await AsyncStorage.setItem(userKey, JSON.stringify(data));
+    return data;
   },
 );
 
-const setOTPToStorage = createAsyncThunk(
-  'OTP/setToStorage',
-  async (OTPData: IOTP) => {
-    await AsyncStorage.setItem(MSKey, JSON.stringify(OTPData));
-    return OTPData;
+const accessTokenRequest = createAsyncThunk('payment/access-token',
+  async (data: IAccessToken) => {
+    await AsyncStorage.setItem(accessTokenKey, JSON.stringify(data));
+    return data;
+  },
+);
+
+const paymentAccessRequest = createAsyncThunk('payment/request-payment',
+  async (data: IRequestPayment) => {
+    await AsyncStorage.setItem(requestPaymentKey, JSON.stringify(data));
+    return data;
   },
 );
 
 
 // Remove Storage 
-const removeMonthlySubscription = createAsyncThunk('MonthlySubscrition/user/inactive', () => {
-  return AsyncStorage.removeItem(MSKey);
+const removePayment = createAsyncThunk('user/subscrition/inactive', () => {
+  return AsyncStorage.removeItem(verifyPaymentKey);
 });
 
-
 // Data Slices
-const MonthlySubscriptionSlice = createSlice({
-  name: 'MonthlySubscrition',
-  initialState: MSinitialState,
+const userSlice = createSlice({
+  name: 'user',
+  initialState: userInitialState,
   reducers: {},
   // use the builder pattern its easier to understand
   extraReducers: builder => {
     builder
-    .addCase(loadMSFromStorage.fulfilled,
+    .addCase(loginUser.fulfilled,
       (state: any, action: PayloadAction<any>) => {
         const {payload} = action;
-        if (payload) {
-          state.MSstatus = true;
-        } else {
-          state.MSstatus = false;
-        }
+        const user = JSON.parse(payload);
+        console.log('loginUser fulfilled : ', payload);
+        // if (payload) {
+        // state.isLoadingStorageData = false;
+        // state.isLoggedIn = true;
+        // state.userData = user;
+        // } 
       })
-    .addCase(loadMSFromStorage.rejected,
-      (state: { MSstatus: boolean; }) => {
-      state.MSstatus = false;
+    .addCase(loginUser.rejected,
+      (state: any, action: PayloadAction<any>) => {
+      // state.MSstatus = false;
+      const {payload} = action;
+        console.log('loginUser rejected : ', payload);
+      })
+    .addCase(loadUserFromStorage.fulfilled, 
+      (state: any, action: PayloadAction<any>) => {
+       const {payload} = action;
+       const user = JSON.parse(payload);
+       console.log('loadUserFromStorage fulfilled : ', user);
+        if (user) {
+          state.userData = user;
+          state.isLoggedIn = true;
+          state.isLoadingStorageData = false;
+        } 
     })
-
+    .addCase(loadUserFromStorage.rejected,
+      state => {
+      state.isLoadingStorageData = false;
+    })
   },
 });
 
-// State Reducers
-const MonthlySubscriptionReducer = MonthlySubscriptionSlice.reducer;
+const paymentSlice = createSlice({
+  name: 'payment',
+  initialState: requestPaymentInitialState,
+  reducers: {},
+  // use the builder pattern its easier to understand
+  extraReducers: builder => {
+    builder
+    .addCase(paymentAccessRequest.fulfilled,
+      (state: any, action: PayloadAction<any>) => {
+        const {payload} = action;
+        console.log('paymentAccessRequest fulfilled: ', payload);
+        // if (payload) {
+        //   state.isLoggedIn = true;
+        // } 
+      })
+    .addCase(paymentAccessRequest.rejected,
+      (state: any, action: PayloadAction<any>) => {
+        const {payload} = action;
+        console.log('paymentAccessRequest rejected: ', payload);
+      // state.MSstatus = false;
+    })
+  },
+});
 
+
+// State Reducers
+const userSliceReducer = userSlice.reducer;
+const paymentSliceReducer = paymentSlice.reducer;
 
 export {
-  MonthlySubscriptionReducer,
-  removeMonthlySubscription
+  userSliceReducer,
+  paymentSliceReducer,
+  loginUser,
+  loadUserFromStorage,
+  paymentAccessRequest,
+  accessTokenRequest,
+  removePayment
 };
