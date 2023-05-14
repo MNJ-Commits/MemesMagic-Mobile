@@ -17,8 +17,6 @@ target 'InputDemoApp' do
 
   pod 'RNFS', :path => '../node_modules/react-native-fs'
   
-  pod 'react-native-payments', :path => '../node_modules/react-native-payments'
-
   pod 'react-native-cameraroll', :path => '../node_modules/@react-native-camera-roll/camera-roll'
 
   permissions_path = '../node_modules/react-native-permissions/ios'
