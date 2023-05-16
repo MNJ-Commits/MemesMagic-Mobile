@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const userKey = 'userKey';
 export const accessKey = 'accessKey';
 export const paymentKey = 'paymentKey';
+export const individualGif = 'individualGif';
 
 
 
@@ -25,6 +26,13 @@ export const storeAppleAccessToken = async (data: { access_token: string }) => {
 export const storeVerifyPayment = async (data: { one_time: boolean; subcription: boolean }) => {
     try {
       await AsyncStorage.setItem(paymentKey, JSON.stringify(data));
+    } catch (error) {
+      console.log( 'storeVerifyPayment error: ',error);
+    }
+  };
+export const storeIndividualGifData = async (data: {src: string, width: number, height: number, uid?:number, defaultText?:string, giphy?: boolean, src2?: string, returnScreen: string}) => {
+    try {
+      await AsyncStorage.setItem(individualGif, JSON.stringify(data));
     } catch (error) {
       console.log( 'storeVerifyPayment error: ',error);
     }
@@ -54,6 +62,15 @@ export const loadVerifyPaymentFromStorage = async () => {
       const savedPaymentInfo: any = await AsyncStorage.getItem(paymentKey);
       const paymentInfo = JSON.parse(savedPaymentInfo);
       return paymentInfo
+    } catch (error) {
+      console.log('loadVerifyPaymentFromStorage error: ',error);
+    }
+  };
+export const loadIndividualGifData = async () => {
+    try {
+      const savedGifData: any = await AsyncStorage.getItem(individualGif);
+      const gifData = JSON.parse(savedGifData);
+      return gifData
     } catch (error) {
       console.log('loadVerifyPaymentFromStorage error: ',error);
     }

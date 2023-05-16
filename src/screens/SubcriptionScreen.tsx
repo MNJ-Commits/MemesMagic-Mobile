@@ -202,11 +202,6 @@ const SubcriptionScreen = ({navigation, route}:any) => {
   }, [])
 
 
-  if(!authData)
-    onAppleButtonPress()
-
-
-    
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -216,18 +211,9 @@ const SubcriptionScreen = ({navigation, route}:any) => {
             
             <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
               <TouchableOpacity onPress={()=>{
-                // returnScreen ?
-                // navigation.goBack()
-                // :
-                // navigation.navigate('CustomScreen')
-
-                navigation.navigate(returnScreen ? returnScreen : 'CustomScreen')
-
-                // navigation.navigate(returnScreen ? returnScreen : 'CustomScreen', 
-                // route.params?.giphy ? {src:route.params.src, width:route.params?.width, height:route.params.height, giphy: route.params.giphy, src2: route.params?.scr2, returnScreen:'BannerScreen'} 
-                // : route.params?.defaultText ? {src:route.params?.src, width:route.params?.width, height:route.params?.height, uid: route.params.uid, defaultText: route.params?.defaultText, returnScreen:'CustomScreen'} 
-                // : null
-                // )
+                navigation.canGoBack() ? navigation.pop() :
+                returnScreen ? navigation.push(returnScreen) :
+                navigation.push('CustomScreen')
               }} 
               >
                 <BackButton width={RFValue(25)} height={RFValue(25)}/>

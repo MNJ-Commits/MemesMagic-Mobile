@@ -16,7 +16,7 @@ import Share from 'react-native-share';
 
 import { DownloadFileOptions, downloadFile, writeFile } from 'react-native-fs';
 import { checkLibraryPermissions, requestLibraryPermissions } from '../utils/Permissions';
-import { loadAppleAccessTokenFromStorage, loadVerifyPaymentFromStorage } from '../store/asyncStorage';
+import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPaymentFromStorage } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 var RNFS = require('react-native-fs');
 
@@ -31,10 +31,42 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [fromURL, setFromURL] = useState<string>('')
     const [verifyPayment, setVerifyPayment] = useState<any>({})
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
+    const [gifData, setGIFData] = useState<any>({})
 
-    const returnScreen = route.params?.returnScreen
+    // GET Store
+    const getter = async () => {
+    
+        const gif_state = await loadIndividualGifData().catch((error:any)=>{
+            console.log('loadAppleAccessTokenFromStorage Error: ', error);
+        })
+        setGIFData(gif_state) 
+
+        const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+            console.log('loadVerifyPaymentFromStorage Error: ', error);
+        })
+        setVerifyPayment(paymentStatus) 
+        
+        const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+            console.log('loadAppleAccessTokenFromStorage Error: ', error);
+        })
+        setAppleAccessToken(access_token) 
+
+
+    }
+    useFocusEffect(
+        React.useCallback(() => {
+            getter().catch((error:any)=>{
+            console.log('getter Error: ', error);
+            })
+            // console.log(authData ? authData : null);
+            // console.log('appleAccessToken: ', appleAccessToken);
+        }, []),
+    );
+    
+
+    const returnScreen = gifData?.returnScreen
     // console.log('returnScreen: ',returnScreen);
-    // console.log('route.params: ',route.params);
+    // console.log('gifData: ',gifData);
     const renderRenderById: any = usePostCustomRenders({
         onSuccess(res) { 
             if(res[0].render.includes('.gif')){
@@ -51,8 +83,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     }); 
 
     useEffect(()=>{
-        if(route?.params?.giphy){
-            const textSting = route.params?.src2?.split("&w")[0]
+        if(gifData?.giphy){
+            const textSting = gifData?.src2?.split("&w")[0]
             setText(textSting?.split("=")[1])
         }
         else{
@@ -61,25 +93,25 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 "HQ": true,
                 "animated_sequence": true,
                 "render_format": "gif",
-                "uids": [ route.params.uid ], 
-                text:[route.params?.defaultText],
+                "uids": [ gifData.uid ], 
+                text:[gifData?.defaultText],
             }) 
             // For custom render 
             renderRenderById.mutate({ 
                 "HQ": true,
                 "animated_sequence": true,
                 "render_format": "webp",
-                "uids": [ route.params.uid ],
-                text:[route.params?.defaultText]
+                "uids": [ gifData.uid ],
+                text:[gifData?.defaultText]
             })
-            setText(route.params.defaultText)
+            setText(gifData.defaultText)
         }
-    },[])
+    },[gifData])
 
-    const textSting = route.params?.src2?.split("&w")[1] 
+    const textSting = gifData?.src2?.split("&w")[1] 
     
     let BannerURI: string = ''
-    text ? BannerURI+=`?text=${text}&w`+textSting : route.params?.src2
+    text ? BannerURI+=`?text=${text}&w`+textSting : gifData?.src2
 
     // checkLibraryPermissions( ).then((resp:any)=>{
     //     if(!resp){
@@ -111,10 +143,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
         // TO SAVE GIF'S TO IOS LIBRARY
         //Define options
+       
+        const header:any = appleAccessToken ? 
+            {  
+                'Accept': 'application/json',
+                'Content-Type': 'application/json', 
+                "X-ACCESS-TOKEN": appleAccessToken,  
+            }
+            :
+            { 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json', 
+            }
         const options: DownloadFileOptions = {
             fromUrl: fromURL,
             toFile: filePath,
-            headers: { 'Accept': 'application/json',  'Content-Type': 'application/json',  "X-ACCESS-TOKEN": appleAccessToken }
+            headers: header
         } 
         let response = await downloadFile(options);
         return response.promise.then(async (res: any) => {
@@ -133,12 +177,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         //Define path and directory to store files to
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
         const payload = {
-            "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-            "giphy_url":  route.params?.src
-        }
+                    "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                    "giphy_url":  gifData?.src
+                }
+        const header:any = appleAccessToken ? 
+            {  
+                'Content-Type': 'application/json', 
+                "X-ACCESS-TOKEN": appleAccessToken,  
+            }
+            :
+            { 
+                'Content-Type': 'application/json', 
+            }
+
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-            { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": appleAccessToken }, 
-            JSON.stringify({...payload }))
+                header, JSON.stringify({...payload }))
                 .then(async (response) =>{ 
                     if(response.info().status==200){
                         // TO SAVE GIF'S TO IOS LIBRARY                            
@@ -177,10 +230,18 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 fileCache: true,
                 path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`,
             };
+        const header:any = appleAccessToken ? 
+            {  
+                'Content-Type': 'application/json', 
+                "X-ACCESS-TOKEN": appleAccessToken,  
+            }
+            :
+            { 
+                'Content-Type': 'application/json', 
+            }
         // Download,
         RNFetchBlob.config(configOptions)
-            .fetch('GET', fromURL, 
-            { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": appleAccessToken }, )
+            .fetch('GET', fromURL, header)
             .then(async (resp:any) => {
                 setLoading(false)
                 filePath = await resp.path();
@@ -212,17 +273,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         setLoading(true)   
         const payload = {
             "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-            "giphy_url":  route.params?.src
+            "giphy_url":  gifData?.src
         }
-
-        // console.log(payload);
-        
+        const header:any = appleAccessToken ? 
+        {  
+            'Content-Type': 'application/json', 
+            "X-ACCESS-TOKEN": appleAccessToken,  
+        }
+        :
+        { 
+            'Content-Type': 'application/json', 
+        }
 
         let data: any;
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-            { 'Content-Type': 'application/json', 
-            "X-ACCESS-TOKEN": appleAccessToken,  
-        }, JSON.stringify({...payload }) )
+            header, JSON.stringify({...payload }) )
             .then(async (response) =>{ 
                 
                 console.log('reponse: ', response.info().status);
@@ -250,44 +315,20 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             });
     }
 
-    const getter = async () => {
-    
-        const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
-            console.log('loadVerifyPaymentFromStorage Error: ', error);
-        })
-        setVerifyPayment(paymentStatus) 
-        
-        const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-            console.log('loadAppleAccessTokenFromStorage Error: ', error);
-        })
-        setAppleAccessToken(access_token) 
-
-    }
-
-    useFocusEffect(
-        React.useCallback(() => {
-            getter().catch((error:any)=>{
-            console.log('getter Error: ', error);
-            })
-            // console.log(authData ? authData : null);
-            // console.log('appleAccessToken: ', appleAccessToken);
-        }, []),
-    );
-    
+    // console.log('gifData: ', gifData);
     // console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
     
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
-            <KeyboardAvoidingView
+          {gifData.src &&  <KeyboardAvoidingView
                 style={{flex: 1}}
                 behavior={Platform.OS === 'ios' ? 'padding': undefined }
                 keyboardVerticalOffset={20}
             >
                 {/* Back Button */}
                 <TouchableOpacity onPress={()=>{
-                    navigation.goBack()
-                    // navigation.navigate(returnScreen, {text:text})
+                    navigation.pop()
                     // navigation.navigate(returnScreen)
                     }}
                     style={{margin:20 }} >
@@ -300,19 +341,23 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                  >
                     {/* Gif */}
                     <Image
-                        source={{uri: route.params?.giphy ? route.params.src : webp }}
-                        style={[{width: '100%', aspectRatio: route.params.width/route.params.height, resizeMode:'contain', borderRadius:RFValue(30), margin:RFValue(20),  } ]}
+                        source={{uri: gifData?.giphy ? gifData.src : webp }}
+                        style={[{width: '100%', aspectRatio: gifData.width/gifData.height, resizeMode:'contain', borderRadius:RFValue(30), margin:RFValue(20),  } ]}
                     />        
                     {
-                    route.params.giphy && 
+                    gifData.giphy && 
                         <Image 
-                            source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                            source={appleAccessToken ?
+                                {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
                                     headers:{ "X-ACCESS-TOKEN": appleAccessToken }
-                                }}
+                                }
+                                :
+                                { uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }
+                            }
                             resizeMode={'contain'}
                             style={{
                                 width:'100%', 
-                                aspectRatio: route.params.width/route.params.height,
+                                aspectRatio: gifData.width/gifData.height,
                                 position:'absolute',
                                 borderRadius:RFValue(30), margin:RFValue(20),
                             }}
@@ -320,43 +365,38 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     }
 
                     
-                    {/* Download/Share */}
+                    {/* Copy/Download/Share */}
                     <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center' }} >
                         <TouchableOpacity 
-                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
                                 // if (verifyPayment?.subcription){
-                                //     route.params?.giphy ? ShareGiphyGif() : ShareCustomGif()
+                                //     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 // } else{
-                                //     navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                //     navigation.navigate('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
                                 // }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
                             <CopyIcon width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
                                     if (verifyPayment?.subcription){
-                                        route.params?.giphy ? DownloadGiphy() : DownloadCustomGif()
+                                        gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
                                     } else{
-                                        navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                        navigation.navigate('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
                                     }}}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
                                 if (verifyPayment?.subcription){
-                                    route.params?.giphy ? ShareGiphyGif() : ShareCustomGif()
+                                    gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 } else{
-                                    navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
-                                    // route.params?.giphy && text ?
-                                    //     navigation.navigate( 'SubcriptionScreen',{src: route.params.src, width: route.params.width, height: route.params.height, giphy: route?.params?.giphy, src2: route.params?.src2, returnScreen: 'IndividualGiphScreen' })
-                                    // : route.params?.defaultText ? 
-                                    //     navigation.navigate( 'SubcriptionScreen',{src:route.params.src, width: route.params.width, height: route.params.height, uid: route.params.uid, defaultText: route.params?.defaultText, returnScreen: 'IndividualGiphScreen' }) 
-                                    // : null
+                                    navigation.push('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'IndividualGiphScreen'}: {returnScreen : 'IndividualGiphScreen'})
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
@@ -370,7 +410,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
                             : loading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Loading...</Text>
-                            : !route.params.giphy && !fromURL ?
+                            : !gifData.giphy && !fromURL ?
                                 <ActivityIndicator size={'small'} />
                             : null
                         }
@@ -397,14 +437,14 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             }}            
                         />
                         <TouchableOpacity onPress={()=> { 
-                            if(!route.params.giphy){
+                            if(!gifData.giphy){
                                 setLoader(true); 
                                 Keyboard.dismiss()
                                 renderRenderById.mutate({ 
                                     text:[text],
                                     "HQ": true,
                                     "animated_sequence": true,
-                                    "uids": [ route.params.uid ], 
+                                    "uids": [ gifData.uid ], 
                                 }) 
                             }
                         }} >
@@ -417,7 +457,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         </TouchableOpacity>
                     </View> 
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </KeyboardAvoidingView>}
         </SafeAreaView>
     )
 }

@@ -9,9 +9,7 @@ const useGetBannerTemplatesRequest = async<T>()=>{
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
       }
     )    
-    const data = await response?.json()
-    console.log(data.data);
-    
+    const data = await response?.json()    
     return data?.data
   } catch (err: any) {
     throw new Error(err.response.data.message);

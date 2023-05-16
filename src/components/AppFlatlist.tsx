@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
+import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 
   const AppFlatlist = ({data, giphy, refresh, isLoader, response, renderData, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
@@ -85,10 +85,17 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     return(
     <TouchableOpacity 
       key={item.index}
-      onPress={()=>{giphy && text ?
-          navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, giphy: giphy, src2:BannerURI, returnScreen:'BannerScreen'})
-        : renderData && text ? navigation.navigate( 'IndividualGiphScreen',{src:customURI, width:width, height:height, uid: id, defaultText:text, returnScreen:'CustomScreen' }) 
-        : null}} 
+      onPress={()=>{
+        if(giphy && text)
+          {
+            storeIndividualGifData({src:customURI, width:width, height:height, giphy: giphy, src2: BannerURI, returnScreen:'BannerScreen'});
+            navigation.navigate( 'IndividualGiphScreen')
+          }
+        else if(renderData && text ){
+          storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text, returnScreen:'CustomScreen'});
+          navigation.navigate( 'IndividualGiphScreen')
+        }
+      }} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
       < >               

@@ -61,7 +61,6 @@ const CustomScreen = ({navigation, route}:any) => {
   useEffect(()=>{
     getCustomTemplates.refetch()
   },[tag])  
-    
 
 
   return (
