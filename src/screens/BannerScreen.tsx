@@ -27,8 +27,8 @@ const BannerScreen = ({navigation}:any) => {
  
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [sText, setSText] = useState<Boolean>(false)
-  const [fontFile, setFontFile] = useState<string>("")  
-  const [fontcolor, setFontcolor] = useState<string>("")  
+  const [fontFile, setFontFile] = useState<string>("Lucita-Regular.otf")  
+  const [fontcolor, setFontcolor] = useState<string>("#000000")  
   const [textPosition, setTextPosition] = useState('YellowBoxBB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
   const [text, setText] = useState<string>("")
@@ -105,10 +105,10 @@ const BannerScreen = ({navigation}:any) => {
         <View style={{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#000000',padding:15 }}>
           <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
             <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10)  }} >
-              <Text style={{color:'white', fontSize:RFValue(10), marginTop:RFValue(2), fontWeight:'normal' }} >CUSTOM</Text>
+              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(3.5), fontFamily:'Lucita-Regular' }} >CUSTOM</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10)  }} >
-              <Text style={{color:'white', fontSize:RFValue(10), marginTop:RFValue(2), fontWeight:'normal' }} >BANNER</Text>
+              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(3.5), fontFamily:'Lucita-Regular' }} >BANNER</Text>
             </TouchableOpacity>
           </View>
 
@@ -138,31 +138,36 @@ const BannerScreen = ({navigation}:any) => {
                 placeholderTextColor={'#ffffff'}
                 // onChangeText={(e: any) => { setText(e) }}
                 placeholder={'Search'}
+                returnKeyType= {'search'}
+                  onSubmitEditing ={ (e)=>{
+                      Keyboard.dismiss()
+                  }}
                 style= {{ 
                   fontSize: RFValue(15),
                   fontFamily:'arial',
                   width:'85%',
                   alignSelf:'center',
                   height: RFValue(40), 
-                  color:'#000000',
+                  color:'#ffffff',
                 }}            
               />
             </View> 
             <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} >
-              <Text style={{fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
+              <Text style={{fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
             </TouchableOpacity>
           </View>
           :
-          <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', }}>
+          <View style={{ flexDirection:'row', justifyContent:'space-between',  alignItems:'center', }}>
             <TouchableOpacity onPress={()=>setVisibleSearch(true)} style={{borderWidth:1, borderColor:"#ffffff", width:RFValue(35), height:RFValue(35), padding:RFValue(6), borderRadius:RFValue(20), marginRight:RFValue(10) }}  >
               <Search width={RFValue(20)} height={RFValue(20)} />
             </TouchableOpacity> 
             <View style={{ flexDirection:'row', justifyContent:'space-between', width:'85%', paddingHorizontal:RFValue(15), alignItems:'center', backgroundColor:'#ffffff', borderRadius: RFValue(20), padding:RFValue(5)   }} >
               <TouchableOpacity onPress={()=>{setFontModalVisible(!isFontModalVisible)}} >
-                <TextIcon width={RFValue(25)} height={RFValue(25)}/>
+                <TextIcon width={RFValue(25)} height={RFValue(25)} style={{marginTop:RFValue(6), }} />
               </TouchableOpacity>
               <TouchableOpacity onPress={()=>{setColorModalVisible(!isColorModalVisible)}} >
-                <BgColors width={RFValue(25)} height={RFValue(25)}/>
+                <View style={{width:RFValue(25), height:RFValue(22), backgroundColor: fontcolor, borderColor:'#000000', borderWidth:RFValue(2), borderRadius:RFValue(3), marginRight:RFValue(7) }} ></View>
+                {/* <BgColors width={RFValue(25)} height={RFValue(25)}/> */}
               </TouchableOpacity>
               {/* <TouchableOpacity onPress={()=>{setSText(!sText)}} >
                 {sText ? 
@@ -251,7 +256,7 @@ const BannerScreen = ({navigation}:any) => {
       </KeyboardAvoidingView>
       
       {/* Font Family Modal */}
-      <AppModal isVisible={isFontModalVisible} setModalVisible = {setFontModalVisible} >
+      <AppModal isVisible={isFontModalVisible} setModalVisible = {setFontModalVisible} style={{justifyContent: 'flex-end', margin: 0}}  >
         <AppModal.Container>
           <AppModal.Header title="Select a font style" />
           <AppModal.Body>
@@ -281,7 +286,7 @@ const BannerScreen = ({navigation}:any) => {
       </AppModal>
       
       {/* Color Modal */}
-      <AppModal isVisible={isColorModalVisible} setModalVisible = {setColorModalVisible} >
+      <AppModal isVisible={isColorModalVisible} setModalVisible = {setColorModalVisible} style={{justifyContent: 'flex-end', margin: 0}} >
         <AppModal.Container>
           <AppModal.Header title="Select a font color" />
           <AppModal.Body>
@@ -298,7 +303,7 @@ const BannerScreen = ({navigation}:any) => {
                         setTimeout(()=>setColorModalVisible(false), 500)
                       }}
                       style={{ width:RFValue(55), height:RFValue(55), justifyContent:'center', alignItems:'center'}} >
-                    <View style={{width:RFValue(35), height:RFValue(35), backgroundColor: data.hex, borderRadius:3 }} ></View>
+                    <View style={{width:RFValue(35), height:RFValue(35), backgroundColor: data.hex, borderRadius:RFValue(3) }} ></View>
                     <Text style={[{fontFamily:'arial', fontSize: RFValue(8), padding: RFValue(3), color:'#ffffff'}]}>{data.hex}</Text>
                   </TouchableOpacity>
                 )}

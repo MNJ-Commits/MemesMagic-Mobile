@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import BackButton from "../assets/svgs/back-button.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
 import ShareIcon from "../assets/svgs/shareIcon.svg";
+import CopyIcon from "../assets/svgs/copy.svg";
 import DownloadSvg from "../assets/svgs/download.svg";
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 
@@ -71,6 +72,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 "uids": [ route.params.uid ],
                 text:[route.params?.defaultText]
             })
+            setText(route.params.defaultText)
         }
     },[])
 
@@ -112,7 +114,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const options: DownloadFileOptions = {
             fromUrl: fromURL,
             toFile: filePath,
-            headers: { 'Accept': 'application/json',  'Content-Type': 'application/json' }
+            headers: { 'Accept': 'application/json',  'Content-Type': 'application/json',  "X-ACCESS-TOKEN": appleAccessToken }
         } 
         let response = await downloadFile(options);
         return response.promise.then(async (res: any) => {
@@ -135,7 +137,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             "giphy_url":  route.params?.src
         }
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-            { 'Content-Type': 'application/json' }, 
+            { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": appleAccessToken }, 
             JSON.stringify({...payload }))
                 .then(async (response) =>{ 
                     if(response.info().status==200){
@@ -177,7 +179,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             };
         // Download,
         RNFetchBlob.config(configOptions)
-            .fetch('GET', fromURL)
+            .fetch('GET', fromURL, 
+            { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": appleAccessToken }, )
             .then(async (resp:any) => {
                 setLoading(false)
                 filePath = await resp.path();
@@ -211,13 +214,23 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
             "giphy_url":  route.params?.src
         }
+
+        // console.log(payload);
+        
+
         let data: any;
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-            { 'Content-Type': 'application/json' }, JSON.stringify({...payload }) )
+            { 'Content-Type': 'application/json', 
+            "X-ACCESS-TOKEN": appleAccessToken,  
+        }, JSON.stringify({...payload }) )
             .then(async (response) =>{ 
+                
+                console.log('reponse: ', response.info().status);
                 if(response.info().status==200){
                     setLoading(false)
                     data = await response.base64() 
+                    console.log(data);
+                    
                     return data
                 }
             }).then((base64Data:any) => {
@@ -230,10 +243,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     console.log('res: ', res);
                 }).catch((error:any)=>{
                     setLoading(false)
-                    console.log('error: ', error);
+                    console.log('Share error: ', error);
                 });
             }).catch((error:any)=>{ 
-                console.log('fetch error: ', error) 
+                // console.log('fetch error: ', error) 
             });
     }
 
@@ -262,10 +275,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     );
     
     // console.log('verifyPayment: ', verifyPayment);
-    console.log('appleAccessToken: ', appleAccessToken);
+    // console.log('appleAccessToken: ', appleAccessToken);
     
     return(
-        <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }} >
+        <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
             <KeyboardAvoidingView
                 style={{flex: 1}}
                 behavior={Platform.OS === 'ios' ? 'padding': undefined }
@@ -283,6 +296,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 <ScrollView 
                     style={{flex:1, }} 
                     contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20) }}
+                    keyboardShouldPersistTaps='handled' 
                  >
                     {/* Gif */}
                     <Image
@@ -293,7 +307,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     route.params.giphy && 
                         <Image 
                             source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-                                    headers:{ "X-ACCESS-TOKEN": `${appleAccessToken}`}
+                                    headers:{ "X-ACCESS-TOKEN": appleAccessToken }
                                 }}
                             resizeMode={'contain'}
                             style={{
@@ -304,6 +318,64 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             }}
                         />
                     }
+
+                    
+                    {/* Download/Share */}
+                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center' }} >
+                        <TouchableOpacity 
+                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            onPress={ ()=>{
+                                // if (verifyPayment?.subcription){
+                                //     route.params?.giphy ? ShareGiphyGif() : ShareCustomGif()
+                                // } else{
+                                //     navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                // }
+                            }}
+                            style={{alignSelf:'center', margin:20 }} >
+                            <CopyIcon width={RFValue(40)} height={RFValue(40)} />
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            onPress={ ()=>{
+                                    if (verifyPayment?.subcription){
+                                        route.params?.giphy ? DownloadGiphy() : DownloadCustomGif()
+                                    } else{
+                                        navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                    }}}
+                            style={{alignSelf:'center', margin:20 }} >
+                            <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            disabled = { !route.params.giphy && !fromURL ? true : false}
+                            onPress={ ()=>{
+                                if (verifyPayment?.subcription){
+                                    route.params?.giphy ? ShareGiphyGif() : ShareCustomGif()
+                                } else{
+                                    navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                    // route.params?.giphy && text ?
+                                    //     navigation.navigate( 'SubcriptionScreen',{src: route.params.src, width: route.params.width, height: route.params.height, giphy: route?.params?.giphy, src2: route.params?.src2, returnScreen: 'IndividualGiphScreen' })
+                                    // : route.params?.defaultText ? 
+                                    //     navigation.navigate( 'SubcriptionScreen',{src:route.params.src, width: route.params.width, height: route.params.height, uid: route.params.uid, defaultText: route.params?.defaultText, returnScreen: 'IndividualGiphScreen' }) 
+                                    // : null
+                                }
+                            }}
+                            style={{alignSelf:'center', margin:20 }} >
+                            <ShareIcon width={RFValue(40)} height={RFValue(40)} />
+                        </TouchableOpacity>
+                    </View>
+                    
+                    <View style={{paddingTop:20}} >
+                        {
+                            downloading ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
+                            : loading ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Loading...</Text>
+                            : !route.params.giphy && !fromURL ?
+                                <ActivityIndicator size={'small'} />
+                            : null
+                        }
+                    </View>
+
                     {/* Text Ipnut */}
                     <View style={{ marginTop:RFValue(50), flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
                         <TextInput
@@ -313,7 +385,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             onSubmitEditing={() => { }}
                             onChangeText={(e: any) => { setText(e) }}
                             placeholder={'Your text here'}
-                            defaultValue={ text ? text : route.params?.defaultText}
+                            value={ text }
                             style= {{ 
                             fontSize: RFValue(15),
                             fontFamily:'arial',
@@ -327,6 +399,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity onPress={()=> { 
                             if(!route.params.giphy){
                                 setLoader(true); 
+                                Keyboard.dismiss()
                                 renderRenderById.mutate({ 
                                     text:[text],
                                     "HQ": true,
@@ -343,52 +416,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             }
                         </TouchableOpacity>
                     </View> 
-                    
-                    {/* Download/Share */}
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center' }} >
-                        <TouchableOpacity 
-                            // disabled = {gif=='' ? true : false}
-                            onPress={ ()=>{
-                                    if (verifyPayment.subcription){
-                                        route.params?.giphy ? DownloadGiphy() : DownloadCustomGif()
-                                    } else{
-                                        navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
-                                    }}}
-                            style={{alignSelf:'center', margin:20 }} >
-                            <DownloadSvg width={RFValue(20)} height={RFValue(20)} />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            // disabled = {gif==''  ? true : false}
-                            onPress={ ()=>{
-                                if (verifyPayment?.subcription){
-                                    console.log('here');
-                                    
-                                    route.params?.giphy ? ShareGiphyGif() : ShareCustomGif()
-                                } else{
-                                    navigation.navigate('SubcriptionScreen', route.params?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
-                                    // route.params?.giphy && text ?
-                                    //     navigation.navigate( 'SubcriptionScreen',{src: route.params.src, width: route.params.width, height: route.params.height, giphy: route?.params?.giphy, src2: route.params?.src2, returnScreen: 'IndividualGiphScreen' })
-                                    // : route.params?.defaultText ? 
-                                    //     navigation.navigate( 'SubcriptionScreen',{src:route.params.src, width: route.params.width, height: route.params.height, uid: route.params.uid, defaultText: route.params?.defaultText, returnScreen: 'IndividualGiphScreen' }) 
-                                    // : null
-                                }
-                            }}
-                            style={{alignSelf:'center', margin:20 }} >
-                            <ShareIcon width={RFValue(20)} height={RFValue(20)} />
-                        </TouchableOpacity>
-                    </View>
-                    
-                    <View style={{paddingTop:20}} >
-                        {
-                            downloading ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
-                            : loading ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Loading...</Text>
-                            : !route.params.giphy && !fromURL ?
-                                <ActivityIndicator size={'small'} />
-                            : null
-                        }
-                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>

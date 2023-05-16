@@ -106,9 +106,12 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
           giphy && 
             <Image 
               key={item.index}
-              source={{uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-                       headers:{ "X-ACCESS-TOKEN": `${appleAccessToken}`}
-                     }}
+              source={appleAccessToken ? 
+                      { 
+                        uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                        headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
+                      }
+                    : {  uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }}
               resizeMode={'contain'}
               style={{
                 width:'100%', 

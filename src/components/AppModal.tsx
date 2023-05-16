@@ -14,6 +14,7 @@ export const AppModal = ({
   children,
   ...props
 }: AppModalProps) => {
+
   return (
     <RNModal
       isVisible={isVisible}
@@ -22,7 +23,6 @@ export const AppModal = ({
       animationOutTiming={1000}
       backdropTransitionInTiming={800}
       backdropTransitionOutTiming={800}
-      style={{justifyContent: 'flex-end', margin: 0}}
       {...props}>
       {children}
     </RNModal>
@@ -51,19 +51,21 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor:'#25282D',
     borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderStyle: "solid",
+    // borderWidth: 1,
+    // borderColor: "#000",
+    // borderStyle: "solid",
   },
   header: {
     alignItems: "center",
     justifyContent: "center",
+    marginTop:10
   },
   text: {
     paddingTop: 10,
     textAlign: "center",
     fontSize: 24,
-    color:'#ffffff'
+    color:'#ffffff',
+    fontFamily:'Lucita-Regular',
   },
   body: {
     justifyContent: "center",

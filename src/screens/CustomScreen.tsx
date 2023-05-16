@@ -75,12 +75,10 @@ const CustomScreen = ({navigation, route}:any) => {
         <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:15 }}>
           <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
             <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
-              <Text style={{color:'white', fontSize:RFValue(10), marginTop:RFValue(2), fontWeight:'normal', 
-              // fontFamily:'Lucita Regular'  
-              }} >CUSTOM</Text>
+              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
-              <Text style={{color:'white', fontSize:RFValue(10), marginTop:RFValue(2), fontWeight:'normal' }} >BANNER</Text>
+              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular' }} >BANNER</Text>
             </TouchableOpacity>
           </View>
 
@@ -109,7 +107,7 @@ const CustomScreen = ({navigation, route}:any) => {
                   placeholderTextColor={'#ffffff'}
                   onChangeText={(e: any) => { setTag(e) }}
                   placeholder={'Search'}
-                  returnKeyType= {'done'}
+                  returnKeyType= {'search'}
                   onSubmitEditing ={ (e)=>{
                       Keyboard.dismiss()
                   }}
@@ -124,7 +122,7 @@ const CustomScreen = ({navigation, route}:any) => {
                 />
               </View> 
               <TouchableOpacity onPress={()=> { setVisibleSearch(false); setTag('') }} >
-                <Text style={{fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
+                <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
               </TouchableOpacity>
             </View> 
               :
@@ -146,7 +144,7 @@ const CustomScreen = ({navigation, route}:any) => {
                           else{ setTag(data); setLoader(true);} }} 
                           key={index} 
                           style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
-                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(12), paddingTop:RFValue(7), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
+                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(11), paddingTop:RFValue(8), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
                       </TouchableOpacity>
                     )})
                   }

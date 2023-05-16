@@ -23,9 +23,7 @@ const usePostAppleOneTimeRequest = async (params: any)=>{
                 body:JSON.stringify(body),
                 headers: headers
             })   
-        const data = await response?.json()        
-        console.log('data: ',response);
-        
+        const data = await response?.json()                
         return data?.data
     }
     catch (err:any) {
