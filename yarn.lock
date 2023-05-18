@@ -1232,7 +1232,7 @@
     "node-forge" "^1.2.1"
     "nullthrows" "^1.1.1"
 
-"@expo/config-plugins@^6.0.1", "@expo/config-plugins@~6.0.0", "@expo/config-plugins@6.0.1":
+"@expo/config-plugins@~6.0.0", "@expo/config-plugins@6.0.1":
   "integrity" "sha512-6mqZutxeibXFeqFfoZApFUEH2n1RxGXYMHCdJrDj4eXDBBFZ3aJ0XBoroZcHHHvfRieEsf54vNyJoWp7JZGj8g=="
   "resolved" "https://registry.npmjs.org/@expo/config-plugins/-/config-plugins-6.0.1.tgz"
   "version" "6.0.1"
@@ -7832,13 +7832,6 @@
     "hoist-non-react-statics" "^3.3.0"
     "invariant" "^2.2.4"
     "prop-types" "^15.7.2"
-
-"react-native-iap@^12.10.5":
-  "integrity" "sha512-KVIgIiz3EE0esPVSZiavKSN2NeUarURA5JJUh6XUGXSsM9YTS3pZaJZpHo8Z62vbsXceg17N5soCnlyvaNmIIQ=="
-  "resolved" "https://registry.npmjs.org/react-native-iap/-/react-native-iap-12.10.5.tgz"
-  "version" "12.10.5"
-  dependencies:
-    "@expo/config-plugins" "^6.0.1"
 
 "react-native-inappbrowser-reborn@^3.7.0":
   "integrity" "sha512-Ia53jYNtFcbNaX5W3QfOmN25I7bcvuDiQmSY5zABXjy4+WI20bPc9ua09li55F8yDCjv3C99jX6vKms68mBV7g=="
