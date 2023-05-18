@@ -17,9 +17,9 @@ import { usePostAppleOneTime } from '../hooks/usePostAppleOneTime';
 import { useFocusEffect } from '@react-navigation/native';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { AppModal } from '../components/AppModal';
-// import { useGetPaymentVerification } from '../hooks/useGetPaymentVerification';
 
 
+// import * as RNIap from 'react-native-iap'
 
 const SubscriptionScreen = ({navigation, route}:any) => {
 
@@ -37,6 +37,19 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
     {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
   ]
+
+
+// useEffect(()=>{ 
+//   RNIap.initConnection()
+//   .then(() => { console.log('Connected to store');
+//   })
+//   .catch(() => { console.log('Not connected to store');
+//   })
+// },[])
+
+
+
+
 
   const getter = async () => {
     

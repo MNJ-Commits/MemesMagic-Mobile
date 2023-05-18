@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
 import { ActivityIndicator } from 'react-native';
+// import { withIAPContext } from 'react-native-iap';
 
 const Stack = createNativeStackNavigator(); 
 // Create a client
@@ -56,6 +57,7 @@ const AppBootStrap = React.memo(function () {
     </NavigationContainer>
   )
 })
+// export default withIAPContext(App);
 export default App;
 
 
