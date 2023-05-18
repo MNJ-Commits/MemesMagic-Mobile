@@ -370,6 +370,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
+                                navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 // if (verifyPayment?.subcription){
                                 //     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 // } else{
@@ -385,7 +386,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     if (verifyPayment?.subcription){
                                         gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
                                     } else{
-                                        navigation.navigate('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                        navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                     }}}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -396,7 +397,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 if (verifyPayment?.subcription){
                                     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 } else{
-                                    navigation.push('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'IndividualGiphScreen'}: {returnScreen : 'IndividualGiphScreen'})
+                                    navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >

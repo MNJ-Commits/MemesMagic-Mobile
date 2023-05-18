@@ -189,12 +189,16 @@ const SubcriptionScreen = ({navigation, route}:any) => {
           { 
             storeVerifyPayment({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
             setVerifyPayments({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
-            InAppBrowser.close()
+            InAppBrowser.close()            
+            returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
+            navigation.push('CustomScreen')
           }
         else if(url.url?.includes('paymentType=subcribed')){
           storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
           setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
           InAppBrowser.close()
+          returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
+          navigation.push('CustomScreen')
         }
       });
     }
@@ -280,8 +284,8 @@ const SubcriptionScreen = ({navigation, route}:any) => {
           </TouchableOpacity>
           <AppModal.Header title="Terms and Conditions" />
           <AppModal.Body>
-            <View style={{paddingLeft:RFValue(10), marginTop:10, height: RFValue(320)}} >
-              <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(12)}}>
+            <View style={{ marginTop:10 }} >
+              <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(12), textAlign:'justify', lineHeight:20 }}>
               Subscription renews monthly or annually. Payment will be charged to iTunes account at confirmation of purchase. Subscription automaticlaly renews unless the automatic-renew is turned off at least 24 hours before the end of the current period. Account will be charged for renewal within 24 hours prior to the end of the current period, and identify the cost of the renewal subscription may be managed by the user and auto-renewal may be turned off by going to the user’s Account Settings after purchase. Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that application. By signing up for subscription, you agree to our <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12), color:'#FEB720'}}>terms and conditions</Text> and  <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12), color:'#FEB720'}}>privacy policy</Text>.
               </Text>
             </View>
