@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import CustomScreen from './screens/CustomScreen';
 import BannerScreen from './screens/BannerScreen';
-import SubscriptionScreen from './screens/SubscriptionScreen (Payments)';
+import SubscriptionScreen from './screens/SubscriptionScreen';
 import IndividualGiphScreen from './screens/IndividualGiphScreen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
