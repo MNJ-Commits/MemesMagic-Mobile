@@ -370,11 +370,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                                navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 // if (verifyPayment?.subcription){
                                 //     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 // } else{
-                                //     navigation.navigate('SubcriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
+                                //     navigation.navigate('SubscriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
                                 // }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
@@ -386,7 +386,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     if (verifyPayment?.subcription){
                                         gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
                                     } else{
-                                        navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                     }}}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -397,7 +397,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 if (verifyPayment?.subcription){
                                     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 } else{
-                                    navigation.push('SubcriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                    navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >

@@ -26,6 +26,7 @@
 		57AF5F85F64A44018F79D3D0 /* Calibri Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6C01A795C02A46B983089524 /* Calibri Regular.ttf */; };
 		57EAF89D5C5F4856B3E68131 /* Lazer84.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0613DA8F741444D3ACAFF329 /* Lazer84.ttf */; };
 		8006ACC11ADE491DA796CD8A /* Rounds Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 680DB8CFE6144663993C4894 /* Rounds Black.otf */; };
+		80ACA4EC2A16029E00CC611B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 80ACA4EB2A16029E00CC611B /* StoreKit.framework */; };
 		80DF56F529CD863A0014E737 /* Mappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F429CD863A0014E737 /* Mappers.swift */; };
 		80DF56F729CD86860014E737 /* MessagesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F629CD86860014E737 /* MessagesManager.swift */; };
 		80DF56F929CD877B0014E737 /* MessagesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56F829CD877B0014E737 /* MessagesManager.m */; };
@@ -139,6 +140,7 @@
 		8019C55D29D6CA54008C522F /* libYoga.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libYoga.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		803EE8532A012CE20036FEEE /* InputDemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = InputDemoApp.entitlements; path = InputDemoApp/InputDemoApp.entitlements; sourceTree = "<group>"; };
 		80895A642A02437A00117625 /* MessagesExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MessagesExtension.entitlements; sourceTree = "<group>"; };
+		80ACA4EB2A16029E00CC611B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		80DF56F429CD863A0014E737 /* Mappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mappers.swift; sourceTree = "<group>"; };
 		80DF56F629CD86860014E737 /* MessagesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesManager.swift; sourceTree = "<group>"; };
 		80DF56F829CD877B0014E737 /* MessagesManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessagesManager.m; sourceTree = "<group>"; };
@@ -180,6 +182,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5C87E000BE6914B66F6A52A /* libPods-InputDemoApp.a in Frameworks */,
+				80ACA4EC2A16029E00CC611B /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,6 +245,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				80ACA4EB2A16029E00CC611B /* StoreKit.framework */,
 				8019C51D29D6CA54008C522F /* libDoubleConversion.a */,
 				8019C51F29D6CA54008C522F /* libFBReactNativeSpec.a */,
 				8019C52129D6CA54008C522F /* libglog.a */,

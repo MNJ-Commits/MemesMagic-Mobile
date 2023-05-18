@@ -21,7 +21,7 @@ import { AppModal } from '../components/AppModal';
 
 
 
-const SubcriptionScreen = ({navigation, route}:any) => {
+const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
   // console.log('route.params: ',route.params);
@@ -54,7 +54,7 @@ const SubcriptionScreen = ({navigation, route}:any) => {
       console.log('loadVerifyPaymentFromStorage Error: ', error);
     })
     setVerifyPayments(verifyPayment)
-    console.log('verifyPayment: ', verifyPayment);
+    // console.log('verifyPayment: ', verifyPayment);
   };
  
   useFocusEffect(
@@ -62,8 +62,8 @@ const SubcriptionScreen = ({navigation, route}:any) => {
       getter().catch((error:any)=>{
         console.log('getter Error: ', error);
       })
-      console.log(authData ? authData : null);
-      console.log('appleAccessToken: ', appleAccessToken);
+      // console.log(authData ? authData : null);
+      // console.log('appleAccessToken: ', appleAccessToken);
     }, [appleAccessToken]),
   );
 
@@ -169,7 +169,7 @@ const SubcriptionScreen = ({navigation, route}:any) => {
 
       // Get the deep link used to open the app
       await Linking.getInitialURL().then((url) => {
-        console.log('getInitialURL: ',url) 
+        // console.log('getInitialURL: ',url) 
         if(url?.includes('paymentType=subcribed') ){ 
           storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
           setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
@@ -301,4 +301,4 @@ const SubcriptionScreen = ({navigation, route}:any) => {
 
  
 
-export default SubcriptionScreen;
+export default SubscriptionScreen;

@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import CustomScreen from './screens/CustomScreen';
 import BannerScreen from './screens/BannerScreen';
-import SubcriptionScreen from './screens/SubcriptionScreen';
+import SubscriptionScreen from './screens/SubscriptionScreen (Payments)';
 import IndividualGiphScreen from './screens/IndividualGiphScreen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,9 +29,9 @@ const App = () => {
 const AppBootStrap = React.memo(function () {
 
   const linking = {
-    prefixes: ['memeswork://SubcriptionScreen', 'https://memeswork.com'],
+    prefixes: ['memeswork://SubscriptionScreen', 'https://memeswork.com'],
     screens:{
-      SubcriptionScreen:"SubcriptionScreen",
+      SubscriptionScreen:"SubscriptionScreen",
     }
   };
   
@@ -46,7 +46,7 @@ const AppBootStrap = React.memo(function () {
             headerShown: false,
           }}
         >
-          <Stack.Screen name="SubcriptionScreen" component={SubcriptionScreen} />
+          <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} />
           <Stack.Screen name="CustomScreen" component={CustomScreen} />
           <Stack.Screen name="BannerScreen" component={BannerScreen} />
           <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />

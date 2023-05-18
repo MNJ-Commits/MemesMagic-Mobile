@@ -1232,7 +1232,7 @@
     "node-forge" "^1.2.1"
     "nullthrows" "^1.1.1"
 
-"@expo/config-plugins@~6.0.0", "@expo/config-plugins@6.0.1":
+"@expo/config-plugins@^6.0.1", "@expo/config-plugins@~6.0.0", "@expo/config-plugins@6.0.1":
   "integrity" "sha512-6mqZutxeibXFeqFfoZApFUEH2n1RxGXYMHCdJrDj4eXDBBFZ3aJ0XBoroZcHHHvfRieEsf54vNyJoWp7JZGj8g=="
   "resolved" "https://registry.npmjs.org/@expo/config-plugins/-/config-plugins-6.0.1.tgz"
   "version" "6.0.1"
@@ -7854,6 +7854,13 @@
     "lodash" "^4.17.21"
     "prop-types" "^15.7.2"
 
+"react-native-iap@^12.10.5":
+  "integrity" "sha512-KVIgIiz3EE0esPVSZiavKSN2NeUarURA5JJUh6XUGXSsM9YTS3pZaJZpHo8Z62vbsXceg17N5soCnlyvaNmIIQ=="
+  "resolved" "https://registry.npmjs.org/react-native-iap/-/react-native-iap-12.10.5.tgz"
+  "version" "12.10.5"
+  dependencies:
+    "@expo/config-plugins" "^6.0.1"
+
 "react-native-inappbrowser-reborn@^3.7.0":
   "integrity" "sha512-Ia53jYNtFcbNaX5W3QfOmN25I7bcvuDiQmSY5zABXjy4+WI20bPc9ua09li55F8yDCjv3C99jX6vKms68mBV7g=="
   "resolved" "https://registry.npmjs.org/react-native-inappbrowser-reborn/-/react-native-inappbrowser-reborn-3.7.0.tgz"
@@ -7956,7 +7963,7 @@
   "resolved" "https://registry.npmjs.org/react-native-webp-format/-/react-native-webp-format-1.2.0.tgz"
   "version" "1.2.0"
 
-"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.72 || 1000.0.0", "react-native@>=0.42.0", "react-native@>=0.56", "react-native@>=0.58", "react-native@>=0.59", "react-native@>=0.59.0", "react-native@>=0.63.3", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@0.64.1":
+"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.72 || 1000.0.0", "react-native@>=0.42.0", "react-native@>=0.56", "react-native@>=0.58", "react-native@>=0.59", "react-native@>=0.59.0", "react-native@>=0.63.3", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@>=0.65.1", "react-native@0.64.1":
   "integrity" "sha512-jvSj+hNAfwvhaSmxd5KHJ5HidtG0pDXzoH6DaqNpU74g3CmAiA8vuk58B5yx/DYuffGq6PeMniAcwuh3Xp4biQ=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.64.1.tgz"
   "version" "0.64.1"
