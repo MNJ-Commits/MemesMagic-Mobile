@@ -20,6 +20,8 @@ import { AppModal } from '../components/AppModal';
 
 
 // import * as RNIap from 'react-native-iap'
+import {requestPurchase, requestSubscription, useIAP} from 'react-native-iap';
+
 
 const SubscriptionScreen = ({navigation, route}:any) => {
 
@@ -47,9 +49,66 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 //   })
 // },[])
 
+  const {
+    connected,
+    products,
+    promotedProductsIOS,
+    subscriptions,
+    availablePurchases,
+    currentPurchase,
+    currentPurchaseError,
+    initConnectionError,
+    finishTransaction,
+    getProducts,
+    getSubscriptions,
+    getAvailablePurchases,
+  } = useIAP();
 
+  useEffect(()=>{
+  
+  if(connected){
+    console.log('Connected: ',connected);
+    
+    getProducts({skus:["NoWatermarks"]})
+    .then(()=>{ console.log('getProductsReponse: ', products) })
+    .catch((currentPurchaseError)=>{ console.log('getProductsError: ', currentPurchaseError) })
+    
+    getSubscriptions({skus:["MonthlySubscription"]})
+    .then(()=>{ console.log('getSubscriptionsResponse: ', subscriptions) })
+    .catch((currentPurchaseError)=>{ console.log('getSubscriptionsError: ', currentPurchaseError) })
+    
+  } 
+  else{
+    console.log('Not connected: ', initConnectionError);
+  }
+},[])
+  
 
+  const handlePurchase = async (sku: string) => {
+    if(products[0].productId=='NoWatermarks')
+    {
+      await requestPurchase({sku})
+      .then((purchaseReponse)=>{
+        console.log("purchaseReponse: ", purchaseReponse);
+      })
+      .catch((purchaseError)=>{
+        console.log('purchaseError: ', purchaseError);
+      })
+    }
+  };
 
+  const handleSubscription = async (sku: string) => {
+    if(subscriptions[0].productId = 'MonthlySubscription')
+    {
+      await requestSubscription({sku})
+      .then((subscriptionReponse)=>{
+        console.log("subscriptionReponse: ", subscriptionReponse);
+      })
+      .catch((subscriptionError)=>{
+        console.log('subscriptionError: ', subscriptionError);
+      })
+    }
+  };
 
   const getter = async () => {
     
@@ -70,153 +129,14 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     // console.log('verifyPayment: ', verifyPayment);
   };
  
-  useFocusEffect(
-    React.useCallback(() => {
-      getter().catch((error:any)=>{
-        console.log('getter Error: ', error);
-      })
-      // console.log(authData ? authData : null);
-      // console.log('appleAccessToken: ', appleAccessToken);
-    }, [appleAccessToken]),
-  );
-
-  async function onAppleButtonPress() {
-    // console.log('appleAuth.isSupported: ', appleAuth.isSupported);    
-    if( appleAuth.isSupported){
-      // performs login request
-      const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      }).then((performLoginResponse:any)=>{
-        setAuthData({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-        storeAppleAuth({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-        getAppleAccessToken.mutate({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-      }).catch((performLoginrror:any)=>{
-        console.log('performLoginError: ', performLoginrror);
-      });
-      console.log('appleAuthRequestResponse: ', appleAuthRequestResponse);
-    } 
-  }
-
-  const getAppleAccessToken: any = usePostAppleAccessToken({
-    onSuccess(res) { 
-      console.log('getAppleAccessToken: ', res.access_token);
-      storeAppleAccessToken(res.access_token)
-      setAppleAccessToken(res.accessToken) 
-    },
-    onError(error) {
-      console.log(error);
-    },
-  }); 
-   
-  const getAppleSubcribe: any = usePostAppleSubcribe({
-    onSuccess(res) { 
-      // console.log('getAppleSubcribe: ', res);
-      openLink(res.redirect)
-    },
-    onError(error) {
-      console.log('getAppleSubcribe error: ', error);
-    },
-  });
-
-  const getAppleOneTime: any = usePostAppleOneTime({
-    onSuccess(res) { 
-      // console.log('getAppleOneTime: ', res);
-      // openURL(res.redirect)
-      openLink(res.redirect)
-    },
-    onError(error) {
-      console.log(error);
-    },
-  });  
-
-  // Open Redirect Link
-  // External Browser
-  const openURL = async (redirect: any) => {
-
-    await Linking.canOpenURL(redirect).then(async supported => {
-      if (supported) {
-        await Linking.openURL(redirect)
-        .catch((error)=>{
-          console.log('Linking openURL error: ', error);
-        });
-      }
-      else {
-        console.log("Don't know how to open URI: " + redirect);
-      }
-    })
-    .catch((error)=>{
-      console.log('canOpenURL linking error: ', error);
-    })
-  }
-  // In-App Browser
-  async function openLink(url: any) {
-    try {
-      const isAvailable = await InAppBrowser.isAvailable()
-      console.log('isAvailable: ',isAvailable);
-      if (isAvailable)  {
-        const result = await InAppBrowser.open(url, {
-          // iOS Properties
-          dismissButtonStyle: 'cancel',
-          preferredBarTintColor: '#453AA4',
-          preferredControlTintColor: 'white',
-          readerMode: false,
-          animated: true,
-          modalPresentationStyle: 'fullScreen',
-          modalTransitionStyle: 'coverVertical',
-          modalEnabled: true,
-          enableBarCollapsing: false,
-        })
-        // Alert.alert(JSON.stringify(result))
-      }
-      else openURL(url)
-    } catch (error:any) {
-      console.log('isAvailable error: ', error);
-      openURL(url)
-    }
-  }
-
-  // Open Deep Link
-  useEffect(() => {
-    const getUrlAsync = async () => {
-
-      // Get the deep link used to open the app
-      await Linking.getInitialURL().then((url) => {
-        // console.log('getInitialURL: ',url) 
-        if(url?.includes('paymentType=subcribed') ){ 
-          storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
-          setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
-          InAppBrowser.close()
-        }
-        else if(url?.includes("paymentType=oneTime") ){
-          storeVerifyPayment({one_time: true, subcription: isVerifyPayments.subcription ? true : false })
-          setVerifyPayments({one_time: true, subcription: isVerifyPayments.subcription ? true : false })
-          InAppBrowser.close()
-        }
-      })
-  
-      // Listen to the deep link if app it is already open
-      Linking.addEventListener('url',(url)=>{ 
-        console.log('addEventListener: ',url) 
-        if(url.url?.includes("paymentType=oneTime") )
-          { 
-            storeVerifyPayment({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
-            setVerifyPayments({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
-            InAppBrowser.close()            
-            returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
-            navigation.push('CustomScreen')
-          }
-        else if(url.url?.includes('paymentType=subcribed')){
-          storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
-          setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
-          InAppBrowser.close()
-          returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
-          navigation.push('CustomScreen')
-        }
-      });
-    }
-    getUrlAsync();
-  }, [])
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     getter().catch((error:any)=>{
+  //       console.log('getter Error: ', error);
+  //     })
+  //     storeAppleAuth({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
+  //   }, [appleAccessToken]),
+  // );
 
 
   return (
@@ -235,6 +155,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               >
                 <BackButton width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
+              
               <View style={{flexDirection:'row', alignItems:'center', }}  >
                 <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
                   <Information width={RFValue(22)} height={RFValue(22)}/>
@@ -259,13 +180,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               </View>
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
-              <TouchableOpacity onPress={() => {
-                authData && appleAccessToken ?
-                  getAppleSubcribe.mutate({access_token: appleAccessToken}) :
-                authData ? 
-                  getAppleAccessToken.mutate({ ...authData}) :
-                onAppleButtonPress()
-              }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
+              <TouchableOpacity onPress={() => { handleSubscription(subscriptions[0].productId) }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
               </TouchableOpacity>
               <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then $9.99 monthly</Text>
@@ -273,13 +188,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           </ScrollView>  
           <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
             <TouchableOpacity 
-              onPress={() => {
-                authData && appleAccessToken ?
-                  getAppleOneTime.mutate({access_token: appleAccessToken}) :
-                authData ? 
-                  getAppleAccessToken.mutate({ ...authData}) :
-                onAppleButtonPress()
-              }} 
+              onPress={() =>{ handlePurchase(products[0].productId) }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >$19.99</Text>
