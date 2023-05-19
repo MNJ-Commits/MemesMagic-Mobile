@@ -300,6 +300,8 @@ PODS:
     - React-Core
   - RNGestureHandler (1.10.3):
     - React-Core
+  - RNIap (12.10.5):
+    - React-Core
   - RNInAppBrowser (3.7.0):
     - React-Core
   - RNPermissions (3.8.0):
@@ -384,6 +386,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNIap (from `../node_modules/react-native-iap`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -474,6 +477,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNIap:
+    :path: "../node_modules/react-native-iap"
   RNInAppBrowser:
     :path: "../node_modules/react-native-inappbrowser-reborn"
   RNPermissions:
@@ -536,7 +541,7 @@ SPEC CHECKSUMS:
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNShare: d82e10f6b7677f4b0048c23709bd04098d5aee6c
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
-  SDWebImage: 25bac438318faf37e35650619ebc288a9061d292
+  SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   Yoga: b316a990bb6d115afa1b436b5626ac7c61717d17
 

@@ -41,13 +41,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   ]
 
 
-// useEffect(()=>{ 
-//   RNIap.initConnection()
-//   .then(() => { console.log('Connected to store');
-//   })
-//   .catch(() => { console.log('Not connected to store');
-//   })
-// },[])
 
   const {
     connected,
@@ -64,10 +57,12 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     getAvailablePurchases,
   } = useIAP();
 
+  // console.log('availablePurchases: ', currentPurchase, availablePurchases);
+  
   useEffect(()=>{
   
   if(connected){
-    console.log('Connected: ',connected);
+    console.log('Connected: ', connected);
     
     getProducts({skus:["NoWatermarks"]})
     .then(()=>{ console.log('getProductsReponse: ', products) })
@@ -77,17 +72,26 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     .then(()=>{ console.log('getSubscriptionsResponse: ', subscriptions) })
     .catch((currentPurchaseError)=>{ console.log('getSubscriptionsError: ', currentPurchaseError) })
     
+    getAvailablePurchases()
+    .then((availablePurchasesResponse)=>{ console.log('availablePurchasesResponse: ', availablePurchasesResponse) })
+    .catch((availablePurchasesError)=>{ console.log('availablePurchasesError: ', availablePurchasesError) })
+    
   } 
   else{
     console.log('Not connected: ', initConnectionError);
   }
-},[])
+},[connected])
   
 
   const handlePurchase = async (sku: string) => {
+    console.log('handlePurchase: ');
+    
     if(products[0].productId=='NoWatermarks')
     {
-      await requestPurchase({sku})
+      await requestPurchase({
+        sku,
+        andDangerouslyFinishTransactionAutomaticallyIOS: false
+      })
       .then((purchaseReponse)=>{
         console.log("purchaseReponse: ", purchaseReponse);
       })
@@ -98,6 +102,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   };
 
   const handleSubscription = async (sku: string) => {
+    console.log('handleSubscription');
+    
     if(subscriptions[0].productId = 'MonthlySubscription')
     {
       await requestSubscription({sku})
