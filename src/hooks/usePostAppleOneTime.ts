@@ -12,8 +12,8 @@ const usePostAppleOneTimeRequest = async (params: any)=>{
     }
 
     const body = {
-        "failure_url": "memeswork://SubcriptionScreen",
-        "success_url": "memeswork://SubcriptionScreen?paymentType=oneTime"
+        "failure_url": "memeswork://SubscriptionScreen",
+        "success_url": "memeswork://SubscriptionScreen?paymentType=oneTime"
     }
 
     try {

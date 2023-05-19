@@ -119,7 +119,7 @@ const BannerScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubcriptionScreen',{returnScreen:'BannerScreen'})}} >
+            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'BannerScreen'})}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
           </View>

@@ -21,7 +21,7 @@ import { AppModal } from '../components/AppModal';
 
 
 
-const SubcriptionScreen = ({navigation, route}:any) => {
+const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
   // console.log('route.params: ',route.params);
@@ -29,7 +29,6 @@ const SubcriptionScreen = ({navigation, route}:any) => {
   const [authData, setAuthData] = useState<any>({})
   const [appleAccessToken, setAppleAccessToken] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
-  const [termAndCond, setTermAndCond] = useState<boolean>(false)
   const [isVisibleModal, setVisibleModal] = useState(false);
 
 
@@ -301,4 +300,4 @@ const SubcriptionScreen = ({navigation, route}:any) => {
 
  
 
-export default SubcriptionScreen;
+export default SubscriptionScreen;
