@@ -5,7 +5,7 @@ const usePostAppleAccessTokenRequest = async (params: any)=>{
         
     // console.log('apple AccessToken params: ',params);
     try {
-        const response = await fetch('http://18.143.157.105:3000/auth/sso/apple', 
+        const response = await fetch('http://18.143.157.105:3000/auth/sso/apple-payment', 
             {
                 method: 'POST',
                 body: JSON.stringify({...params }),

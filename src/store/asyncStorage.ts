@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Constants
-export const userKey = 'userKey';
+export const receiptKey = 'receiptKey';
 export const accessKey = 'accessKey';
 export const paymentKey = 'paymentKey';
 export const individualGif = 'individualGif';
@@ -9,11 +9,11 @@ export const individualGif = 'individualGif';
 
 
 // Set Storage 
-export const storeAppleAuth = async (data: { identity_token: string; user_id: string }) => {
+export const storePaymentsReceipt = async (data: { receipt: string }) => {
     try {
-      await AsyncStorage.setItem(userKey, JSON.stringify(data));
+      await AsyncStorage.setItem(receiptKey, JSON.stringify(data));
     } catch (error) {
-      console.log( 'storeAppleAuth error: ',error);
+      console.log( 'storeTransactionsReceipt error: ',error);
     }
   };
 export const storeAppleAccessToken = async (data: { access_token: string }) => {
@@ -39,13 +39,12 @@ export const storeIndividualGifData = async (data: {src: string, width: number, 
   };
 
 // Get Storage 
-export const loadAppleAuthFromStorage = async () => {
+export const loadPaymentsReceipt = async () => {
     try {
-      const savedUser: any = await AsyncStorage.getItem(userKey);
-      const currentUser = JSON.parse(savedUser);
-      return currentUser
+      const savedReceipt: any = await AsyncStorage.getItem(receiptKey);
+      return savedReceipt
     } catch (error) {
-      console.log('loadAppleAuthFromStorage error: ',error);
+      console.log('loadPaymentsReceipt error: ',error);
     }
   };
 export const loadAppleAccessTokenFromStorage = async () => {

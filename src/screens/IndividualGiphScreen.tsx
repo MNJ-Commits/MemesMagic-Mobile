@@ -387,7 +387,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
                                     } else{
                                         navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                    }}}
+                                    }
+                                }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
