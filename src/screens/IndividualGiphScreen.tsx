@@ -127,6 +127,16 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     var today = ""+new Date()
     const datetime = today.split('GMT')[0].replace(/\:/g, '.').trim().replace(/\ /g, '_')
 
+    const header:any = appleAccessToken ? 
+        {  
+            'Content-Type': 'application/json', 
+            "X-ACCESS-TOKEN": appleAccessToken,  
+        }
+        :
+        { 
+            'Content-Type': 'application/json', 
+        }
+
     const DownloadCustomGif  = async ()=>{
 
         setDownloading(true)
@@ -134,36 +144,24 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
         console.log('fromURL: ',fromURL);
 
-        // // TO SAVE GIF'S TO IOS PHOTO 
-        // await CameraRoll.save(fromURL, { type: 'video', album:'MemeMagic' }).then((res:any)=>{
-        //     console.log('res: ', res);
-        // }).catch((error:any)=>{
-        //     console.log('error: ', error);
-        // })
-
-        // TO SAVE GIF'S TO IOS LIBRARY
         //Define options
-       
-        const header:any = appleAccessToken ? 
-            {  
-                'Accept': 'application/json',
-                'Content-Type': 'application/json', 
-                "X-ACCESS-TOKEN": appleAccessToken,  
-            }
-            :
-            { 
-                'Accept': 'application/json',
-                'Content-Type': 'application/json', 
-            }
         const options: DownloadFileOptions = {
             fromUrl: fromURL,
             toFile: filePath,
             headers: header
         } 
+        // TO SAVE GIF'S TO IOS LIBRARY
         let response = await downloadFile(options);
         return response.promise.then(async (res: any) => {
             setDownloading(false)
-            console.log('res: ', res, filePath);               
+            console.log('res: ', res, filePath);      
+            // TO SAVE GIF'S TO IOS PHOTO 
+            await CameraRoll.save(filePath).then((res:any)=>{
+                console.log('res: ', res);
+            }).catch((error:any)=>{
+                console.log('error: ', error);
+            })
+         
         }).catch((error:any)=>{
             setDownloading(false)
             console.log('error: ', error);
@@ -180,20 +178,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
                     "giphy_url":  gifData?.src
                 }
-        const header:any = appleAccessToken ? 
-            {  
-                'Content-Type': 'application/json', 
-                "X-ACCESS-TOKEN": appleAccessToken,  
-            }
-            :
-            { 
-                'Content-Type': 'application/json', 
-            }
 
-        await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
+        await RNFetchBlob
+            .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
                 header, JSON.stringify({...payload }))
                 .then(async (response) =>{ 
                     if(response.info().status==200){
+                                                
                         // TO SAVE GIF'S TO IOS LIBRARY                            
                         writeFile(filePath, response.base64(), 'base64')
                         .then((writeFileReposne)=> {
@@ -205,13 +196,12 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         console.log('filePath: ', filePath);
                     
                         RNFS.exists(filePath).then(async (status: any)=>{
-                            // // TO SAVE GIF'S TO IOS PHOTO 
-                            // await CameraRoll.save(filePath, { type: 'video', album:'MemeMagic' })
-                            // .then((res:any)=>{
-                            //     console.log('res: ', res);
-                            // }).catch((error:any)=>{
-                            //     console.log('error: ', error);
-                            // })
+                           // TO SAVE GIF'S TO IOS PHOTO 
+                            await CameraRoll.save(filePath,).then((res:any)=>{
+                                console.log('res: ', res);
+                            }).catch((error:any)=>{
+                                console.log('error: ', error);
+                            })
                         })
                         
                     }
@@ -230,15 +220,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 fileCache: true,
                 path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`,
             };
-        const header:any = appleAccessToken ? 
-            {  
-                'Content-Type': 'application/json', 
-                "X-ACCESS-TOKEN": appleAccessToken,  
-            }
-            :
-            { 
-                'Content-Type': 'application/json', 
-            }
+
         // Download,
         RNFetchBlob.config(configOptions)
             .fetch('GET', fromURL, header)
@@ -274,15 +256,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const payload = {
             "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
             "giphy_url":  gifData?.src
-        }
-        const header:any = appleAccessToken ? 
-        {  
-            'Content-Type': 'application/json', 
-            "X-ACCESS-TOKEN": appleAccessToken,  
-        }
-        :
-        { 
-            'Content-Type': 'application/json', 
         }
 
         let data: any;
