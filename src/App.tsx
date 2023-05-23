@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
 import { ActivityIndicator } from 'react-native';
 
+
 const Stack = createNativeStackNavigator(); 
 // Create a client
 const queryClient = new QueryClient()
@@ -56,7 +57,8 @@ const AppBootStrap = React.memo(function () {
     </NavigationContainer>
   )
 })
-export default App;
+
+export default App
 
 
 

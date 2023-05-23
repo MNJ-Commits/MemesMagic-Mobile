@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Linking, Alert, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, } from 'react-native';
 import AppLogo from "../assets/svgs/app-logo.svg";
 import BackButton from "../assets/svgs/back-button.svg";
 import Subcribe from "../assets/svgs/subcribe.svg";
@@ -9,202 +9,229 @@ import NoAds from "../assets/svgs/no-ad's.svg";
 import Information from "../assets/svgs/information.svg";
 import Cross from "../assets/svgs/cross.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
-import { appleAuth } from '@invertase/react-native-apple-authentication';
-import { loadAppleAccessTokenFromStorage, loadAppleAuthFromStorage, loadVerifyPaymentFromStorage, storeAppleAccessToken, storeAppleAuth, storeVerifyPayment } from '../store/asyncStorage';
+import { storeAppleAccessToken, storePaymentsReceipt, storeVerifyPayment } from '../store/asyncStorage';
 import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
-import { usePostAppleSubcribe } from '../hooks/usePostAppleSubcribe';
-import { usePostAppleOneTime } from '../hooks/usePostAppleOneTime';
-import { useFocusEffect } from '@react-navigation/native';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { AppModal } from '../components/AppModal';
-// import { useGetPaymentVerification } from '../hooks/useGetPaymentVerification';
 
+import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection} from 'react-native-iap';
+import { getUniqueId } from 'react-native-device-info';
 
 
 const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
   // console.log('route.params: ',route.params);
-  
-  const [authData, setAuthData] = useState<any>({})
-  const [appleAccessToken, setAppleAccessToken] = useState<string>('')
-  const [isVerifyPayments, setVerifyPayments] = useState<any>({})
-  const [isVisibleModal, setVisibleModal] = useState(false);
 
+  const [isVisibleModal, setVisibleModal] = useState(false);
 
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
     {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
   ]
 
-  const getter = async () => {
-    
-    const appleAuth = await loadAppleAuthFromStorage().catch((error:any)=>{
-      console.log('loadAppleAuthFromStorage Error: ', error);
-    })
-    setAuthData(appleAuth)
-    
-    const accessToken = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-      console.log('loadAppleAccessTokenFromStorage Error: ', error);
-    })
-    setAppleAccessToken(accessToken) 
 
-    const verifyPayment = await loadVerifyPaymentFromStorage().catch((error:any)=>{
-      console.log('loadVerifyPaymentFromStorage Error: ', error);
-    })
-    setVerifyPayments(verifyPayment)
-    console.log('verifyPayment: ', verifyPayment);
-  };
- 
-  useFocusEffect(
-    React.useCallback(() => {
-      getter().catch((error:any)=>{
-        console.log('getter Error: ', error);
-      })
-      console.log(authData ? authData : null);
-      console.log('appleAccessToken: ', appleAccessToken);
-    }, [appleAccessToken]),
-  );
+  // const { connected, initConnectionError } = useIAP();
 
-  async function onAppleButtonPress() {
-    // console.log('appleAuth.isSupported: ', appleAuth.isSupported);    
-    if( appleAuth.isSupported){
-      // performs login request
-      const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      }).then((performLoginResponse:any)=>{
-        setAuthData({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-        storeAppleAuth({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-        getAppleAccessToken.mutate({identity_token: performLoginResponse.identityToken, user_id: performLoginResponse.user})
-      }).catch((performLoginrror:any)=>{
-        console.log('performLoginError: ', performLoginrror);
-      });
-      console.log('appleAuthRequestResponse: ', appleAuthRequestResponse);
-    } 
+  const [products, setProducts] = useState<any>([])
+  const [subscriptions, setSubscriptions] = useState<any>([])
+  const [connected, setConnected] = useState<boolean>(false)
+  const [checkingSubscriptions, setCheckingSubscriptions] = useState<boolean>(true)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [UUID, setUUID] = useState<string>('')
+  const [isVerifyPayments, setVerifyPayments] = useState<any>({})
+
+  let purchaseUpdated: any
+
+  const getInitials = async () =>{
+
+  await initConnection()
+    .then(()=>{
+      setConnected(true)
+      getProducts({skus:["NoWatermarks"]})
+        .then((productsResponse)=>{ 
+          setProducts(productsResponse) 
+        }).catch((currentPurchaseError)=>{ 
+          console.log('getProductsError: ', currentPurchaseError) 
+        })
+    
+      getSubscriptions({skus:["MonthlySubscription"]})
+        .then((getSubscriptionsResponse)=>{ 
+          setSubscriptions(getSubscriptionsResponse) 
+        }).catch((currentPurchaseError)=>{ 
+          console.log('getSubscriptionsError: ', currentPurchaseError) 
+        })
+      setLoading(false)
+    }).catch((error)=>{
+      setLoading(false)
+      console.log('Not connected: ', error);
+      getInitials()
+    })
   }
+
+  useEffect( ()=>{
+    getInitials().catch((error)=>{
+      console.log("getInitials: ", JSON.stringify(error))
+    })
+    return () => {
+      purchaseUpdated?.remove()
+      endConnection()
+    };
+  },[])
+  
+  useEffect(()=>{
+  if(connected){
+    getPurchaseHistory().then((purchases)=>{
+      console.log('purchases: ', purchases.length); 
+      const receipt = purchases[0].transactionReceipt
+      if(receipt)
+        validateReceipt(receipt)
+      }).catch(()=>{
+        setCheckingSubscriptions(false)
+      })
+
+    // getAvailablePurchases()
+    //   .then((availableResponse)=>{
+    //     console.log('availableResponse: ',availableResponse.length);   
+    //   }).catch((availableError)=>{
+    //     console.log('availableError: ', availableError);
+    //   })
+
+    purchaseUpdated = purchaseUpdatedListener((purchase)=>{
+      try{
+        const receipt = purchase?.transactionReceipt
+        if(receipt){
+          finishTransaction({purchase: purchase})
+          .then((AckResult)=>{
+            console.log('AckResult: ', AckResult);
+            validateReceipt(receipt)    
+          }).catch((AckResultError)=>{
+            console.log('AckResultError: ', AckResultError);
+          })
+        }
+      }
+      catch{
+        console.log('purchaseListener error');
+      }
+    })
+  }
+  else{
+    console.log('Not connected')
+  }
+  },[connected])
+
+  
+  const validateReceipt = async (receipt: string)=>{
+
+    await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
+    .then((validationReponse)=>{ 
+      // console.log("validationReponse: ", validationReponse.latest_receipt_info);
+      
+      // validationReponse.latest_receipt_info.map((data: any)=>{
+      //   console.log(data?.product_id);
+      // }) 
+      storePaymentsReceipt({receipt: validationReponse.latest_receipt})
+      getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
+      const renewal_history = validationReponse?.latest_receipt_info
+      const expiration = renewal_history[1].expires_date_ms
+      // console. log('expired: ', Date.now(), expiration);
+      // console.log('renewal_history: ', renewal_history);
+            
+      // Apple expires subscription after 6 attempts in sandbox automatically
+      // if (expired)
+      // { console.log('expired');
+      
+      //   // Alert.alert("Purchased Expired", "Your monthly subscription has expired")
+      // }
+      // else{
+          console.log(renewal_history[0]?.product_id, renewal_history[1]?.product_id);
+          
+          if(renewal_history[0]?.product_id === "NoWatermarks" && renewal_history[1]?.product_id ===  "MonthlySubscription")
+            setVerifyPayments({ one_time: true, subcription: true })
+          else if( renewal_history[0]?.product_id ===  "MonthlySubscription" && renewal_history[1]?.product_id === "NoWatermarks")
+            setVerifyPayments({ one_time: true, subcription: true })
+          else if(renewal_history[0]?.product_id === "NoWatermarks")
+            setVerifyPayments({ one_time: true, subcription: false })
+          else if (renewal_history[0]?.product_id ===  "MonthlySubscription")
+            setVerifyPayments({ one_time: false, subcription: true })
+      // }
+
+      setCheckingSubscriptions(false)
+    })
+    .catch((validationError)=>{ 
+      setCheckingSubscriptions(false)
+      console.log('validationError: ', validationError)
+    })    
+  }
+
+  const handlePurchase = async (sku: string) => {
+    setLoading(true)
+    if(products[0].productId=='NoWatermarks')
+    {
+      await requestPurchase({
+        sku,
+        andDangerouslyFinishTransactionAutomaticallyIOS: false,
+        appAccountToken: UUID
+      })
+      .then((purchaseReponse)=>{
+        setLoading(false)
+        console.log("purchaseReponse: ", purchaseReponse);
+      })
+      .catch((purchaseError)=>{
+        setLoading(false)
+        console.log('purchaseError: ', purchaseError);
+      })
+    }
+  };
+
+  const handleSubscription = async (sku: string) => {
+    setLoading(true)
+    if(subscriptions[0].productId = 'MonthlySubscription')
+    {
+      await requestSubscription({sku, appAccountToken: UUID})
+      .then((subscriptionReponse)=>{
+        setLoading(false)
+        console.log("subscriptionReponse: ", subscriptionReponse);
+      })
+      .catch((subscriptionError)=>{
+        setLoading(false)
+        console.log('subscriptionError: ', subscriptionError);
+      })
+    }
+  };  
+ 
+  // const getter = async () =>{
+    
+  //   const receipt = await loadPaymentsReceipt().catch((error:any)=>{
+  //     console.log('loadAppleAccessTokenFromStorage Error: ', error);
+  //   })
+  // }
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     getter()
+  //   }, []),
+  // );
+
+  getUniqueId()
+  .then((uniqueId) => {
+    setUUID(uniqueId)
+  })
+  .catch((error) => {
+  console.log('UUID: ', JSON.stringify(error))
+  });
+
+  useEffect(()=>{  
+    storeVerifyPayment(isVerifyPayments)
+  },[isVerifyPayments])
 
   const getAppleAccessToken: any = usePostAppleAccessToken({
     onSuccess(res) { 
-      console.log('getAppleAccessToken: ', res.access_token);
+      // console.log('getAppleAccessToken: ', res);
       storeAppleAccessToken(res.access_token)
-      setAppleAccessToken(res.accessToken) 
     },
     onError(error) {
       console.log(error);
-    },
-  }); 
-   
-  const getAppleSubcribe: any = usePostAppleSubcribe({
-    onSuccess(res) { 
-      // console.log('getAppleSubcribe: ', res);
-      openLink(res.redirect)
-    },
-    onError(error) {
-      console.log('getAppleSubcribe error: ', error);
     },
   });
-
-  const getAppleOneTime: any = usePostAppleOneTime({
-    onSuccess(res) { 
-      // console.log('getAppleOneTime: ', res);
-      // openURL(res.redirect)
-      openLink(res.redirect)
-    },
-    onError(error) {
-      console.log(error);
-    },
-  });  
-
-  // Open Redirect Link
-  // External Browser
-  const openURL = async (redirect: any) => {
-
-    await Linking.canOpenURL(redirect).then(async supported => {
-      if (supported) {
-        await Linking.openURL(redirect)
-        .catch((error)=>{
-          console.log('Linking openURL error: ', error);
-        });
-      }
-      else {
-        console.log("Don't know how to open URI: " + redirect);
-      }
-    })
-    .catch((error)=>{
-      console.log('canOpenURL linking error: ', error);
-    })
-  }
-  // In-App Browser
-  async function openLink(url: any) {
-    try {
-      const isAvailable = await InAppBrowser.isAvailable()
-      console.log('isAvailable: ',isAvailable);
-      if (isAvailable)  {
-        const result = await InAppBrowser.open(url, {
-          // iOS Properties
-          dismissButtonStyle: 'cancel',
-          preferredBarTintColor: '#453AA4',
-          preferredControlTintColor: 'white',
-          readerMode: false,
-          animated: true,
-          modalPresentationStyle: 'fullScreen',
-          modalTransitionStyle: 'coverVertical',
-          modalEnabled: true,
-          enableBarCollapsing: false,
-        })
-        // Alert.alert(JSON.stringify(result))
-      }
-      else openURL(url)
-    } catch (error:any) {
-      console.log('isAvailable error: ', error);
-      openURL(url)
-    }
-  }
-
-  // Open Deep Link
-  useEffect(() => {
-    const getUrlAsync = async () => {
-
-      // Get the deep link used to open the app
-      await Linking.getInitialURL().then((url) => {
-        console.log('getInitialURL: ',url) 
-        if(url?.includes('paymentType=subcribed') ){ 
-          storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
-          setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true }) 
-          InAppBrowser.close()
-        }
-        else if(url?.includes("paymentType=oneTime") ){
-          storeVerifyPayment({one_time: true, subcription: isVerifyPayments.subcription ? true : false })
-          setVerifyPayments({one_time: true, subcription: isVerifyPayments.subcription ? true : false })
-          InAppBrowser.close()
-        }
-      })
-  
-      // Listen to the deep link if app it is already open
-      Linking.addEventListener('url',(url)=>{ 
-        console.log('addEventListener: ',url) 
-        if(url.url?.includes("paymentType=oneTime") )
-          { 
-            storeVerifyPayment({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
-            setVerifyPayments({one_time:true, subcription: isVerifyPayments.subcription ? true : false})
-            InAppBrowser.close()            
-            returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
-            navigation.push('CustomScreen')
-          }
-        else if(url.url?.includes('paymentType=subcribed')){
-          storeVerifyPayment({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
-          setVerifyPayments({one_time: isVerifyPayments.one_time ? true : false, subcription: true })
-          InAppBrowser.close()
-          returnScreen == 'IndividualGiphScreen' ? navigation.navigate('IndividualGiphScreen') :
-          navigation.push('CustomScreen')
-        }
-      });
-    }
-    getUrlAsync();
-  }, [])
-
-
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -221,11 +248,19 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               >
                 <BackButton width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
+              
               <View style={{flexDirection:'row', alignItems:'center', }}  >
                 <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
                   <Information width={RFValue(22)} height={RFValue(22)}/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>{ }} >
+                <TouchableOpacity onPress={()=>{ 
+                  // deepLinkToSubscriptions({sku:subscriptions[0].productId, isAmazonDevice:false})
+                  // .then((response)=>{ console.log('SubResp: ', response) })
+                  // .catch((error)=>{ 
+                  //   console.log('SubError: ', error)
+                  //   openLink('https://apps.apple.com/account/subscriptions')
+                  // })
+                 }}>
                   <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                 </TouchableOpacity>
               </View>
@@ -269,6 +304,30 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >$19.99</Text>
+                // isVerifyPayments?.subcription ? 
+                // Alert.alert("Auto-renewable subscription is active") :
+                handleSubscription(subscriptions[0]?.productId) }}  
+                style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
+                disabled={(subscriptions.length <1 || loading) ? true : false}  
+              >
+                <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
+              </TouchableOpacity>
+              <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscriptions[0]?.localizedPrice} monthly</Text>
+            </View> 
+            {(loading || checkingSubscriptions) && <ActivityIndicator size={'large'} color={'grey'} style={{marginTop:10}} />}
+          </ScrollView>  
+          <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
+            <TouchableOpacity 
+              onPress={() =>{ 
+                // isVerifyPayments?.one_time ? 
+                // Alert.alert("No Watermarks already purchased") :
+                handlePurchase(products[0]?.productId) 
+              }} 
+              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
+              disabled={(products.length <1 || loading) ? true : false}    
+            >
+              <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
+              <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>
             </TouchableOpacity>
             <Text style={{color:'#ffffff', fontSize:RFValue(10), fontFamily:'Lucita-Regular', alignSelf:'center', paddingTop: RFValue(5) }} >one time purchase</Text>
           </View>
