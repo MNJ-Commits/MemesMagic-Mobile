@@ -281,29 +281,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
               <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
               <TouchableOpacity onPress={() => {
-                authData && appleAccessToken ?
-                  getAppleSubcribe.mutate({access_token: appleAccessToken}) :
-                authData ? 
-                  getAppleAccessToken.mutate({ ...authData}) :
-                onAppleButtonPress()
-              }}  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10)    }} >
-                <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
-              </TouchableOpacity>
-              <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then $9.99 monthly</Text>
-            </View> 
-          </ScrollView>  
-          <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
-            <TouchableOpacity 
-              onPress={() => {
-                authData && appleAccessToken ?
-                  getAppleOneTime.mutate({access_token: appleAccessToken}) :
-                authData ? 
-                  getAppleAccessToken.mutate({ ...authData}) :
-                onAppleButtonPress()
-              }} 
-              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20)    }} >
-              <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
-              <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >$19.99</Text>
                 // isVerifyPayments?.subcription ? 
                 // Alert.alert("Auto-renewable subscription is active") :
                 handleSubscription(subscriptions[0]?.productId) }}  
