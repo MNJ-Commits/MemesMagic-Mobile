@@ -824,7 +824,7 @@
 				ENABLE_BITCODE = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = InputDemoApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
+				INFOPLIST_KEY_CFBundleDisplayName = "Memes Magic";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -858,7 +858,7 @@
 				DEVELOPMENT_TEAM = GLC52ZXC24;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = InputDemoApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MemesWork;
+				INFOPLIST_KEY_CFBundleDisplayName = "Memes Magic";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
