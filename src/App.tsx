@@ -17,8 +17,10 @@ const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient()
 
 
-const App = () => {
+const App = ({route}:any) => {
 
+  console.log('route: ', route);
+  
   return (
       <QueryClientProvider client={queryClient}>
         <AppBootStrap />

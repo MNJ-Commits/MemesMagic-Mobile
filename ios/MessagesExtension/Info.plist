@@ -22,6 +22,8 @@
 	<string>1</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>localhost</key>
@@ -38,5 +40,30 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).MessagesViewController</string>
 	</dict>
+
+	<key>UIAppFonts</key>
+	<array>
+		<string>Arial Black.ttf</string>
+		<string>Arial.ttf</string>
+		<string>Bahnschrift.ttf</string>
+		<string>Calibri Bold Italic.ttf</string>
+		<string>Calibri Bold.TTF</string>
+		<string>Calibri Italic.ttf</string>
+		<string>Calibri Light Italic.ttf</string>
+		<string>Calibri Light.ttf</string>
+		<string>Calibri Regular.ttf</string>
+		<string>Capture it.ttf</string>
+		<string>cibola.ttf</string>
+		<string>Cooper Std.otf</string>
+		<string>Helvetica.ttc</string>
+		<string>KaushanScript-Regular.otf</string>
+		<string>Lazer84.ttf</string>
+		<string>Lucita-Regular.otf</string>
+		<string>Netigen.ttf</string>
+		<string>Rounds Black.otf</string>
+		<string>SF-Pro-Text-Regular.otf</string>
+		<string>Times New Roman.ttf</string>
+		<string>times.ttf</string>
+	</array>
 </dict>
 </plist>

@@ -1,3 +1,6 @@
+import { Linking } from "react-native";
+import InAppBrowser from "react-native-inappbrowser-reborn";
+
   // External Browser
   export const openURL = async (redirect: any) => {
 

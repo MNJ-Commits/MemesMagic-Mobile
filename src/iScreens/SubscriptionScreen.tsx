@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, useWindowDimensions, Keyboard, } from 'react-native';
 import AppLogo from "../assets/svgs/app-logo.svg";
 import BackButton from "../assets/svgs/back-button.svg";
 import Subcribe from "../assets/svgs/subcribe.svg";
@@ -11,7 +11,7 @@ import Cross from "../assets/svgs/cross.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
 import { storeAppleAccessToken, storePaymentsReceipt, storeVerifyPayment } from '../store/asyncStorage';
 import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
-import { AppModal } from '../components/AppModal';
+import { AppModal } from '../iComponents/AppModal';
 
 import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection} from 'react-native-iap';
 import { getUniqueId } from 'react-native-device-info';
@@ -22,11 +22,13 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const returnScreen = route.params?.returnScreen
   // console.log('route.params: ',route.params);
 
-  const [isVisibleModal, setVisibleModal] = useState(false);
-
+  const [viewHeight, setViewHeight] = useState<number>(0)
+  const [ratio, setRatio] = useState<number>(0)
+  const { height } = useWindowDimensions()
+  
   const Services =[
-    {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
-    {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
+    {Label: "All gifs and memes!", SVG: <GifsMemes width={40*ratio} height={40*ratio} style={{marginRight:10*ratio}} /> },
+    {Label: "No ads!", SVG: <NoAds width={40*ratio} height={40*ratio} style={{marginRight:10*ratio}} />  },
   ]
 
 
@@ -39,6 +41,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
+  const [isVisibleModal, setVisibleModal] = useState(false);
 
   let purchaseUpdated: any
 
@@ -232,26 +235,44 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       console.log(error);
     },
   });
+
+  useEffect(()=>{
+    let denomi = height-(height*0.15)
+    setRatio(viewHeight/denomi)
+  },[viewHeight])
+
+
+  
   return (
     <Fragment >
-      <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
-      <SafeAreaView style= {{flex:1, backgroundColor:'#3386FF' }} >
+      {/* <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} /> */}
+      <SafeAreaView 
+        onLayout={(event) => {
+          var {x, y, width, height} = event.nativeEvent.layout;
+          setViewHeight(height)
+        }}
+        style= {{flex:1, backgroundColor:'#3386FF' }} >
+        
         <View style={{ flex:1, backgroundColor:'#FF439E',}} >
-          <ScrollView contentContainerStyle={{ marginTop:10 }} >
+          {/* Body */}
+          <ScrollView 
+            contentContainerStyle={{ marginTop:10, paddingBottom:20, width:'100%' }}
+            showsVerticalScrollIndicator={false}  
+          >
             
-            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
+            <View style={{flexDirection:'row', justifyContent:'space-between', alignSelf:'center', width:`${85}%`,  paddingHorizontal:20*ratio }} >
               <TouchableOpacity onPress={()=>{
                 navigation.canGoBack() ? navigation.pop() :
                 returnScreen ? navigation.push(returnScreen) :
                 navigation.push('CustomScreen')
               }} 
               >
-                <BackButton width={RFValue(25)} height={RFValue(25)}/>
+                <BackButton width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
               </TouchableOpacity>
               
               <View style={{flexDirection:'row', alignItems:'center', }}  >
                 <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
-                  <Information width={RFValue(22)} height={RFValue(22)}/>
+                  <Information width={RFValue(22*ratio)} height={RFValue(22*ratio)}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>{ 
                   // deepLinkToSubscriptions({sku:subscriptions[0].productId, isAmazonDevice:false})
@@ -261,72 +282,73 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                   //   openLink('https://apps.apple.com/account/subscriptions')
                   // })
                  }}>
-                  <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
+                  <Text style={{color:'#ffffff', fontSize:RFValue(14*ratio), fontWeight:'400', marginLeft:RFValue(10*ratio), fontFamily:'Lucita-Regular', }} >Restore</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={{ alignItems:'center', marginTop:30 }}>
-              <AppLogo width={RFValue(250)} height={RFValue(130)} />
-              <View style={{ marginTop:40 }} >
+
+            <View style={{ alignItems:'center', marginTop:30*ratio }}>
+              <AppLogo width={RFValue(250*ratio)} height={RFValue(130*ratio)} />
+              <View style={{ marginTop:40*ratio }} >
                 { Services.map((data:any, index:number)=>{
                     return(
-                    <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(10)  }}  >
+                    <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(10*ratio)  }}  >
                       {data.SVG}
-                      <Text style={{color:'white', fontFamily:'Lucita-Regular', fontSize:RFValue(18), fontWeight:'900', paddingVertical:10 }} >{data.Label}</Text>
+                      <Text style={{color:'white', fontFamily:'Lucita-Regular', fontSize:RFValue(18*ratio), paddingVertical: RFValue(10*ratio) }} >{data.Label}</Text>
                     </TouchableOpacity>
                     )
                   })
                 }
               </View>
-              <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
-              <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
+              {(loading || checkingSubscriptions) && <ActivityIndicator size={'small'} color={'blue'} style={{marginTop:10*ratio, }} />}
+              <Subcribe width={RFValue(230*ratio)} height={RFValue(30*ratio)} style={{marginTop:RFValue(20*ratio)}}/>
+              <ArrowDown width={RFValue(30*ratio)} height={RFValue(30*ratio)} style={{alignSelf:'center', marginTop:-2*ratio}} />
               <TouchableOpacity onPress={() => {
                 // isVerifyPayments?.subcription ? 
                 // Alert.alert("Auto-renewable subscription is active") :
                 handleSubscription(subscriptions[0]?.productId) }}  
-                style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
+                style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15*ratio), borderRadius:RFValue(15), marginTop:RFValue(10*ratio) }} 
                 disabled={(subscriptions.length <1 || loading) ? true : false}  
               >
-                <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
+                <Text style={{color:'#ffffff', fontSize:RFValue(20*ratio), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
               </TouchableOpacity>
-              <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscriptions[0]?.localizedPrice} monthly</Text>
+              <Text style={{color:'white', fontSize:RFValue(10*ratio), paddingTop:RFValue(5*ratio), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscriptions[0]?.localizedPrice} monthly</Text>
             </View> 
-            {(loading || checkingSubscriptions) && <ActivityIndicator size={'large'} color={'grey'} style={{marginTop:10}} />}
           </ScrollView>  
-          <View style={{ alignItems:'center', backgroundColor:'#3386FF', paddingVertical:20 }} >
+
+          {/* Footer */}
+          <View style={{ alignItems:'center', backgroundColor:'#3386FF', }} >
             <TouchableOpacity 
               onPress={() =>{ 
                 // isVerifyPayments?.one_time ? 
                 // Alert.alert("No Watermarks already purchased") :
                 handlePurchase(products[0]?.productId) 
               }} 
-              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
+              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12*ratio), borderRadius:RFValue(15), marginTop:RFValue(20*ratio) }} 
               disabled={(products.length <1 || loading) ? true : false}    
             >
-              <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
-              <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>
+              <Text style={{color:'#622FAE', fontSize:RFValue(12*ratio),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
+              <Text style={{color:'#622FAE', fontSize:RFValue(12*ratio), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>
             </TouchableOpacity>
-            <Text style={{color:'#ffffff', fontSize:RFValue(10), fontFamily:'Lucita-Regular', alignSelf:'center', paddingTop: RFValue(5) }} >one time purchase</Text>
+            <Text style={{color:'#ffffff', fontSize:RFValue(10*ratio), fontFamily:'Lucita-Regular', alignSelf:'center', paddingTop: RFValue(5*ratio) }} >one time purchase</Text>
           </View>
         </View>
 
       {/* Subscription Information Modal */}
-      <AppModal isVisible={isVisibleModal} setModalVisible = {setVisibleModal}  >
+      <AppModal isVisible={isVisibleModal} setModalVisible = {setVisibleModal} >
         <AppModal.Container >
-          <AppLogo width={RFValue(150)} height={RFValue(60)} style={{alignSelf:'center', marginVertical:20}} />
-          <TouchableOpacity onPress={()=>setVisibleModal(false)} style={{ position:'absolute', right:RFValue(10), top:RFValue(10) }}  >
-            <Cross width={RFValue(22)} height={RFValue(22)} style={{alignSelf:'flex-end'}}/>
+          <AppLogo width={RFValue(150*ratio)} height={RFValue(60*ratio)} style={{alignSelf:'center', marginVertical:20*ratio}} />
+          <TouchableOpacity onPress={()=>setVisibleModal(false)}  style={{ position:'absolute', right:RFValue(10*ratio), top:RFValue(10*ratio) }}  >
+            <Cross width={RFValue(22*ratio)} height={RFValue(22*ratio)} style={{alignSelf:'flex-end'}}/>
           </TouchableOpacity>
-          <AppModal.Header title="Terms and Conditions" />
-          <AppModal.Body>
-            <View style={{ marginTop:10 }} >
-              <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(12), textAlign:'justify', lineHeight:20 }}>
-              Subscription renews monthly or annually. Payment will be charged to iTunes account at confirmation of purchase. Subscription automaticlaly renews unless the automatic-renew is turned off at least 24 hours before the end of the current period. Account will be charged for renewal within 24 hours prior to the end of the current period, and identify the cost of the renewal subscription may be managed by the user and auto-renewal may be turned off by going to the user’s Account Settings after purchase. Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that application. By signing up for subscription, you agree to our <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12), color:'#FEB720'}}>terms and conditions</Text> and  <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12), color:'#FEB720'}}>privacy policy</Text>.
+          <AppModal.Header title="Terms and Conditions" ratio={ratio}  />
+          <AppModal.Body ratio={ratio} >
+            <View style={{ margin:10*ratio }} >
+              <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(12*ratio), textAlign:'justify', lineHeight:20*ratio }}>
+              Subscription renews monthly or annually. Payment will be charged to iTunes account at confirmation of purchase. Subscription automaticlaly renews unless the automatic-renew is turned off at least 24 hours before the end of the current period. Account will be charged for renewal within 24 hours prior to the end of the current period, and identify the cost of the renewal subscription may be managed by the user and auto-renewal may be turned off by going to the user’s Account Settings after purchase. Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that application. By signing up for subscription, you agree to our <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12*ratio), color:'#FEB720'}}>terms and conditions</Text> and  <Text style={{fontFamily:'Lucita-Regular', fontSize: RFValue(12*ratio), color:'#FEB720'}}>privacy policy</Text>.
               </Text>
             </View>
           </AppModal.Body>
-          <AppModal.Footer>
-          </AppModal.Footer>
         </AppModal.Container>
       </AppModal>
       </SafeAreaView>
