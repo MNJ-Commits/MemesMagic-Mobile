@@ -92,8 +92,8 @@ const BannerScreen = ({navigation}:any) => {
   useEffect(()=>{
     setLoader(false)
   },[])
-  
-  
+ 
+
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView

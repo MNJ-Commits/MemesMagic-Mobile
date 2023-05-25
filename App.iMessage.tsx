@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react';
-import { NativeModules, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { NativeModules, NativeEventEmitter, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { downloadFile, DownloadFileOptions  } from 'react-native-fs';
 
 
 
 const { MessagesManager, MessagesEventEmitter } = NativeModules;
+const MessagesEvents = new NativeEventEmitter(MessagesEventEmitter);
+
+console.log("MessagesManager: ", MessagesManager);
 
 // Call from JS to print in xcode console
 // MessagesManager.Sentence()
@@ -33,17 +36,17 @@ const App = ()=> {
 
   const [messageState, setMessageState] = React.useState({
     presentationStyle: '',
-    conversation: null,
-    message: null,
+    // conversation: null,
+    // message: null,
   })
   const [imageSrc, setImageSrc] = React.useState('')
 
-  // useEffect(()=>{
-  //   MessagesManager
-  //     .getPresentationStyle(presentationStyle => this.setState({ presentationStyle }))
+  useEffect(()=>{
+    MessagesManager
+      .getPresentationStyle((presentationStyle: any) => setMessageState({ presentationStyle}))
 
-  //   MessagesEvents
-  //     .addListener('onPresentationStyleChanged', ({ nativeStyle }) => setMessageState({...messageState, presentationStyle: nativeStyle }));
+    MessagesEvents
+      .addListener('onPresentationStyleChanged', ({ presentationStyle }) => setMessageState({...messageState, presentationStyle: presentationStyle }));
 
   //   MessagesManager
   //     .getActiveConversation((converse, msg) => setMessageState({...messageState, conversation: converse, message: msg }));
@@ -54,28 +57,30 @@ const App = ()=> {
   //   MessagesEvents
   //     .addListener('didSelectMessage', ({ msg }) => setMessageState({...messageState,  msg }));
 
-  // },[])
+  },[])
 
-  // onComposeMessage = () => {
-  //   MessagesManager.composeMessage({
-  //     layout: {
-  //       imageName: 'zebra.jpg',
-  //       imageTitle: 'Image Title',
-  //       imageSubtitle: 'Image Subtitle',
-  //     },
-  //     summaryText: 'Sent a message from AwesomeMessageExtension',
-  //     url: `?timestamp=${Date.now()}&sender=${this.state.conversation.localParticipiantIdentifier}`
-  //   })
-  //   .then(() => MessagesManager.updatePresentationStyle('compact'))
-  //   .catch(error => console.log('An error occurred while composing the message: ', error))
-  // }
+  const onComposeMessage = () => {
+    MessagesManager.composeMessage({
+      layout: {
+        imageName: 'eagle.png',
+        imageTitle: 'Image Title',
+        imageSubtitle: 'Image Subtitle',
+      },
+      summaryText: 'Sent a message from MessageExtension',
+      url: "/Users/nouman/Documents/Projects/memes_work/ios/MessagesExtension/Assets.xcassets/eagle.imageset/eagle.png"
+    })
+    // .then(() => MessagesManager.updatePresentationStyle('compact'))
+    // .catch(error => console.log('An error occurred while composing the message: ', error))
+    .then((message: any) => console.log('Successfuly compossed a message: ', message))
+    .catch((error: any) => console.log('An error occurred while composing the message: ', error))
+  }
 
-  // const onTogglePresentationStyle = () => {
-  //   console.log('here:',);
-  //   MessagesManager
-  //     ?.updatePresentationStyle(messageState === 'expanded' ? 'compact' : 'expanded')
-  //     .then(presentationStyle => setMessageState({...messageState, presentationStyle }))
-  // }
+  const onTogglePresentationStyle = () => {
+    console.log('here:',);
+    MessagesManager
+      ?.updatePresentationStyle(messageState.presentationStyle === 'expanded' ? 'compact' : 'expanded')
+      .then((presentationStyle: any) => setMessageState({...messageState, presentationStyle }))
+  }
 
 
   // console.log(Image.resolveAssetSource(require('/Users/nouman/Downloads/Compressed/rn-input-extensions-blog-main/src/newAssets/D7ED4149-C251-437C-8DC4-A796DF84B6BB.jpg')).uri)
@@ -97,11 +102,17 @@ const App = ()=> {
         <Image source={require('./src/stickers/mango.png')} style={{width: 90, height: 90}} />
       </TouchableOpacity> */}
       <TouchableOpacity 
-        // onPress={onTogglePresentationStyle }
-        onPress={()=>{}}
+        onPress={onTogglePresentationStyle }
+        // disabled={!messageState?.presentationStyle}
+        style={{marginVertical:20}}
+      >
+        <Text >Toggle the Presentation Style</Text>          
+      </TouchableOpacity>
+      <TouchableOpacity 
+        onPress={onComposeMessage }
         // disabled={!messageState?.presentationStyle}
       >
-        {/* <Text>Toggle the Presentation Style</Text>           */}
+        <Text style={{fontFamily:'Lucita-Regular', fontSize:14}} >Compose a message</Text>          
       </TouchableOpacity>
 
     </View>
