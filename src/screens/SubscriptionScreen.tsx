@@ -1,5 +1,13 @@
+// Libraries
 import React, { Fragment, useEffect, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Image, } from 'react-native';
+import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection} from 'react-native-iap';
+import { getUniqueId } from 'react-native-device-info';
+import { RFValue } from 'react-native-responsive-fontsize';
+import { storeAppleAccessToken, storePaymentsReceipt, storeVerifyPayment } from '../store/asyncStorage';
+import * as RNFS from 'react-native-fs';
+
+// SVG's
 import AppLogo from "../assets/svgs/app-logo.svg";
 import BackButton from "../assets/svgs/back-button.svg";
 import Subcribe from "../assets/svgs/subcribe.svg";
@@ -8,13 +16,13 @@ import GifsMemes from "../assets/svgs/gifs-memes.svg";
 import NoAds from "../assets/svgs/no-ad's.svg";
 import Information from "../assets/svgs/information.svg";
 import Cross from "../assets/svgs/cross.svg";
-import { RFValue } from 'react-native-responsive-fontsize';
-import { storeAppleAccessToken, storePaymentsReceipt, storeVerifyPayment } from '../store/asyncStorage';
-import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
-import { AppModal } from '../components/AppModal';
 
-import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection} from 'react-native-iap';
-import { getUniqueId } from 'react-native-device-info';
+// Hooks
+import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
+
+// Components
+import { AppModal } from '../components/AppModal';
+import RNFetchBlob from 'rn-fetch-blob';
 
 
 const SubscriptionScreen = ({navigation, route}:any) => {
@@ -232,10 +240,24 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       console.log(error);
     },
   });
+
+const  filepath = RNFS.DocumentDirectoryPath+"/sampleImg.png"
+// console.log(filepath);
+
+
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
       <SafeAreaView style= {{flex:1, backgroundColor:'#3386FF' }} >
+        
+        {/* <Image 
+          source={{ uri: 'file://' + filepath }}
+          resizeMode={'contain'}
+          style={{
+              width:200, 
+              height: 200,
+          }} 
+        /> */}
         <View style={{ flex:1, backgroundColor:'#FF439E',}} >
           <ScrollView contentContainerStyle={{ marginTop:10 }} >
             
@@ -337,3 +359,13 @@ const SubscriptionScreen = ({navigation, route}:any) => {
  
 
 export default SubscriptionScreen;
+
+
+// <Image 
+// source={require('/var/mobile/Containers/Data/Application/0641D31F-A26D-4360-A065-888C24487A61/Documents/Sun_May_28_2023_22.52.43.png')}
+// resizeMode={'contain'}
+// style={{
+//     width:200, 
+//     height: 200,
+// }}
+// />

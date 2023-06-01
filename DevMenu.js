@@ -26,51 +26,39 @@ const styles = StyleSheet.create({
   },
 });
 
-class DevMenu extends React.Component {
-  state = {
-    liveReloadEnabled: false,
-    remoteDebuggingEnabled: false,
-  }
+const DevMenu = () => {
 
-  onToggleRemoteDebugging = () => {
-    const remoteDebuggingEnabled = !this.state.remoteDebuggingEnabled;
+  const [liveReloadEnabled, setLiveReloadEnabled] = React.useState<Boolean>(false)
+  const [remoteDebuggingEnabled, setRemoteDebuggingEnabled] = React.useState<Boolean>(false)
 
-    NativeModules.DevSettings.setIsDebuggingRemotely(remoteDebuggingEnabled);
+  // onToggleRemoteDebugging = () => {
+  //   NativeModules.DevSettings.setIsDebuggingRemotely(!remoteDebuggingEnabled);
+  //   setRemoteDebuggingEnabled(!remoteDebuggingEnabled)
+  // }
 
-    this.setState({
-      remoteDebuggingEnabled,
-    });
-  }
+  // onToggleLiveReload = () => {
+  //   NativeModules.DevSettings.setLiveReloadEnabled(!liveReloadEnabled);
+  //   setLiveReloadEnabled(!liveReloadEnabled)
+  // }
 
-  onToggleLiveReload = () => {
-    const liveReloadEnabled = !this.state.liveReloadEnabled;
-
-    NativeModules.DevSettings.setLiveReloadEnabled(liveReloadEnabled);
-
-    this.setState({
-      liveReloadEnabled,
-    });
-  }
-
-  render() {
-    const { liveReloadEnabled, remoteDebuggingEnabled } = this.state;
 
     return (
       <View style={styles.wrapper}>
-        <TouchableHighlight style={styles.button} onPress={this.onToggleRemoteDebugging}>
+        {/* <TouchableHighlight style={styles.button} onPress={onToggleRemoteDebugging}>
           <Text style={styles.buttonText}>
             {remoteDebuggingEnabled ? 'Disable' : 'Enable'} Remote Debugging
           </Text>
-        </TouchableHighlight>
+        </TouchableHighlight> */}
 
-        <TouchableHighlight style={styles.button} onPress={this.onToggleLiveReload}>
+        <TouchableHighlight style={styles.button} onPress={()=> DevSettings.reload()}>
           <Text style={styles.buttonText}>
-            {liveReloadEnabled ? 'Disable' : 'Enable'} Live Reload
+            {/* {liveReloadEnabled ? 'Disable' : 'Enable'}  */}
+            Live Reload
           </Text>
         </TouchableHighlight>
       </View>
     );
-  }
+  
 }
 
 export default DevMenu;
