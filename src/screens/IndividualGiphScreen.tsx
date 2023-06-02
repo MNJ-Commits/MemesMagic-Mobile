@@ -1,24 +1,28 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+// Libraries
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { useFocusEffect } from '@react-navigation/native';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import RNFetchBlob from 'rn-fetch-blob';
+import Share from 'react-native-share';
+import { DownloadFileOptions, downloadFile, writeFile } from 'react-native-fs';
+var RNFS = require('react-native-fs');
+
+// SVG's
 import BackButton from "../assets/svgs/back-button.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
 import ShareIcon from "../assets/svgs/shareIcon.svg";
 import CopyIcon from "../assets/svgs/copy.svg";
 import DownloadSvg from "../assets/svgs/download.svg";
-import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 
-
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
-
-import RNFetchBlob from 'rn-fetch-blob';
-import Share from 'react-native-share';
-
-import { DownloadFileOptions, downloadFile, writeFile } from 'react-native-fs';
+// Hooks
 import { checkLibraryPermissions, requestLibraryPermissions } from '../utils/Permissions';
+import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPaymentFromStorage } from '../store/asyncStorage';
-import { useFocusEffect } from '@react-navigation/native';
-var RNFS = require('react-native-fs');
+
+ 
+
 
 
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
@@ -144,12 +148,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
         setDownloading(true)
         //Define path and directory to store files to
-        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
+        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.png`
         console.log('fromURL: ',fromURL);
 
         //Define options
         const options: DownloadFileOptions = {
-            fromUrl: fromURL,
+            fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
+            // fromUrl: fromURL,
             toFile: filePath,
             headers: header
         } 
@@ -378,13 +383,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                                    if(isBlank(text)){
-                                        Alert.alert("You must enter text to proceed")
-                                    } else if (verifyPayment?.subcription){
+                                    // if (verifyPayment?.subcription){
                                         gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
-                                    } else{
-                                       navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                   }
+                                    // } else{
+                                    //     navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                    // }
                                 }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />

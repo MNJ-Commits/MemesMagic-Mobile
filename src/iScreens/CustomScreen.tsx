@@ -112,7 +112,7 @@ useEffect(() => {
    };
  }, []);
 
- console.log('isKeyboardVisible: ', isKeyboardVisible);
+//  console.log('isKeyboardVisible: ', isKeyboardVisible);
  
   return (
     <SafeAreaView 

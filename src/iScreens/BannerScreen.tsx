@@ -122,7 +122,7 @@ const BannerScreen = ({navigation}:any) => {
       style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
         style={{flex: 1}}
-        behavior={(Platform.OS === 'ios' && isKeyboardVisible) ? 'padding': undefined }
+        behavior={Platform.OS === 'ios'  ? 'padding': undefined }
         keyboardVerticalOffset={10}
       >
         {/* Header */}
@@ -143,7 +143,9 @@ const BannerScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})}} >
+            <TouchableOpacity onPress={()=>{
+              // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
+              }} >
               <Pro width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
           </View>
