@@ -23,6 +23,7 @@ import { usePostAppleAccessToken } from '../hooks/usePostAppleAccessToken';
 // Components
 import { AppModal } from '../components/AppModal';
 import RNFetchBlob from 'rn-fetch-blob';
+import { openLink } from '../utils/openLink';
 
 
 const SubscriptionScreen = ({navigation, route}:any) => {

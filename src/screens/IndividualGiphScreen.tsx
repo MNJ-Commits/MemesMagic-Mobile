@@ -1,11 +1,6 @@
 // Libraries
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-=======
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
->>>>>>> 9c02c42352ff57e62e6111353a43fe4d9d100e0a
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useFocusEffect } from '@react-navigation/native';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
@@ -388,13 +383,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-<<<<<<< HEAD
-                                    // if (verifyPayment?.subcription){
-                                        gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
-                                    // } else{
-                                    //     navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                    // }
-=======
                                     if(isBlank(text)){
                                         Alert.alert("You must enter text to proceed")
                                     } else if (verifyPayment?.subcription){
@@ -402,7 +390,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     } else{
                                        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                    }
->>>>>>> 9c02c42352ff57e62e6111353a43fe4d9d100e0a
                                 }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
