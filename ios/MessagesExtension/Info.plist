@@ -42,6 +42,13 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).MessagesViewController</string>
 	</dict>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> iMessageExtension
+>>>>>>> 9c02c42352ff57e62e6111353a43fe4d9d100e0a
 	<key>UIAppFonts</key>
 	<array>
 		<string>Arial Black.ttf</string>
