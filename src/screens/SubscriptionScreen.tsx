@@ -83,9 +83,14 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   if(connected){
     getPurchaseHistory().then((purchases)=>{
       console.log('purchases: ', purchases.length); 
-      const receipt = purchases[0].transactionReceipt
-      if(receipt)
-        validateReceipt(receipt)
+      if(purchases.length>0){
+        const receipt = purchases[0].transactionReceipt
+        if(receipt)
+          validateReceipt(receipt)
+      }
+      else(
+        setCheckingSubscriptions(false)
+      )
       }).catch(()=>{
         setCheckingSubscriptions(false)
       })
@@ -144,16 +149,24 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       //   // Alert.alert("Purchased Expired", "Your monthly subscription has expired")
       // }
       // else{
-          console.log(renewal_history[0]?.product_id, renewal_history[1]?.product_id);
           
-          if(renewal_history[0]?.product_id === "NoWatermarks" && renewal_history[1]?.product_id ===  "MonthlySubscription")
+          let purchaseType:any = []
+          for (let purchaseNo = 0; purchaseNo < renewal_history.length; purchaseNo++) {
+            !purchaseType.includes(renewal_history[purchaseNo].product_id) ? purchaseType.push(renewal_history[purchaseNo].product_id) : null
+          }
+
+          console.log("purchaseType: ", purchaseType);
+          
+          if(purchaseType.length <= 1){
+            if(purchaseType[0] === "NoWatermarks")
+              setVerifyPayments({ one_time: true, subcription: false })
+            else if (purchaseType[0] ===  "MonthlySubscription")
+              setVerifyPayments({ one_time: false, subcription: true })
+            }
+          else if(purchaseType.length <= 2){
             setVerifyPayments({ one_time: true, subcription: true })
-          else if( renewal_history[0]?.product_id ===  "MonthlySubscription" && renewal_history[1]?.product_id === "NoWatermarks")
-            setVerifyPayments({ one_time: true, subcription: true })
-          else if(renewal_history[0]?.product_id === "NoWatermarks")
-            setVerifyPayments({ one_time: true, subcription: false })
-          else if (renewal_history[0]?.product_id ===  "MonthlySubscription")
-            setVerifyPayments({ one_time: false, subcription: true })
+          }
+
       // }
 
       setCheckingSubscriptions(false)

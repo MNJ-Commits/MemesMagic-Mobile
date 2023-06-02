@@ -299,7 +299,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     }
 
     // console.log('gifData: ', gifData);
-    // console.log('verifyPayment: ', verifyPayment);
+    console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
  
     
@@ -365,7 +365,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                                navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                              //  // navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 // if (verifyPayment?.subcription){
                                 //     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 // } else{
