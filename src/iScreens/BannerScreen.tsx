@@ -128,10 +128,10 @@ const BannerScreen = ({navigation}:any) => {
         {/* Header */}
         <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:15*ratio }}>
           <View style={{flexDirection:'row', width:`${40*ratio}%`, justifyContent:'space-between'}} >
-            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5*ratio), paddingHorizontal:RFValue(10*ratio) }} >
+            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5*ratio), paddingHorizontal:RFValue(10*ratio) }} >
               <Text style={{color:'white', fontSize:RFValue(8*ratio), marginTop:RFValue(2*ratio), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5*ratio), paddingHorizontal:RFValue(10*ratio) }} >
+            <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5*ratio), paddingHorizontal:RFValue(10*ratio) }} >
               <Text style={{color:'white', fontSize:RFValue(8*ratio), marginTop:RFValue(2*ratio), fontFamily:'Lucita-Regular' }} >BANNER</Text>
             </TouchableOpacity>
           </View>
@@ -143,7 +143,9 @@ const BannerScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})}} >
+            <TouchableOpacity onPress={()=>{
+              // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
+              }} >
               <Pro width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
           </View>

@@ -145,7 +145,9 @@ useEffect(() => {
             <TouchableOpacity>
               <Download2 width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})}} >
+            <TouchableOpacity onPress={()=>{
+              // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
+              }} >
               <Pro width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
           </View>
