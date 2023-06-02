@@ -250,7 +250,6 @@ const BannerScreen = ({navigation}:any) => {
               :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
             }
-            {/* <RightTick width={RFValue(20)} height={RFValue(20)} /> */}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

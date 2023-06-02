@@ -44,8 +44,8 @@ const CustomScreen = ({navigation, route}:any) => {
   });  
 
   const refresh = () => {
-    setAllGIF([]);    
     setLoader(true)
+    setAllGIF([]);    
     if(text.length!=0){
       getCustomRenders.mutate({ text:[text], "uids": UIDs})
     }
@@ -186,12 +186,8 @@ const CustomScreen = ({navigation, route}:any) => {
           />
           <TouchableOpacity 
             onPress={()=> { 
-              setLoader(true)
               Keyboard.dismiss()
-              getCustomRenders.mutate({ 
-                text:[text],
-                "uids": UIDs,
-              })
+              refresh()
             }}
           >
            {loader ?

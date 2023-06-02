@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import BackButton from "../assets/svgs/back-button.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
@@ -37,7 +37,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const getter = async () => {
     
         const gif_state = await loadIndividualGifData().catch((error:any)=>{
-            console.log('loadAppleAccessTokenFromStorage Error: ', error);
+            console.log('loadIndividualGifData Error: ', error);
         })
         setGIFData(gif_state) 
 
@@ -53,49 +53,27 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
 
     }
-    useFocusEffect(
-        React.useCallback(() => {
-            getter().catch((error:any)=>{
-            console.log('getter Error: ', error);
-            })
-            // console.log(authData ? authData : null);
-            // console.log('appleAccessToken: ', appleAccessToken);
-        }, []),
-    );
+    useLayoutEffect( () => {
+        getter().catch((error:any)=>{
+        console.log('getter Error: ', error);
+        })
+        // console.log(authData ? authData : null);
+        // console.log('appleAccessToken: ', appleAccessToken);
+    }, [])
+    
     
 
     const returnScreen = gifData?.returnScreen
     // console.log('returnScreen: ',returnScreen);
     // console.log('gifData: ',gifData);
-    const renderRenderById: any = usePostCustomRenders({
-        onSuccess(res) { 
-            if(res[0].render.includes('.gif')){
-                setFromURL(`http://18.143.157.105:3000${res[0].render}`) 
-            }
-            else{
-                setWebp(`http://18.143.157.105:3000${res[0].render}`) 
-            }
-            setLoader(false)
-        },
-        onError(error) {
-            console.log(error);
-        },
-    }); 
+
 
     useEffect(()=>{
         if(gifData?.giphy){
             const textSting = gifData?.src2?.split("&w")[0]
-            setText(textSting?.split("=")[1])
+            setText(decodeURIComponent(textSting?.split("=")[1]))
         }
         else{
-            // For custom download
-            renderRenderById.mutate({ 
-                "HQ": true,
-                "animated_sequence": true,
-                "render_format": "gif",
-                "uids": [ gifData.uid ], 
-                text:[gifData?.defaultText],
-            }) 
             // For custom render 
             renderRenderById.mutate({ 
                 "HQ": true,
@@ -107,11 +85,36 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             setText(gifData.defaultText)
         }
     },[gifData])
+   
+    const renderRenderById: any = usePostCustomRenders({
+        onSuccess(res) { 
+            if(res[0].render.includes('.webp')){
+                setWebp(`http://18.143.157.105:3000${res[0].render}`) 
+                console.log("webp");
 
+                // For custom download
+                renderRenderById.mutate({ 
+                    "HQ": true,
+                    "animated_sequence": true,
+                    "render_format": "gif",
+                    "uids": [ gifData.uid ], 
+                    text:[gifData?.defaultText],
+                }) 
+            }
+            else {
+                setFromURL(`http://18.143.157.105:3000${res[0].render}`) 
+                console.log("gif");
+            }
+            setLoader(false)
+        },
+        onError(error) {
+            console.log("renderRenderById", error);
+        },
+    }); 
     const textSting = gifData?.src2?.split("&w")[1] 
     
     let BannerURI: string = ''
-    text ? BannerURI+=`?text=${text}&w`+textSting : gifData?.src2
+    text ? BannerURI+=`?text=${encodeURIComponent(text)}&w`+textSting : gifData?.src2
 
     // checkLibraryPermissions( ).then((resp:any)=>{
     //     if(!resp){
@@ -241,7 +244,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 let options = {
                     type: 'image/gif',
                     url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
-                    };  
+                };  
                 Share.open(options).then((res:any)=>{
                     console.log('res: ', res);
                 }).catch((error:any)=>{
@@ -298,7 +301,14 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // console.log('gifData: ', gifData);
     // console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
+ 
     
+    function isBlank(str: string) {
+        return (!str || /^\s*$/.test(str));
+    }
+ 
+
+
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
           {gifData.src &&  <KeyboardAvoidingView
@@ -320,33 +330,38 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     keyboardShouldPersistTaps='handled' 
                  >
                     {/* Gif */}
-                    <Image
-                        source={{uri: gifData?.giphy ? gifData.src : webp }}
-                        style={[{width: '100%', aspectRatio: gifData.width/gifData.height, resizeMode:'contain', borderRadius:RFValue(30), margin:RFValue(20),  } ]}
-                    />        
-                    {
-                    gifData.giphy && 
-                        <Image 
-                            source={appleAccessToken ?
-                                {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-                                    headers:{ "X-ACCESS-TOKEN": appleAccessToken }
-                                }
-                                :
-                                { uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }
-                            }
-                            resizeMode={'contain'}
-                            style={{
-                                width:'100%', 
-                                aspectRatio: gifData.width/gifData.height,
-                                position:'absolute',
-                                borderRadius:RFValue(30), margin:RFValue(20),
-                            }}
-                        />
-                    }
-
+                    <>
+                        <Image
+                            source={{uri: gifData?.giphy ? gifData.src : webp }}
+                            style={[{width: '100%', aspectRatio: gifData.width/gifData.height, resizeMode:'contain', borderRadius:RFValue(30), margin:RFValue(20),  } ]}
+                        />        
                     
+                        {
+                        gifData.giphy && 
+                            <Image 
+                                source={appleAccessToken ?
+                                    {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                                        headers:{ "X-ACCESS-TOKEN": appleAccessToken }
+                                    }
+                                    :
+                                    { uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }
+                                }
+                                resizeMode={'contain'}
+                                style={{
+                                    width:'100%', 
+                                    aspectRatio: gifData.width/gifData.height,
+                                    position:'absolute',
+                                    borderRadius:RFValue(30), margin:RFValue(20),
+                                }}
+                            />
+                        }
+                        { (!gifData.giphy && !webp )&&
+                            <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue(gifData.height/3) }}/>}
+                    </>
+                  
+
                     {/* Copy/Download/Share */}
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center' }} >
+                    <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }, !gifData.giphy && !fromURL ? {opacity:0.1} : {opacity:1} ]} >
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
@@ -363,11 +378,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                                    if (verifyPayment?.subcription){
+                                    if(isBlank(text)){
+                                        Alert.alert("You must enter text to proceed")
+                                    } else if (verifyPayment?.subcription){
                                         gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
                                     } else{
-                                        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                    }
+                                       navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                   }
                                 }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -375,7 +392,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                                if (verifyPayment?.subcription){
+                                if(isBlank(text)){
+                                    Alert.alert("You must enter text to proceed")
+                                } else if (verifyPayment?.subcription){
                                     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
                                 } else{
                                     navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
@@ -386,14 +405,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         </TouchableOpacity>
                     </View>
                     
+                    {/* Activity Indicator */}
                     <View style={{paddingTop:20}} >
                         {
                             downloading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
                             : loading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Loading...</Text>
-                            : !gifData.giphy && !fromURL ?
-                                <ActivityIndicator size={'small'} />
                             : null
                         }
                     </View>

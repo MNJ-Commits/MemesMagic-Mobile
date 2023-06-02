@@ -47,9 +47,9 @@ const AppBootStrap = React.memo(function () {
             headerShown: false,
           }}
         >
-          <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} />
           <Stack.Screen name="CustomScreen" component={CustomScreen} />
           <Stack.Screen name="BannerScreen" component={BannerScreen} />
+          <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} />
           <Stack.Screen name="IndividualGiphScreen" component={IndividualGiphScreen} />
           <Stack.Screen name="ApplePayScreen" component={ApplePayScreen} />
         </Stack.Navigator>
