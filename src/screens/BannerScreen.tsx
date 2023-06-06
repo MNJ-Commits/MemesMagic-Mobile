@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
@@ -21,6 +21,7 @@ import { AppModal } from '../components/AppModal';
 
 import { Fonts } from '../utils/Fonts';
 import { Colors } from '../utils/colors';
+import { useGetBannerSearch } from '../hooks/useGetBannerSearch';
 
 
 const BannerScreen = ({navigation}:any) => {
@@ -32,6 +33,7 @@ const BannerScreen = ({navigation}:any) => {
   const [textPosition, setTextPosition] = useState('YellowBoxBB')
   const [fontsArray, setFontsArray] = useState<string[]>([])  
   const [text, setText] = useState<string>("")
+  const [query, setQuery] = useState<string>("")
   const [loader, setLoader] = useState<Boolean>(true)
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
@@ -45,7 +47,14 @@ const BannerScreen = ({navigation}:any) => {
     onError: (res: any) => console.log('onError: ',res),
   });
 
-  
+  const getBannerSearch: any = useGetBannerSearch(query,{
+    onSuccess: (res: any) => { 
+      setLoader(false)
+      setAllGIF(res) 
+    },
+    onError: (res: any) => console.log('onError: ',res),
+  });
+
   const getFonts: any = useGetFonts({
     onSuccess: (res: any) => {
       // let fontList: {fontname:string; name:string, fontFamily:string}[] = []
@@ -61,7 +70,6 @@ const BannerScreen = ({navigation}:any) => {
 
   const refresh = () => {
     setAllGIF([]); 
-    // setText('');
     setLoader(true)   
     getBannerTemplates.refetch()
   };
@@ -92,11 +100,18 @@ const BannerScreen = ({navigation}:any) => {
   useEffect(()=>{
     setLoader(false)
   },[])
+
+  useEffect(()=>{
+    if (query)
+      getBannerSearch.refetch()
+  },[query])
  
+  const searchInput: any = useRef()
 
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
+        enabled={ searchInput.isFocussed ? false : true}
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding': undefined }
         keyboardVerticalOffset={10}
@@ -134,13 +149,15 @@ const BannerScreen = ({navigation}:any) => {
                 <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
               {/* </TouchableOpacity> */}
               <TextInput
+                ref={searchInput}
                 editable={true}
                 placeholderTextColor={'#ffffff'}
-                // onChangeText={(e: any) => { setText(e) }}
+                // onChangeText={(e: any) => { setQuery(e) }}
                 placeholder={'Search'}
                 returnKeyType= {'search'}
                   onSubmitEditing ={ (e)=>{
-                      Keyboard.dismiss()
+                    setQuery(e?.nativeEvent?.text)
+                    Keyboard.dismiss()
                   }}
                 style= {{ 
                   fontSize: RFValue(15),
@@ -242,7 +259,7 @@ const BannerScreen = ({navigation}:any) => {
             onPress={()=> {
               setLoader(true);
               Keyboard.dismiss()
-              getBannerTemplates.refetch()
+              // getBannerTemplates.refetch()
             }} 
           >
             {loader ?

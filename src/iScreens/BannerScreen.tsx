@@ -122,7 +122,7 @@ const BannerScreen = ({navigation}:any) => {
       style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
         style={{flex: 1}}
-        behavior={Platform.OS === 'ios'  ? 'padding': undefined }
+        // behavior={Platform.OS === 'ios'  ? 'padding': undefined }
         keyboardVerticalOffset={10}
       >
         {/* Header */}

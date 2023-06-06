@@ -36,7 +36,7 @@ import { useFocusEffect } from '@react-navigation/native';
         textStroke={textStroke} 
         color={color} 
         font={font} 
-        renderData={renderData}
+        renderData={renderData}     // disables individual Gif open without text
         navigation={navigation} />
       }
     />
@@ -45,7 +45,7 @@ import { useFocusEffect } from '@react-navigation/native';
 export default AppFlatlist
 
 
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, renderData, navigation}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation}:any)=>{
   
 
   const [appleAccessToken, setAppleAccessToken] = useState<string>('')
@@ -86,12 +86,12 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     <TouchableOpacity 
       key={item.index}
       onPress={()=>{
-        if(giphy && text)
+        if(giphy)
           {
             storeIndividualGifData({src:customURI, width:width, height:height, giphy: giphy, src2: BannerURI, returnScreen:'BannerScreen'});
             navigation.navigate( 'IndividualGiphScreen')
           }
-        else if(renderData && text ){
+        else{
           storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text, returnScreen:'CustomScreen'});
           navigation.navigate( 'IndividualGiphScreen')
         }
@@ -125,9 +125,8 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
                 height:RFValue(150/width*height), 
                 position:'absolute',
                 borderRadius:RFValue(10),
-               }}
+              }}
             />
-
           }
           <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
       </>

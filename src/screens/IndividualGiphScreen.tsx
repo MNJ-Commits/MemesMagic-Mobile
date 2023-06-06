@@ -2,7 +2,6 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { useFocusEffect } from '@react-navigation/native';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
@@ -23,19 +22,19 @@ import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPayme
 
  
 
-
-
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
     
     const [text, setText] = useState<string>('')
     const [loader, setLoader] = useState<Boolean>(false)
     const [downloading, setDownloading] = useState<Boolean>(false)
-    const [loading, setLoading] = useState<Boolean>(false)
+    const [sharing, setSharing] = useState<Boolean>(false)
     const [webp, setWebp] = useState<string>('')
     const [fromURL, setFromURL] = useState<string>('')
     const [verifyPayment, setVerifyPayment] = useState<any>({})
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const [gifData, setGIFData] = useState<any>({})
+    const [fileAction, setFileAction] = useState<string>('')
+
 
     // GET Store
     const getter = async () => {
@@ -54,8 +53,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             console.log('loadAppleAccessTokenFromStorage Error: ', error);
         })
         setAppleAccessToken(access_token) 
-
-
     }
     useLayoutEffect( () => {
         getter().catch((error:any)=>{
@@ -65,13 +62,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         // console.log('appleAccessToken: ', appleAccessToken);
     }, [])
     
-    
-
-    const returnScreen = gifData?.returnScreen
-    // console.log('returnScreen: ',returnScreen);
-    // console.log('gifData: ',gifData);
-
-
     useEffect(()=>{
         if(gifData?.giphy){
             const textSting = gifData?.src2?.split("&w")[0]
@@ -95,23 +85,20 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             if(res[0].render.includes('.webp')){
                 setWebp(`http://18.143.157.105:3000${res[0].render}`) 
                 console.log("webp");
-
-                // For custom download
-                renderRenderById.mutate({ 
-                    "HQ": true,
-                    "animated_sequence": true,
-                    "render_format": "gif",
-                    "uids": [ gifData.uid ], 
-                    text:[gifData?.defaultText],
-                }) 
             }
             else {
                 setFromURL(`http://18.143.157.105:3000${res[0].render}`) 
                 console.log("gif");
+                if(fileAction==="ShareCustomGif")
+                    ShareCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+                else if(fileAction==="DownloadCustomGif")
+                    DownloadCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+
             }
             setLoader(false)
         },
         onError(error) {
+            setLoader(false)
             console.log("renderRenderById", error);
         },
     }); 
@@ -144,17 +131,17 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             'Content-Type': 'application/json', 
         }
 
-    const DownloadCustomGif  = async ()=>{
+    const DownloadCustomGif  = async (remoteURL: string)=>{
 
-        setDownloading(true)
         //Define path and directory to store files to
-        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.png`
-        console.log('fromURL: ',fromURL);
+        // const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.png`
+        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
+        console.log('remoteURL: ',remoteURL);
 
         //Define options
         const options: DownloadFileOptions = {
-            fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-            // fromUrl: fromURL,
+            // fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
+            fromUrl: remoteURL,
             toFile: filePath,
             headers: header
         } 
@@ -163,44 +150,37 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         return response.promise.then(async (res: any) => {
             setDownloading(false)
             console.log('res: ', res, filePath);    
-
              // TO SAVE GIF'S TO IOS PHOTO 
-            await CameraRoll.save(filePath, { type: 'auto', album:'MemeMagic' }).then((res:any)=>{
+            await CameraRoll.save(remoteURL).then((res:any)=>{
                 console.log('res: ', res);
             }).catch((error:any)=>{
                 console.log('error: ', error);
             })
-         
         }).catch((error:any)=>{
             setDownloading(false)
             console.log('error: ', error);
         })
-
-
     }
 
     // Download Files
-    const DownloadGiphy = async ()=>{
+    const DownloadGiphyGif = async ()=>{
 
         setDownloading(true)
         //Define path and directory to store files to
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
-        const payload = {
-                    "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-                    "giphy_url":  gifData?.src
-                }
 
         await RNFetchBlob
             .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-                header, JSON.stringify({...payload }))
+                header, JSON.stringify({
+                    "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                    "giphy_url":  gifData?.src
+                }))
                 .then(async (response) =>{ 
-
                     if(response.info().status==200){
                         // TO SAVE GIF'S TO IOS LIBRARY                            
                         writeFile(filePath, response.base64(), 'base64')
                         .then((writeFileReposne)=> {
                             console.log('writeFileReposne: ', writeFileReposne);
-                            setDownloading(false)
                         }).catch((writeFile:any)=>{
                             console.log('writeFile error: ',writeFile) 
                         })
@@ -210,106 +190,99 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                            // TO SAVE GIF'S TO IOS PHOTO 
                             await CameraRoll.save(filePath,).then((res:any)=>{
                                 console.log('res: ', res);
+                                setDownloading(false)
                             }).catch((error:any)=>{
+                                setDownloading(false)
                                 console.log('error: ', error);
                             })
                         })
-                        setDownloading(false)
                     }
-                    
                 }).catch((writeFile:any)=>{
+                    setDownloading(false)
                     console.log('writeFile error: ',writeFile) 
                 })
                 console.log('filePath: ', filePath);
                 
-        }
+    }
 
  
 
     // 1. Download   2. Share   3. Remove
-    const ShareCustomGif = () => {
+    const ShareCustomGif = (remoteURL: string) => {
 
-        setLoading(true)   
         let filePath: any;
-        let data: any;
-        const configOptions = {
-                fileCache: true,
-                path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`,
-            };
-        // Download,
-        RNFetchBlob.config(configOptions)
-            .fetch('GET', fromURL, header)
-            .then(async (resp:any) => {
-                setLoading(false)
-                filePath = await resp.path();
-                data = await resp.base64();            
-                return data
-            }).then((base64Data:any) => {
-                // Share
-                let options = {
-                    type: 'image/gif',
-                    url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
-                };  
-                Share.open(options).then((res:any)=>{
-                    console.log('res: ', res);
-                }).catch((error:any)=>{
-                    setLoading(false)
-                    console.log('error: ', error);
-                });
-                // Remove from device's storage
-                RNFetchBlob.fs.unlink(filePath);
+        // Download
+        RNFetchBlob.config({
+            fileCache: true,
+            path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`
+        }).fetch('GET', remoteURL, header).then(async (resp:any) => {
+            // setSharing(false)
+            filePath = await resp.path();
+            let data: any = await resp.base64();            
+            return data
+        }).then((base64Data:any) => {
+            // Share
+            Share.open({
+                type: 'image/gif',
+                url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
+            }).then((res:any)=>{
+                setSharing(false)
+                console.log('res: ', res);
             }).catch((error:any)=>{
-                setLoading(false)
-                console.log("error: ",error);
-            })
+                setSharing(false)
+                console.log('error: ', error);
+            });
+            // Remove from device's storage
+            RNFetchBlob.fs.unlink(filePath);
+        }).catch((error:any)=>{
+            setSharing(false)
+            console.log("error: ",error);
+        })
     }
 
     // 1. Download   2. Share,
     const ShareGiphyGif=async ()=>{
         
-        setLoading(true)   
-        const payload = {
-            "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-            "giphy_url":  gifData?.src
-        }
-
+        setSharing(true)   
         let data: any;
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
-            header, JSON.stringify({...payload }) )
-            .then(async (response) =>{ 
-                
+            header, JSON.stringify({
+                "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                "giphy_url":  gifData?.src
+            }) )
+            .then(async (response) =>{                
                 console.log('reponse: ', response.info().status);
                 if(response.info().status==200){
-                    setLoading(false)
+                    setSharing(false)
                     data = await response.base64() 
-                    console.log(data);
-                    
                     return data
                 }
             }).then((base64Data:any) => {
-                let options = {
+                // Share
+                Share.open({
                     type: 'image/gif',
                     url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
-                };  
-                // Share
-                Share.open(options).then((res:any)=>{
+                }).then((res:any)=>{
                     console.log('res: ', res);
                 }).catch((error:any)=>{
-                    setLoading(false)
+                    setSharing(false)
                     console.log('Share error: ', error);
                 });
             }).catch((error:any)=>{ 
+                setSharing(false)
                 // console.log('fetch error: ', error) 
             });
     }
 
     // console.log('gifData: ', gifData);
-    console.log('verifyPayment: ', verifyPayment);
+    // console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
  
     
     function isBlank(str: string) {
-        return (!str || /^\s*$/.test(str));
+        let string = str.trim()
+        return ( !string || /^\s*$/.test(string) || /^\.*$/.test(string));
+        // return (!string || /^\s*$/.test(string) || /^\.*$/.test(string) || !/^[a-zA-Z.\s]+$/.test(string));
     }
  
 
@@ -366,7 +339,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                   
 
                     {/* Copy/Download/Share */}
-                    <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }, !gifData.giphy && !fromURL ? {opacity:0.1} : {opacity:1} ]} >
+                    <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
                             disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
@@ -381,12 +354,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             <CopyIcon width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
                                     if(isBlank(text)){
                                         Alert.alert("You must enter text to proceed")
                                     } else if (verifyPayment?.subcription){
-                                        gifData?.giphy ? DownloadGiphy() : DownloadCustomGif()
+                                        gifData?.giphy ? DownloadGiphyGif() : 
+                                        // For custom .GIF download
+                                        setDownloading(true)
+                                        setFileAction("DownloadCustomGif");
+                                        renderRenderById.mutate({ 
+                                            "HQ": true,
+                                            "animated_sequence": true,
+                                            "render_format": "gif",
+                                            "uids": [ gifData.uid ], 
+                                            text:[text],
+                                        }) 
                                     } else{
                                        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                    }
@@ -395,12 +377,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
                                 if(isBlank(text)){
                                     Alert.alert("You must enter text to proceed")
                                 } else if (verifyPayment?.subcription){
-                                    gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
+                                    gifData?.giphy ? ShareGiphyGif() 
+                                    :         
+                                    // For custom .GIF download
+                                    setSharing(true)
+                                    setFileAction("ShareCustomGif");
+                                    renderRenderById.mutate({ 
+                                        "HQ": true,
+                                        "animated_sequence": true,
+                                        "render_format": "gif",
+                                        "uids": [ gifData.uid ], 
+                                        text:[text],
+                                    }) 
                                 } else{
                                     navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 }
@@ -415,8 +407,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         {
                             downloading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
-                            : loading ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Loading...</Text>
+                            : sharing ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
                             : null
                         }
                     </View>
