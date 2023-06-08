@@ -90,7 +90,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   useEffect(()=>{
   if(connected){
     getPurchaseHistory().then((purchases)=>{
-      console.log('purchases: ', purchases.length); 
+      console.log('PurchaseHistory: ', purchases.length); 
       if(purchases.length>0){
         const receipt = purchases[0].transactionReceipt
         if(receipt)
@@ -99,15 +99,17 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       else(
         setCheckingSubscriptions(false)
       )
-      }).catch(()=>{
+      }).catch((error:any)=>{
+        console.log('PurchaseHistory error: ', error);
         setCheckingSubscriptions(false)
       })
 
     // getAvailablePurchases()
     //   .then((availableResponse)=>{
-    //     console.log('availableResponse: ',availableResponse.length);   
+    //     console.log('availablePurchases Response: ',availableResponse);   
+    //     setCheckingSubscriptions(false)
     //   }).catch((availableError)=>{
-    //     console.log('availableError: ', availableError);
+    //     console.log('availablePurchases Error: ', availableError);
     //   })
 
     purchaseUpdated = purchaseUpdatedListener((purchase)=>{
@@ -321,13 +323,13 @@ const  filepath = RNFS.DocumentDirectoryPath+"/sampleImg.png"
                 // Alert.alert("Auto-renewable subscription is active") :
                 handleSubscription(subscriptions[0]?.productId) }}  
                 style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
-                disabled={(subscriptions.length <1 || loading) ? true : false}  
+                disabled={(subscriptions.length <1 || loading || checkingSubscriptions) ? true : false}  
               >
                 <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
               </TouchableOpacity>
               <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscriptions[0]?.localizedPrice} monthly</Text>
             </View> 
-            {(loading || checkingSubscriptions) && <ActivityIndicator size={'large'} color={'grey'} style={{marginTop:10}} />}
+            {( loading || checkingSubscriptions) && <ActivityIndicator size={'large'} color={'grey'} style={{marginTop:10}} />}
           </ScrollView>  
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
@@ -337,7 +339,7 @@ const  filepath = RNFS.DocumentDirectoryPath+"/sampleImg.png"
                 handlePurchase(products[0]?.productId) 
               }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
-              disabled={(products.length <1 || loading) ? true : false}    
+              disabled={(products.length <1 || loading || checkingSubscriptions) ? true : false}    
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>

@@ -10,46 +10,6 @@ import Messages
 
 @objc(MessagesManager)
 class MessagesManager: NSObject {
-  //
-  //  @objc
-  //  func constantsToExport() -> [AnyHashable : Any]! {
-  //    return ["initialString": "Hello REACT from native ios"]
-  //  }
-  //
-  //  private var textString = ""
-  //
-  //  @objc
-  //  func Sentence() {
-  //    textString = "Call me from React Native JS"
-  ////    print(textString)
-  //  }
-  //
-  //
-  //  @objc
-  //  func getInitialString(_ callback: RCTResponseSenderBlock) {
-  //    callback([textString])
-  //  }
-  //
-  //
-  //  @objc
-  //  func checkString(
-  //    _ resolve: RCTPromiseResolveBlock,
-  //    rejecter reject: RCTPromiseRejectBlock
-  //  ) -> Void {
-  //    print(textString)
-  //    if textString.isEmpty {
-  //      print("Yes")
-  ////      let error = NSError(domain: "", code: 200, userInfo: nil)
-  ////      reject("E_COUNT", "string cannot be empty", error)
-  //    } else {
-  //      print("No")
-  ////      textString = ""
-  ////      resolve("string was updated")
-  //    }
-  //  }
-  
-  
-  
   
   let messagesVC: MessagesViewController
   
@@ -236,3 +196,53 @@ class MessagesManager: NSObject {
   
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//  @objc
+//  func constantsToExport() -> [AnyHashable : Any]! {
+//    return ["initialString": "Hello REACT from native ios"]
+//  }
+//
+//  private var textString = ""
+//
+//  @objc
+//  func Sentence() {
+//    textString = "Call me from React Native JS"
+////    print(textString)
+//  }
+//
+//
+//  @objc
+//  func getInitialString(_ callback: RCTResponseSenderBlock) {
+//    callback([textString])
+//  }
+//
+//
+//  @objc
+//  func checkString(
+//    _ resolve: RCTPromiseResolveBlock,
+//    rejecter reject: RCTPromiseRejectBlock
+//  ) -> Void {
+//    print(textString)
+//    if textString.isEmpty {
+//      print("Yes")
+////      let error = NSError(domain: "", code: 200, userInfo: nil)
+////      reject("E_COUNT", "string cannot be empty", error)
+//    } else {
+//      print("No")
+////      textString = ""
+////      resolve("string was updated")
+//    }
+//  }
+

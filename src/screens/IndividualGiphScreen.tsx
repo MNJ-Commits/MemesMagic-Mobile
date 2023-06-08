@@ -28,8 +28,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [loader, setLoader] = useState<Boolean>(false)
     const [downloading, setDownloading] = useState<Boolean>(false)
     const [sharing, setSharing] = useState<Boolean>(false)
+    const [coping, setCoping] = useState<Boolean>(false)
     const [webp, setWebp] = useState<string>('')
-    const [fromURL, setFromURL] = useState<string>('')
     const [verifyPayment, setVerifyPayment] = useState<any>({})
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const [gifData, setGIFData] = useState<any>({})
@@ -65,7 +65,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     useEffect(()=>{
         if(gifData?.giphy){
             const textSting = gifData?.src2?.split("&w")[0]
-            setText(decodeURIComponent(textSting?.split("=")[1]))
+            setText(textSting ? decodeURIComponent(textSting?.split("=")[1]) : ""  )
         }
         else{
             // For custom render 
@@ -87,12 +87,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 console.log("webp");
             }
             else {
-                setFromURL(`http://18.143.157.105:3000${res[0].render}`) 
                 console.log("gif");
                 if(fileAction==="ShareCustomGif")
                     ShareCustomGif(`http://18.143.157.105:3000${res[0].render}`)
                 else if(fileAction==="DownloadCustomGif")
                     DownloadCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+                else if(fileAction==="CopyCustomGif")
+                    CopyCustomGif(`http://18.143.157.105:3000${res[0].render}`)
 
             }
             setLoader(false)
@@ -131,6 +132,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             'Content-Type': 'application/json', 
         }
 
+    // DOWNLOAD GIF'S
     const DownloadCustomGif  = async (remoteURL: string)=>{
 
         //Define path and directory to store files to
@@ -206,10 +208,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     }
 
  
-
-    // 1. Download   2. Share   3. Remove
+    // SHARE GIF'S
     const ShareCustomGif = (remoteURL: string) => {
-
+    
+        // 1. Download   2. Share   3. Remove
         let filePath: any;
         // Download
         RNFetchBlob.config({
@@ -240,9 +242,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         })
     }
 
-    // 1. Download   2. Share,
     const ShareGiphyGif=async ()=>{
-        
+      
+        // 1. Download   2. Share,
         setSharing(true)   
         let data: any;
         await RNFetchBlob.fetch('POST', 'http://18.143.157.105:3000/giphy/render',
@@ -274,19 +276,43 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             });
     }
 
-    // console.log('gifData: ', gifData);
-    // console.log('verifyPayment: ', verifyPayment);
-    // console.log('appleAccessToken: ', appleAccessToken);
- 
+
+    // COPY GIF'S
+    const CopyCustomGif = (remoteURL: string) => {
+
+        let filePath: any;
+        // Download
+        RNFetchBlob.config({
+            fileCache: true,
+            path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`
+        }).fetch('GET', remoteURL, header).then(async (resp:any) => {
+            filePath = await resp.path();
+            let data: any = await resp.base64();            
+            return data
+        }).then((base64Data:any) => {
+            // NativeModules.BetterClipboard.addBase64Image(base64Data);
+            setCoping(false)
+            // Remove from device's storage
+            RNFetchBlob.fs.unlink(filePath);
+        }).catch((error:any)=>{
+            setCoping(false)
+            // Remove from device's storage
+            RNFetchBlob.fs.unlink(filePath);
+            console.log("error: ",error);
+        })
+    }
     
     function isBlank(str: string) {
+        
         let string = str.trim()
         return ( !string || /^\s*$/.test(string) || /^\.*$/.test(string));
         // return (!string || /^\s*$/.test(string) || /^\.*$/.test(string) || !/^[a-zA-Z.\s]+$/.test(string));
     }
  
-
-
+    // console.log('gifData: ', gifData);
+    // console.log('verifyPayment: ', verifyPayment);
+    // console.log('appleAccessToken: ', appleAccessToken);
+ 
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
           {gifData.src &&  <KeyboardAvoidingView
@@ -337,29 +363,43 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue(gifData.height/3) }}/>}
                     </>
                   
-
                     {/* Copy/Download/Share */}
                     <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
-                            disabled = { !gifData.giphy && !fromURL ? true : false}
                             onPress={ ()=>{
-                              //  // navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                // if (verifyPayment?.subcription){
-                                //     gifData?.giphy ? ShareGiphyGif() : ShareCustomGif()
-                                // } else{
-                                //     navigation.navigate('SubscriptionScreen', gifData?.giphy ? {returnScreen : 'BannerScreen'}: {returnScreen : 'CustomScreen'})
-                                // }
+                                // if(isBlank(text)){
+                                //     Alert.alert("You must enter text to proceed")
+                                // } else if(text.length<2){
+                                //     Alert.alert("Please enter more text" )
+                                // } else if (verifyPayment?.subcription){
+                                //     gifData?.giphy ? DownloadGiphyGif() : 
+                                //     // For custom .GIF download
+                                    setCoping(true)
+                                    setFileAction("CopyCustomGif");
+                                    renderRenderById.mutate({ 
+                                        "HQ": true,
+                                        "animated_sequence": true,
+                                        "render_format": "gif",
+                                        "uids": [ gifData.uid ], 
+                                        text:[text],
+                                    }) 
+                            //     } else{
+                            //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                            //    }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
                             <CopyIcon width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
                             onPress={ ()=>{
-                                    if(isBlank(text)){
-                                        Alert.alert("You must enter text to proceed")
-                                    } else if (verifyPayment?.subcription){
-                                        gifData?.giphy ? DownloadGiphyGif() : 
-                                        // For custom .GIF download
+                                    // if(isBlank(text)){
+                                    //     Alert.alert("You must enter text to proceed")
+                                    // else if(text.length<2){
+                                    //     Alert.alert("Please enter more text" )
+                                    // } 
+                                    // } else if (verifyPayment?.subcription){
+                                    //     gifData?.giphy ? DownloadGiphyGif() : 
+                                    //     // For custom .GIF download
                                         setDownloading(true)
                                         setFileAction("DownloadCustomGif");
                                         renderRenderById.mutate({ 
@@ -369,9 +409,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "uids": [ gifData.uid ], 
                                             text:[text],
                                         }) 
-                                    } else{
-                                       navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                   }
+                                //     } else{
+                                //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                //    }
                                 }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -380,7 +420,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             onPress={ ()=>{
                                 if(isBlank(text)){
                                     Alert.alert("You must enter text to proceed")
-                                } else if (verifyPayment?.subcription){
+                                }
+                                else if(text.length<2){
+                                    Alert.alert("Please enter more text" )
+                                }  
+                                else if (verifyPayment?.subcription){
                                     gifData?.giphy ? ShareGiphyGif() 
                                     :         
                                     // For custom .GIF download
@@ -409,6 +453,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
                             : sharing ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
+                            : coping ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Coping...</Text>
                             : null
                         }
                     </View>
@@ -445,7 +491,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 }) 
                             }
                         }} >
-                            {/* <RightTick width={RFValue(20)} height={RFValue(20)} /> */}
                             {loader ?
                                 <ActivityIndicator size={'small'} />
                                 :

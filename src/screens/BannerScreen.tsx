@@ -99,6 +99,7 @@ const BannerScreen = ({navigation}:any) => {
 
   useEffect(()=>{
     setLoader(false)
+    setText("")
   },[])
 
   useEffect(()=>{

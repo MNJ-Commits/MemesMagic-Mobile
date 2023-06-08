@@ -33,7 +33,6 @@
 		80DF56FB29CD8C9E0014E737 /* MessagesEventEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56FA29CD8C9E0014E737 /* MessagesEventEmitter.swift */; };
 		80DF56FD29CD8D2B0014E737 /* MessagesEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56FC29CD8D2B0014E737 /* MessagesEventEmitter.m */; };
 		80DF56FF29CD8DAE0014E737 /* ModuleInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DF56FE29CD8DAE0014E737 /* ModuleInitializer.swift */; };
-		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		873651DE4747E9349D2600CA /* libPods-MessagesExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A59E14C6ED312DC2640AAE0 /* libPods-MessagesExtension.a */; };
 		8924F1D5F4AC4B15B3EB5D52 /* Arial Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 52FF8B0624CA466188927AB6 /* Arial Black.ttf */; };
 		96E3544C26A752E20019AD0E /* Messages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96E3544B26A752E20019AD0E /* Messages.framework */; };
@@ -147,7 +146,6 @@
 		80DF56FA29CD8C9E0014E737 /* MessagesEventEmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesEventEmitter.swift; sourceTree = "<group>"; };
 		80DF56FC29CD8D2B0014E737 /* MessagesEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessagesEventEmitter.m; sourceTree = "<group>"; };
 		80DF56FE29CD8DAE0014E737 /* ModuleInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleInitializer.swift; sourceTree = "<group>"; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = InputDemoApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		82052135BD3D48148512DD4B /* Calibri Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Calibri Light.ttf"; path = "../src/assets/fonts/Calibri Light.ttf"; sourceTree = "<group>"; };
 		8BCC7D2981E14A489D057876 /* cibola.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = cibola.ttf; path = ../src/assets/fonts/cibola.ttf; sourceTree = "<group>"; };
 		96E3544A26A752E20019AD0E /* MessagesExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MessagesExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,7 +221,6 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
-				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
 			name = InputDemoApp;
@@ -484,7 +481,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				8924F1D5F4AC4B15B3EB5D52 /* Arial Black.ttf in Resources */,
 				09ED6DC4CF954401A30161FC /* Arial.ttf in Resources */,
@@ -523,7 +519,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
@@ -531,7 +527,7 @@
 			name = "Bundle React Native code and images";
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nexport NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
@@ -651,7 +647,7 @@
 		};
 		B0E8007484FC410032AE756E /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
@@ -661,7 +657,7 @@
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp/Pods-InputDemoApp-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-InputDemoApp/Pods-InputDemoApp-resources.sh\"\n";
 			showEnvVarsInLog = 0;
