@@ -25,6 +25,7 @@ import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPayme
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
     
     const [text, setText] = useState<string>('')
+    const [textCheck, setTextCheck] = useState<Boolean>(true)
     const [loader, setLoader] = useState<Boolean>(false)
     const [downloading, setDownloading] = useState<Boolean>(false)
     const [sharing, setSharing] = useState<Boolean>(false)
@@ -65,6 +66,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     useEffect(()=>{
         if(gifData?.giphy){
             const textSting = gifData?.src2?.split("&w")[0]
+            setTextCheck( textSting ? false : true)
             setText(textSting ? decodeURIComponent(textSting?.split("=")[1]) : ""  )
         }
         else{
@@ -76,6 +78,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 "uids": [ gifData.uid ],
                 text:[gifData?.defaultText]
             })
+            setTextCheck( gifData.defaultText ? false : true)
             setText(gifData.defaultText)
         }
     },[gifData])
@@ -83,6 +86,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const renderRenderById: any = usePostCustomRenders({
         onSuccess(res) { 
             if(res[0].render.includes('.webp')){
+                setTextCheck(false)
                 setWebp(`http://18.143.157.105:3000${res[0].render}`) 
                 console.log("webp");
             }
@@ -150,12 +154,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
         let response = await downloadFile(options);
         return response.promise.then(async (res: any) => {
-            setDownloading(false)
             console.log('res: ', res, filePath);    
              // TO SAVE GIF'S TO IOS PHOTO 
             await CameraRoll.save(remoteURL).then((res:any)=>{
+                setDownloading(false)
                 console.log('res: ', res);
             }).catch((error:any)=>{
+                setDownloading(false)
                 console.log('error: ', error);
             })
         }).catch((error:any)=>{
@@ -184,6 +189,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         .then((writeFileReposne)=> {
                             console.log('writeFileReposne: ', writeFileReposne);
                         }).catch((writeFile:any)=>{
+                            setDownloading(false)
                             console.log('writeFile error: ',writeFile) 
                         })
                         console.log('filePath: ', filePath);
@@ -312,6 +318,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // console.log('gifData: ', gifData);
     // console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
+ console.log("textCheck: ", textCheck);
  
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
@@ -366,42 +373,48 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     {/* Copy/Download/Share */}
                     <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
-                            onPress={ ()=>{
-                                // if(isBlank(text)){
-                                //     Alert.alert("You must enter text to proceed")
-                                // } else if(text.length<2){
-                                //     Alert.alert("Please enter more text" )
-                                // } else if (verifyPayment?.subcription){
-                                //     gifData?.giphy ? DownloadGiphyGif() : 
-                                //     // For custom .GIF download
-                                    setCoping(true)
-                                    setFileAction("CopyCustomGif");
-                                    renderRenderById.mutate({ 
-                                        "HQ": true,
-                                        "animated_sequence": true,
-                                        "render_format": "gif",
-                                        "uids": [ gifData.uid ], 
-                                        text:[text],
-                                    }) 
-                            //     } else{
-                            //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                            //    }
-                            }}
+                            // onPress={ ()=>{
+                            //     // if(isBlank(text)){
+                            //     //     Alert.alert("You must enter text to proceed")
+                            //     // } else if(text.length<2){
+                            //     //     Alert.alert("Please enter more text" )
+                            //     // } else if (verifyPayment?.subcription){
+                            //     //     gifData?.giphy ? DownloadGiphyGif() : 
+                            //     //     // For custom .GIF download
+                            //         setCoping(true)
+                            //         setFileAction("CopyCustomGif");
+                            //         setTextCheck( textSting ? false : true)
+                            //         renderRenderById.mutate({ 
+                            //             "HQ": true,
+                            //             "animated_sequence": true,
+                            //             "render_format": "gif",
+                            //             "uids": [ gifData.uid ], 
+                            //             text:[text],
+                            //         }) 
+                            // //     } else{
+                            // //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                            // //    }
+                            // }}
                             style={{alignSelf:'center', margin:20 }} >
                             <CopyIcon width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
                         <TouchableOpacity 
                             onPress={ ()=>{
-                                    // if(isBlank(text)){
-                                    //     Alert.alert("You must enter text to proceed")
-                                    // else if(text.length<2){
-                                    //     Alert.alert("Please enter more text" )
-                                    // } 
-                                    // } else if (verifyPayment?.subcription){
-                                    //     gifData?.giphy ? DownloadGiphyGif() : 
-                                    //     // For custom .GIF download
+                                    if(isBlank(text)){
+                                        Alert.alert("You must enter text to proceed")
+                                    }
+                                    else if(textCheck){
+                                        Alert.alert("You must render text to proceed")
+                                    }
+                                    else if(text.length<2){
+                                        Alert.alert("Please enter more text" )
+                                    } 
+                                    else if (verifyPayment?.subcription){
+                                        gifData?.giphy ? DownloadGiphyGif() : 
+                                        // For custom .GIF download
                                         setDownloading(true)
                                         setFileAction("DownloadCustomGif");
+                                        setTextCheck( textSting ? false : true)
                                         renderRenderById.mutate({ 
                                             "HQ": true,
                                             "animated_sequence": true,
@@ -409,9 +422,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "uids": [ gifData.uid ], 
                                             text:[text],
                                         }) 
-                                //     } else{
-                                //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                                //    }
+                                    } 
+                                    else{
+                                       navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
+                                    }
                                 }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -420,6 +434,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             onPress={ ()=>{
                                 if(isBlank(text)){
                                     Alert.alert("You must enter text to proceed")
+                                }
+                                else if(textCheck){
+                                    Alert.alert("You must render text to proceed")
                                 }
                                 else if(text.length<2){
                                     Alert.alert("Please enter more text" )
@@ -430,6 +447,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     // For custom .GIF download
                                     setSharing(true)
                                     setFileAction("ShareCustomGif");
+                                    setTextCheck( textSting ? false : true)
                                     renderRenderById.mutate({ 
                                         "HQ": true,
                                         "animated_sequence": true,
@@ -437,7 +455,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         "uids": [ gifData.uid ], 
                                         text:[text],
                                     }) 
-                                } else{
+                                } 
+                                else{
                                     navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
                                 }
                             }}
@@ -466,7 +485,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             placeholderTextColor={'#25282D'}
                             showSoftInputOnFocus={true}
                             onSubmitEditing={() => { }}
-                            onChangeText={(e: any) => { setText(e) }}
+                            onChangeText={(e: any) => { setText(e);  setTextCheck(true) }}
                             placeholder={'Your text here'}
                             value={ text }
                             style= {{ 
