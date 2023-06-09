@@ -9,6 +9,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import AppFlatlist from '../components/AppFlatlist';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CustomScreen = ({navigation, route}:any) => {
  
@@ -18,12 +19,14 @@ const CustomScreen = ({navigation, route}:any) => {
   const [tag, setTag] = useState<string>('')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)
+  const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)
   const [showScreen, setShowScreen] = useState<Boolean>(false)
 
   const getCustomTemplates: any = useGetCustomTemplates(tag,{
     onSuccess: (res: any) => {
       // console.log('res: ', res);      
-      setLoader(false)
+      setRefreshLoader(false)
+      // setLoader(false)
       setAllGIF(res) 
       const uids = res?.map((items: any) => {
         return  items.uid
@@ -37,7 +40,8 @@ const CustomScreen = ({navigation, route}:any) => {
     onSuccess(res) { 
       // console.log('res: ', res);
       setAllGIF(res) 
-      setLoader(false)
+      setRefreshLoader(false)
+      // setLoader(false)
     },
     onError(error) {
       console.log('getCustomRenders error: ', error);
@@ -45,6 +49,7 @@ const CustomScreen = ({navigation, route}:any) => {
   });  
 
   const refresh = () => {
+    setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]);    
     if(text.length!=0){
@@ -55,10 +60,10 @@ const CustomScreen = ({navigation, route}:any) => {
     }
   };
   
-  useEffect(()=>{
-    setLoader(false)
-    setText('')
-  },[])  
+  // useEffect(()=>{
+  //   setLoader(false)
+  //   setText('')
+  // },[])  
 
   useEffect(()=>{
     getCustomTemplates.refetch()
@@ -77,6 +82,13 @@ const CustomScreen = ({navigation, route}:any) => {
   setTimeout(() => {
     setShowScreen(true) 
   }, 2000);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh()
+    }, []),
+  );
+
 
   return (
     <>
@@ -121,11 +133,13 @@ const CustomScreen = ({navigation, route}:any) => {
                   <TextInput
                     editable={true}
                     placeholderTextColor={'#ffffff'}
-                    onChangeText={(e: any) => { setTag(e) }}
+                    // onChangeText={(e: any) => { setTag(e) }}
                     placeholder={'Search'}
                     returnKeyType= {'search'}
                     onSubmitEditing ={ (e)=>{
-                        Keyboard.dismiss()
+                      setLoader(true)
+                      setTag(e?.nativeEvent?.text)
+                      Keyboard.dismiss()
                     }}
                     style= {{ 
                       fontSize: RFValue(15),
@@ -175,8 +189,8 @@ const CustomScreen = ({navigation, route}:any) => {
               giphy={false}
               refresh = {refresh}
               isLoader={loader}
-              response = {getCustomTemplates}
-              renderData = {getCustomRenders.data}
+              setLoader={setLoader}
+              refreshLoader={refreshLoader}
               text={text}
               navigation={navigation}
             />
@@ -202,15 +216,19 @@ const CustomScreen = ({navigation, route}:any) => {
             />
             <TouchableOpacity 
               onPress={()=> { 
+                setLoader(true)
                 Keyboard.dismiss()
-                refresh()
+                getCustomRenders.mutate({ 
+                  text:[text],
+                  "uids": UIDs,
+                })
               }}
             >
-            {loader ?
+            {/* {loader ?
               <ActivityIndicator size={'small'} />
-              :
+              : */}
               <RightTick width={RFValue(20)} height={RFValue(20)} />
-            }
+            {/* } */}
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>

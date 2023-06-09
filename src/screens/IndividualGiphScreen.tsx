@@ -19,6 +19,7 @@ import DownloadSvg from "../assets/svgs/download.svg";
 import { checkLibraryPermissions, requestLibraryPermissions } from '../utils/Permissions';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPaymentFromStorage } from '../store/asyncStorage';
+import { useFocusEffect } from '@react-navigation/native';
 
  
 
@@ -55,13 +56,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         })
         setAppleAccessToken(access_token) 
     }
-    useLayoutEffect( () => {
-        getter().catch((error:any)=>{
-        console.log('getter Error: ', error);
-        })
-        // console.log(authData ? authData : null);
-        // console.log('appleAccessToken: ', appleAccessToken);
-    }, [])
+
+    useFocusEffect(
+        React.useCallback(() => {
+          getter().catch((error:any)=>{
+          console.log('getter Error: ', error);
+          })
+        }, []),
+      );
+
+    // useLayoutEffect( () => {
+    //     getter().catch((error:any)=>{
+    //     console.log('getter Error: ', error);
+    //     })
+    //     // console.log(authData ? authData : null);
+    //     // console.log('appleAccessToken: ', appleAccessToken);
+    // }, [])
     
     useEffect(()=>{
         if(gifData?.giphy){
@@ -316,9 +326,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     }
  
     // console.log('gifData: ', gifData);
-    // console.log('verifyPayment: ', verifyPayment);
+    console.log('verifyPayment: ', verifyPayment);
     // console.log('appleAccessToken: ', appleAccessToken);
- console.log("textCheck: ", textCheck);
+    //  console.log("text.length: ", text.length);
  
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
@@ -403,7 +413,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     if(isBlank(text)){
                                         Alert.alert("You must enter text to proceed")
                                     }
-                                    else if(textCheck){
+                                    else if(textCheck && !gifData.giphy){
                                         Alert.alert("You must render text to proceed")
                                     }
                                     else if(text.length<2){
@@ -435,7 +445,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 if(isBlank(text)){
                                     Alert.alert("You must enter text to proceed")
                                 }
-                                else if(textCheck){
+                                else if(textCheck && !gifData.giphy){
                                     Alert.alert("You must render text to proceed")
                                 }
                                 else if(text.length<2){
@@ -498,8 +508,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             color:'#000000',
                             }}            
                         />
+                        {!gifData.giphy &&
                         <TouchableOpacity onPress={()=> { 
-                            if(!gifData.giphy){
                                 setLoader(true); 
                                 Keyboard.dismiss()
                                 renderRenderById.mutate({ 
@@ -508,7 +518,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     "animated_sequence": true,
                                     "uids": [ gifData.uid ], 
                                 }) 
-                            }
+                         
                         }} >
                             {loader ?
                                 <ActivityIndicator size={'small'} />
@@ -516,6 +526,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 <RightTick width={RFValue(20)} height={RFValue(20)} />
                             }
                         </TouchableOpacity>
+                        }
                     </View> 
                 </ScrollView>
             </KeyboardAvoidingView>}

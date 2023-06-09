@@ -234,8 +234,18 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       if (purchaseType.length==0)
         Alert.alert("Payments Alert", "No Payment record found")
       else if(restore)
-        Alert.alert("Payments Alert", "Payments restored successfully")
-
+      Alert.alert("Payments Alert", "Payments restored successfully",
+        [
+          {text: 'Ok', onPress: () => {      
+            navigation.canGoBack() ? navigation.pop() :
+            returnScreen ? navigation.push(returnScreen) :
+            navigation.push('CustomScreen')
+          }},
+        ],
+        { 
+          cancelable: true 
+        }
+      )
     })
     .catch((validationError)=>{ 
       setLoading(false)

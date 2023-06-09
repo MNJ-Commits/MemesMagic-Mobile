@@ -5,8 +5,10 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 
-  const AppFlatlist = ({data, giphy, refresh, isLoader, response, renderData, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
-      
+  const AppFlatlist = ({data, giphy, refresh, isLoader, setLoader, refreshLoader, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+    
+    console.log("isLoader: ", isLoader);
+    
   return (
     <MasonryList
       data={data}
@@ -14,8 +16,8 @@ import { useFocusEffect } from '@react-navigation/native';
       keyExtractor={(item: { id: string; }): string => item.id}
       keyboardDismissMode={"on-drag"}
       refreshControlProps={{ title:'Loading...', titleColor:'#7C7E81', tintColor:'transparent',  }}
-      refreshing={response?.isFetching || isLoader}
-      loading={response?.isFetching || isLoader }
+      refreshing={refreshLoader}
+      loading={refreshLoader }
       LoadingView={
         <Image
           source={require('../assets/gifs/loader.gif')}
@@ -36,8 +38,10 @@ import { useFocusEffect } from '@react-navigation/native';
         textStroke={textStroke} 
         color={color} 
         font={font} 
-        renderData={renderData}     // disables individual Gif open without text
-        navigation={navigation} />
+        navigation={navigation}
+        setLoader={setLoader}
+        loader={isLoader}
+        />
       }
     />
   )}
@@ -45,7 +49,7 @@ import { useFocusEffect } from '@react-navigation/native';
 export default AppFlatlist
 
 
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader}:any)=>{
   
 
   const [appleAccessToken, setAppleAccessToken] = useState<string>('')
@@ -103,12 +107,15 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
           key={item.index}
           source={{ uri: customURI }}
           resizeMode={'contain'}
+          onLoadEnd={()=>setLoader(false)}
           style={{ 
+            zIndex: -1, 
             width:'100%', 
             height: RFValue(150/width*height),
             borderRadius:RFValue(10),   
           }}
         />
+          {(loader && !giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
         {
           giphy && 
             <Image 
@@ -120,6 +127,8 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
                       }
                     : {  uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }}
               resizeMode={'contain'}
+              onLoadStart={()=>setLoader(true)}
+              onLoadEnd={()=>setLoader(false)}
               style={{
                 width:'100%', 
                 height:RFValue(150/width*height), 
@@ -128,7 +137,8 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               }}
             />
           }
-          <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+        {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
+       {(loader && giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
       </>
 
     </TouchableOpacity>

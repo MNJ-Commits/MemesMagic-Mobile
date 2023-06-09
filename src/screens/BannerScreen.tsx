@@ -22,6 +22,7 @@ import { AppModal } from '../components/AppModal';
 import { Fonts } from '../utils/Fonts';
 import { Colors } from '../utils/colors';
 import { useGetBannerSearch } from '../hooks/useGetBannerSearch';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const BannerScreen = ({navigation}:any) => {
@@ -34,14 +35,15 @@ const BannerScreen = ({navigation}:any) => {
   const [fontsArray, setFontsArray] = useState<string[]>([])  
   const [text, setText] = useState<string>("")
   const [query, setQuery] = useState<string>("")
-  const [loader, setLoader] = useState<Boolean>(true)
+  const [loader, setLoader] = useState<Boolean>(false)
+  const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
 
   const getBannerTemplates: any = useGetBannerTemplates({
     onSuccess: (res: any) => {
-      setLoader(false)
+      setRefreshLoader(false)
       setAllGIF(res) 
     },
     onError: (res: any) => console.log('onError: ',res),
@@ -49,6 +51,7 @@ const BannerScreen = ({navigation}:any) => {
 
   const getBannerSearch: any = useGetBannerSearch(query,{
     onSuccess: (res: any) => { 
+      setRefreshLoader(false)
       setLoader(false)
       setAllGIF(res) 
     },
@@ -70,7 +73,7 @@ const BannerScreen = ({navigation}:any) => {
 
   const refresh = () => {
     setAllGIF([]); 
-    setLoader(true)   
+    setRefreshLoader(true)   
     getBannerTemplates.refetch()
   };
   
@@ -96,12 +99,7 @@ const BannerScreen = ({navigation}:any) => {
     {fontname:"Rounds Black", fontFamily:"Rounds Black", fontFile: `${encodeURIComponent("Rounds Black.otf")}`}, 
     // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:"SF-Pro-Text-Regular.otf"}, 
   ]
-
-  useEffect(()=>{
-    setLoader(false)
-    setText("")
-  },[])
-
+  
   useEffect(()=>{
     if (query)
       getBannerSearch.refetch()
@@ -109,6 +107,13 @@ const BannerScreen = ({navigation}:any) => {
  
   const searchInput: any = useRef()
 
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh()
+    }, []),
+  );
+
+  
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
       <KeyboardAvoidingView
@@ -157,6 +162,7 @@ const BannerScreen = ({navigation}:any) => {
                 placeholder={'Search'}
                 returnKeyType= {'search'}
                   onSubmitEditing ={ (e)=>{
+                    setLoader(true)
                     setQuery(e?.nativeEvent?.text)
                     Keyboard.dismiss()
                   }}
@@ -225,7 +231,8 @@ const BannerScreen = ({navigation}:any) => {
           giphy={true}
           refresh = {refresh}
           isLoader = {loader}
-          response = {getBannerTemplates }
+          setLoader = {setLoader}
+          refreshLoader={refreshLoader}
           navigation={navigation}
           text={text}
           textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
@@ -256,7 +263,7 @@ const BannerScreen = ({navigation}:any) => {
               color:'#000000',  
             }}          
           />
-          <TouchableOpacity 
+          {/* <TouchableOpacity 
             onPress={()=> {
               setLoader(true);
               Keyboard.dismiss()
@@ -268,7 +275,7 @@ const BannerScreen = ({navigation}:any) => {
               :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
             }
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </KeyboardAvoidingView>
       
