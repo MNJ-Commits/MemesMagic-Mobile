@@ -11,7 +11,10 @@ const useGetBannerSearchRequest = async<T>(query: string)=>{
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
       }
     )        
-    const data = await response?.json()    
+    console.log("response: ", response); 
+    const data = await response?.json()  
+    
+    console.log(data?.data);
     return data?.data
   } catch (err: any) {
     throw new Error(err.response.data.message);

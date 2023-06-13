@@ -29,6 +29,7 @@ import { openLink } from '../utils/openLink';
 const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
+  const getCustomRenders = route.params?.getCustomRenders
   // console.log('route.params: ',route.params);
 
   const [isVisibleModal, setVisibleModal] = useState(false);
@@ -229,23 +230,28 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         setVerifyPayments({ one_time: false, subcription: false })
         Alert.alert("Purchase Alert", "Your have no active payments")
       }
+
       setLoading(false)
+      if (returnScreen !== "IndividualGiphScreen")
+        getCustomRenders.refetch()
       
       if (purchaseType.length==0)
         Alert.alert("Payments Alert", "No Payment record found")
       else if(restore)
-      Alert.alert("Payments Alert", "Payments restored successfully",
-        [
-          {text: 'Ok', onPress: () => {      
-            navigation.canGoBack() ? navigation.pop() :
-            returnScreen ? navigation.push(returnScreen) :
-            navigation.push('CustomScreen')
-          }},
-        ],
-        { 
-          cancelable: true 
+        {
+          Alert.alert("Payments Alert", "Payments restored successfully",
+            [
+              {text: 'Ok', onPress: () => {      
+                navigation.canGoBack() ? navigation.pop() :
+                returnScreen ? navigation.push(returnScreen) :
+                navigation.push('CustomScreen')
+              }},
+            ],
+            // { 
+            //   cancelable: true 
+            // }
+          )
         }
-      )
     })
     .catch((validationError)=>{ 
       setLoading(false)

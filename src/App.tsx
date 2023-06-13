@@ -19,7 +19,7 @@ const queryClient = new QueryClient()
 
 const App = ({route}:any) => {
 
-  console.log('route: ', route);
+  // console.log('route: ', route);
   
   return (
       <QueryClientProvider client={queryClient}>

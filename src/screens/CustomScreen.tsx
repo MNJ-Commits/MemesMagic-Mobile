@@ -51,7 +51,9 @@ const CustomScreen = ({navigation, route}:any) => {
   const refresh = () => {
     setRefreshLoader(true)
     setLoader(true)
-    setAllGIF([]);    
+    setAllGIF([]); 
+    console.log("text: ",text);
+       
     if(text.length!=0){
       getCustomRenders.mutate({ text:[text], "uids": UIDs})
     }
@@ -83,11 +85,11 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 2000);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refresh()
-    }, []),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refresh()
+  //   }, []),
+  // );
 
 
   return (
@@ -117,7 +119,7 @@ const CustomScreen = ({navigation, route}:any) => {
               <TouchableOpacity>
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})}} >
+              <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', getCustomRenders: getCustomRenders})}} >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
             </View>

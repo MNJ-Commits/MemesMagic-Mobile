@@ -7,7 +7,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
   const AppFlatlist = ({data, giphy, refresh, isLoader, setLoader, refreshLoader, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
     
-    console.log("isLoader: ", isLoader);
     
   return (
     <MasonryList
@@ -92,11 +91,11 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
       onPress={()=>{
         if(giphy)
           {
-            storeIndividualGifData({src:customURI, width:width, height:height, giphy: giphy, src2: BannerURI, returnScreen:'BannerScreen'});
+            storeIndividualGifData({src:customURI, width:width, height:height, giphy: giphy, src2: BannerURI });
             navigation.navigate( 'IndividualGiphScreen')
           }
         else{
-          storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text, returnScreen:'CustomScreen'});
+          storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text });
           navigation.navigate( 'IndividualGiphScreen')
         }
       }} 

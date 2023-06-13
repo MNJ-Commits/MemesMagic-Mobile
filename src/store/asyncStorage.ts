@@ -52,7 +52,7 @@ export const storeVerifyPayment = async (data: { one_time?: boolean; subcription
       console.log( 'storeVerifyPayment error: ',error);
     }
   };
-export const storeIndividualGifData = async (data: {src: string, width: number, height: number, uid?:number, defaultText?:string, giphy?: boolean, src2?: string, returnScreen: string}) => {
+export const storeIndividualGifData = async (data: {src: string, width: number, height: number, uid?:number, defaultText?:string, giphy?: boolean, src2?: string}) => {
     try {
       await AsyncStorage.setItem(individualGif, JSON.stringify(data));
     } catch (error) {

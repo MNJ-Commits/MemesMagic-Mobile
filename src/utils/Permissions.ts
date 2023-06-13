@@ -3,14 +3,14 @@ import { checkMultiple, PERMISSIONS, requestMultiple } from "react-native-permis
 export const checkLibraryPermissions = async ()=>{
   return new Promise<any>(async (resolve, reject) => {
     await checkMultiple([
+      // PERMISSIONS.IOS.MEDIA_LIBRARY,
         PERMISSIONS.IOS.PHOTO_LIBRARY,
-        PERMISSIONS.IOS.MEDIA_LIBRARY,
         PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
     ])
     .then((statuses:any) => {            
       // console.log('statuses: ', statuses);
+      // statuses[PERMISSIONS.IOS.MEDIA_LIBRARY]==='granted' && 
       if(statuses[PERMISSIONS.IOS.PHOTO_LIBRARY]==='granted' && 
-         statuses[PERMISSIONS.IOS.MEDIA_LIBRARY]==='granted' && 
          statuses[PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY]==='granted'){
         resolve(true)   // returns to .then in parent
       }
@@ -29,7 +29,7 @@ export const checkLibraryPermissions = async ()=>{
 export const requestLibraryPermissions = ()=>{
   
         requestMultiple([
-          PERMISSIONS.IOS.MEDIA_LIBRARY,
+          // PERMISSIONS.IOS.MEDIA_LIBRARY,
           PERMISSIONS.IOS.PHOTO_LIBRARY,
           PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
         ])

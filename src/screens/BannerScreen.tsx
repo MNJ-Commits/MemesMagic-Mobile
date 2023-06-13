@@ -46,7 +46,7 @@ const BannerScreen = ({navigation}:any) => {
       setRefreshLoader(false)
       setAllGIF(res) 
     },
-    onError: (res: any) => console.log('onError: ',res),
+    onError: (res: any) => console.log('getBannerTemplates onError: ',res),
   });
 
   const getBannerSearch: any = useGetBannerSearch(query,{
@@ -55,7 +55,7 @@ const BannerScreen = ({navigation}:any) => {
       setLoader(false)
       setAllGIF(res) 
     },
-    onError: (res: any) => console.log('onError: ',res),
+    onError: (res: any) => console.log('getBannerSearch onError: ',res),
   });
 
   const getFonts: any = useGetFonts({
@@ -101,17 +101,18 @@ const BannerScreen = ({navigation}:any) => {
   ]
   
   useEffect(()=>{
+    
     if (query)
       getBannerSearch.refetch()
   },[query])
  
   const searchInput: any = useRef()
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refresh()
-    }, []),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refresh()
+  //   }, []),
+  // );
 
   
   return (
