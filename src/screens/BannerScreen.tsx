@@ -72,9 +72,14 @@ const BannerScreen = ({navigation}:any) => {
   });
 
   const refresh = () => {
+
     setAllGIF([]); 
     setRefreshLoader(true)   
-    getBannerTemplates.refetch()
+
+    if(query.length!=0 )
+      getBannerSearch.refetch()
+    else
+      getBannerTemplates.refetch()
   };
   
   const staticFontsPair = [
@@ -102,8 +107,12 @@ const BannerScreen = ({navigation}:any) => {
   
   useEffect(()=>{
     
-    if (query)
+    setAllGIF([]); 
+    setRefreshLoader(true) 
+    if(query.length!=0 )
       getBannerSearch.refetch()
+    else
+      getBannerTemplates.refetch()
   },[query])
  
   const searchInput: any = useRef()
@@ -177,7 +186,7 @@ const BannerScreen = ({navigation}:any) => {
                 }}            
               />
             </View> 
-            <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} >
+            <TouchableOpacity onPress={()=> { setVisibleSearch(false); setQuery('')}} >
               <Text style={{fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
             </TouchableOpacity>
           </View>

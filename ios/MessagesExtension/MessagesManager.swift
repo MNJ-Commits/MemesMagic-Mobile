@@ -175,10 +175,8 @@ class MessagesManager: NSObject {
     return
   }
   
- 
+  
 
-  
-  
   
   //  @objc func openURL(_ urlString: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
   //    guard let url = URL(string: urlString) else {

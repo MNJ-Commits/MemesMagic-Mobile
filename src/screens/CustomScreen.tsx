@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, Linking, Alert, Animated, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -26,7 +26,6 @@ const CustomScreen = ({navigation, route}:any) => {
     onSuccess: (res: any) => {
       // console.log('res: ', res);      
       setRefreshLoader(false)
-      // setLoader(false)
       setAllGIF(res) 
       const uids = res?.map((items: any) => {
         return  items.uid
@@ -41,7 +40,6 @@ const CustomScreen = ({navigation, route}:any) => {
       // console.log('res: ', res);
       setAllGIF(res) 
       setRefreshLoader(false)
-      // setLoader(false)
     },
     onError(error) {
       console.log('getCustomRenders error: ', error);
@@ -49,25 +47,24 @@ const CustomScreen = ({navigation, route}:any) => {
   });  
 
   const refresh = () => {
+    
     setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]); 
-    console.log("text: ",text);
+    console.log("text: ",tag);
        
-    if(text.length!=0){
+    if(text.length!=0 ){
       getCustomRenders.mutate({ text:[text], "uids": UIDs})
     }
     else{
       getCustomTemplates.refetch()
     }
   };
-  
-  // useEffect(()=>{
-  //   setLoader(false)
-  //   setText('')
-  // },[])  
 
   useEffect(()=>{
+
+    setRefreshLoader(true)
+    setLoader(true)
     getCustomTemplates.refetch()
   },[tag])  
 
@@ -85,13 +82,12 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 2000);
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
-
-
+  const { MessagesManager } = NativeModules;
+  // console.log(" MessagesManager: ",  NativeModules);
+  const CopyClipboard = ()=>{
+  
+    
+  }
   return (
     <>
       {showScreen ? 
@@ -153,37 +149,41 @@ const CustomScreen = ({navigation, route}:any) => {
                     }}            
                   />
                 </View> 
-                <TouchableOpacity onPress={()=> { setVisibleSearch(false); setTag('') }} >
+                <TouchableOpacity onPress={()=> {setTag(''); setVisibleSearch(false) }} >
                   <Text style={{ fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
                 </TouchableOpacity>
               </View> 
                 :
-                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',}} >
-                  <TouchableOpacity onPress={()=>setVisibleSearch(true)} style={{borderWidth:1, borderColor:"#ffffff", width:RFValue(35), height:RFValue(35), padding:RFValue(6), borderRadius:RFValue(20), marginRight:RFValue(10) }}  >
-                    <Search width={RFValue(20)} height={RFValue(20)} />
-                  </TouchableOpacity> 
-                  <ScrollView 
-                    horizontal={true} 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor:'#FF439E' }} >
-                  {
-                    // ['Random', 'TV', 'Movies', 'Sports', 'Screens']
-                    ["Crowd", "Banner", "Stage", "Cardboard", "Surprised", "Ironman", "Painting", "Tony Stark", "Car", "Road", "Crash", "Board", "Siblings", "Pencil", "Table", "The Office", "Rock", "call", "Notice Board", "Sticky Note", "Check", "Nurse", "Laser", "Road Sign"].map((data:string, index: number)=>{
-                    return(
-                        <TouchableOpacity 
-                          onPress={()=>{ 
-                            if(data==tag){setTag('')} 
-                            else{ setTag(data); setLoader(true);} }} 
-                            key={index} 
-                            style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
-                          <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(11), paddingTop:RFValue(8), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
-                        </TouchableOpacity>
-                      )})
-                    }
-                  </ScrollView>
-                </View>
+              <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',}} >
+                <TouchableOpacity onPress={()=>setVisibleSearch(true)} style={{borderWidth:1, borderColor:"#ffffff", width:RFValue(35), height:RFValue(35), padding:RFValue(6), borderRadius:RFValue(20), marginRight:RFValue(10) }}  >
+                  <Search width={RFValue(20)} height={RFValue(20)} />
+                </TouchableOpacity> 
+                <ScrollView 
+                  horizontal={true} 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor:'#FF439E' }} >
+                {
+                  // ['Random', 'TV', 'Movies', 'Sports', 'Screens']
+                  ["Crowd", "Banner", "Stage", "Cardboard", "Surprised", "Ironman", "Painting", "Tony Stark", "Car", "Road", "Crash", "Board", "Siblings", "Pencil", "Table", "The Office", "Rock", "call", "Notice Board", "Sticky Note", "Check", "Nurse", "Laser", "Road Sign"].map((data:string, index: number)=>{
+                  return(
+                      <TouchableOpacity 
+                        onPress={()=>{ 
+                          if(data==tag){setTag('')} 
+                          else{ setTag(data); setLoader(true);} }} 
+                          key={index} 
+                          style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
+                        <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(11), paddingTop:RFValue(8), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
+                      </TouchableOpacity>
+                    )})
+                  }
+                </ScrollView>
+              </View>
             }
           </View>
+
+          {/* <TouchableOpacity onPress={()=> CopyClipboard()} >
+            <Text style={{color:"white", fontSize:14, textAlign:"center" }}>CopGif</Text>
+          </TouchableOpacity> */}
 
           {/* Grid View */}
             <AppFlatlist 

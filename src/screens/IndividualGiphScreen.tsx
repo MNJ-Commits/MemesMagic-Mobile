@@ -89,6 +89,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
    
     const renderRenderById: any = usePostCustomRenders({
         onSuccess(res) { 
+            console.log("res: ", res[0].render);
+            
             setTextCheck(false)
             if(res[0].render.includes('.webp')){
                 setWebp(`http://18.143.157.105:3000${res[0].render}`) 
@@ -117,15 +119,24 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     text ? BannerURI+=`?text=${encodeURIComponent(text)}&w`+textSting : gifData?.src2
 
     // Check Download Permissions to PHOTO'S Gallery
-    checkLibraryPermissions( ).then((resp:any)=>{
-        if(!resp){
-            // console.log('resp: ',resp);
-            requestLibraryPermissions()
-        }
-    }).catch((error:any)=>{
-        console.log('error resp: ', error);
-    })
-
+    const DownloadPermissions = ()=> {
+        checkLibraryPermissions( ).then((resp:any)=>{
+            setDownloading(true);  
+            renderRenderById.mutate({ 
+                "HQ": true,
+                "animated_sequence": true,
+                "render_format": "gif",
+                "uids": [ gifData.uid ], 
+                text:[text],
+            })      
+            if(!resp){
+                // console.log('resp: ',resp);
+                requestLibraryPermissions()
+            }
+        }).catch((error:any)=>{
+            console.log('error resp: ', error);
+        })
+    }
 
     // Date & Time as File Name
     var today = ""+new Date()
@@ -433,14 +444,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     gifData?.giphy ?
                                         DownloadGiphyGif() : 
                                         // For custom .GIF download
-                                        setDownloading(true);   setFileAction("RequestDownloadCustomGif");  setTextCheck( textSting ? false : true)
-                                        renderRenderById.mutate({ 
-                                            "HQ": true,
-                                            "animated_sequence": true,
-                                            "render_format": "gif",
-                                            "uids": [ gifData.uid ], 
-                                            text:[text],
-                                        })      
+                                        setFileAction("RequestDownloadCustomGif"); 
+                                        setTextCheck( textSting ? false : true)
+                                        DownloadPermissions()
                                     } 
                                     else{
                                             StoreIndividualGif()

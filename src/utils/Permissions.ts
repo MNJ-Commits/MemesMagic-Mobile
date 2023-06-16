@@ -34,7 +34,7 @@ export const requestLibraryPermissions = ()=>{
           PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
         ])
         .then((requestMultipleReponse:any) => {        
-          console.log('requestMultipleReponse: ', requestMultipleReponse);        
+          // console.log('requestMultipleReponse: ', requestMultipleReponse);        
         })
         .catch((requestMultipleError)=>{
           console.log('requestMultipleError: ', requestMultipleError);
