@@ -8,7 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* InputDemoAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* InputDemoAppTests.m */; };
-		04E0461D2A39918A00B421A0 /* Clipboard.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E0461C2A39918A00B421A0 /* Clipboard.m */; };
+		04AC14E72A3C6DBE00E0151C /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AC14E62A3C6DBE00E0151C /* ClipboardManager.swift */; };
+		04AC14E92A3C867F00E0151C /* ClipboardManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AC14E82A3C867F00E0151C /* ClipboardManager.m */; };
 		09ED6DC4CF954401A30161FC /* Arial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC7AA956B80E45A5BAC4FD68 /* Arial.ttf */; };
 		1005289CC1BF4A76A8BC9E47 /* Calibri Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21AF78D1F57E418DB5811CFE /* Calibri Italic.ttf */; };
 		12A7D2E938474D03B8269DB5 /* Helvetica.ttc in Resources */ = {isa = PBXBuildFile; fileRef = 57B4F5C3DFC1479E89DDCC70 /* Helvetica.ttc */; };
@@ -84,8 +85,9 @@
 		00E356EE1AD99517003FC87E /* InputDemoAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InputDemoAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* InputDemoAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InputDemoAppTests.m; sourceTree = "<group>"; };
-		04E0461B2A39913200B421A0 /* Clipboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Clipboard.h; sourceTree = "<group>"; };
-		04E0461C2A39918A00B421A0 /* Clipboard.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Clipboard.m; sourceTree = "<group>"; };
+		04AC14E52A3C6DBE00E0151C /* InputDemoApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "InputDemoApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		04AC14E62A3C6DBE00E0151C /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
+		04AC14E82A3C867F00E0151C /* ClipboardManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ClipboardManager.m; sourceTree = "<group>"; };
 		0613DA8F741444D3ACAFF329 /* Lazer84.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Lazer84.ttf; path = ../src/assets/fonts/Lazer84.ttf; sourceTree = "<group>"; };
 		11043BC120ED48D0A10F35B6 /* Calibri Bold Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Calibri Bold Italic.ttf"; path = "../src/assets/fonts/Calibri Bold Italic.ttf"; sourceTree = "<group>"; };
 		12617D4F6E4DC2E016EB82FD /* libPods-InputDemoApp-InputDemoAppTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-InputDemoApp-InputDemoAppTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -225,8 +227,9 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				04E0461B2A39913200B421A0 /* Clipboard.h */,
-				04E0461C2A39918A00B421A0 /* Clipboard.m */,
+				04AC14E62A3C6DBE00E0151C /* ClipboardManager.swift */,
+				04AC14E82A3C867F00E0151C /* ClipboardManager.m */,
+				04AC14E52A3C6DBE00E0151C /* InputDemoApp-Bridging-Header.h */,
 			);
 			name = InputDemoApp;
 			sourceTree = "<group>";
@@ -447,7 +450,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1430;
 					};
 					96E3544926A752E20019AD0E = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -723,8 +726,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04E0461D2A39918A00B421A0 /* Clipboard.m in Sources */,
+				04AC14E92A3C867F00E0151C /* ClipboardManager.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				04AC14E72A3C6DBE00E0151C /* ClipboardManager.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -763,6 +767,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 66B4CB1C31875E6284651F3C /* Pods-InputDemoApp-InputDemoAppTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -791,6 +796,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3A717A7A85A974A6E55255D3 /* Pods-InputDemoApp-InputDemoAppTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = InputDemoAppTests/Info.plist;
@@ -840,6 +846,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MemesWork;
 				PRODUCT_NAME = InputDemoApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "InputDemoApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -874,6 +881,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MemesWork;
 				PRODUCT_NAME = InputDemoApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "InputDemoApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";

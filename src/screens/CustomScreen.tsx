@@ -9,7 +9,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import AppFlatlist from '../components/AppFlatlist';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
-import { useFocusEffect } from '@react-navigation/native';
+
 
 const CustomScreen = ({navigation, route}:any) => {
  
@@ -46,14 +46,19 @@ const CustomScreen = ({navigation, route}:any) => {
     },
   });  
 
+  // console.log("getCustomTemplates :", getCustomTemplates?.data );
+  // console.log("getCustomRenders :", getCustomRenders?.data );
+  
+
   const refresh = () => {
-    
+  
     setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]); 
     console.log("text: ",tag);
        
     if(text.length!=0 ){
+      console.log("refresh: called");
       getCustomRenders.mutate({ text:[text], "uids": UIDs})
     }
     else{
@@ -82,12 +87,8 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 2000);
 
-  const { MessagesManager } = NativeModules;
-  // console.log(" MessagesManager: ",  NativeModules);
-  const CopyClipboard = ()=>{
+
   
-    
-  }
   return (
     <>
       {showScreen ? 
@@ -115,7 +116,7 @@ const CustomScreen = ({navigation, route}:any) => {
               <TouchableOpacity>
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', getCustomRenders: getCustomRenders})}} >
+              <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })}} >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
             </View>
@@ -180,10 +181,6 @@ const CustomScreen = ({navigation, route}:any) => {
               </View>
             }
           </View>
-
-          {/* <TouchableOpacity onPress={()=> CopyClipboard()} >
-            <Text style={{color:"white", fontSize:14, textAlign:"center" }}>CopGif</Text>
-          </TouchableOpacity> */}
 
           {/* Grid View */}
             <AppFlatlist 

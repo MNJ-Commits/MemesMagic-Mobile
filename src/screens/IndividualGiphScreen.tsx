@@ -1,6 +1,6 @@
 // Libraries
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Keyboard, KeyboardAvoidingView, NativeModules, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import RNFetchBlob from 'rn-fetch-blob';
@@ -75,7 +75,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }
         else{
             // For custom render 
-            renderRenderById.mutate({ 
+            renderGifById.mutate({ 
                 "HQ": true,
                 "animated_sequence": true,
                 "render_format": "webp",
@@ -87,7 +87,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }
     },[gifData])
    
-    const renderRenderById: any = usePostCustomRenders({
+    const renderGifById: any = usePostCustomRenders({
         onSuccess(res) { 
             console.log("res: ", res[0].render);
             
@@ -110,7 +110,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         },
         onError(error) {
             setLoader(false)
-            console.log("renderRenderById", error);
+            console.log("renderGifById", error);
         },
     }); 
     const textSting = gifData?.src2?.split("&w")[1] 
@@ -122,7 +122,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const DownloadPermissions = ()=> {
         checkLibraryPermissions( ).then((resp:any)=>{
             setDownloading(true);  
-            renderRenderById.mutate({ 
+            renderGifById.mutate({ 
                 "HQ": true,
                 "animated_sequence": true,
                 "render_format": "gif",
@@ -224,8 +224,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     setDownloading(false)
                     console.log('writeFile error: ',writeFile) 
                 })
-                console.log('filePath: ', filePath);
-                
+                console.log('filePath: ', filePath);    
     }
 
  
@@ -301,26 +300,33 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // COPY GIF'S
     const CopyCustomGif = (remoteURL: string) => {
 
-        let filePath: any;
-        // Download
-        RNFetchBlob.config({
-            fileCache: true,
-            path: RNFetchBlob.fs.dirs.LibraryDir + `/${datetime}.gif`
-        }).fetch('GET', remoteURL, header).then(async (resp:any) => {
-            filePath = await resp.path();
-            let data: any = await resp.base64();            
-            return data
-        }).then((base64Data:any) => {
-            // NativeModules.BetterClipboard.addBase64Image(base64Data);
-            setCoping(false)
-            // Remove from device's storage
-            RNFetchBlob.fs.unlink(filePath);
-        }).catch((error:any)=>{
-            setCoping(false)
-            // Remove from device's storage
-            RNFetchBlob.fs.unlink(filePath);
-            console.log("error: ",error);
-        })
+        NativeModules.ClipboardManager.CopyGif(remoteURL)
+        setCoping(false)
+    }
+
+    const CopyGiphyGif = async ()=>{
+
+        setCoping(true)
+        await RNFetchBlob
+            .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
+                header, JSON.stringify({
+                    "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                    "giphy_url":  gifData?.src
+                }))
+                .then(async (response) =>{ 
+                    if(response.info().status==200){
+                        let data = await response.base64() 
+                        return data
+                    }
+                }).then((base64Data:any) => {
+                    let remoteURL = `data:image/png;base64,${base64Data}`
+                    NativeModules.ClipboardManager.CopyGif(remoteURL)
+                    setCoping(false)
+                })
+                .catch((writeFile:any)=>{
+                    setCoping(false)
+                    console.log('writeFile error: ',writeFile) 
+                })
     }
 
     const isValidateInput = () => {
@@ -412,28 +418,26 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     {/* Copy/Download/Share */}
                     <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
-                            // onPress={ ()=>{
-                            //     // if(isBlank(text)){
-                            //     //     Alert.alert("You must enter text to proceed")
-                            //     // } else if(text.length<2){
-                            //     //     Alert.alert("Please enter more text" )
-                            //     // } else if (verifyPayment?.subcription){
-                            //     //     gifData?.giphy ? DownloadGiphyGif() : 
-                            //     //     // For custom .GIF download
-                            //         setCoping(true)
-                            //         setFileAction("CopyCustomGif");
-                            //         setTextCheck( textSting ? false : true)
-                            //         renderRenderById.mutate({ 
-                            //             "HQ": true,
-                            //             "animated_sequence": true,
-                            //             "render_format": "gif",
-                            //             "uids": [ gifData.uid ], 
-                            //             text:[text],
-                            //         }) 
-                            // //     } else{
-                            // //        navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
-                            // //    }
-                            // }}
+                            onPress={ ()=>{
+                                if( isValidateInput() ){
+                                    if (verifyPayment?.subcription){
+                                    gifData?.giphy ?
+                                        CopyGiphyGif() : 
+                                        // For custom .GIF download
+                                        setCoping(true); setFileAction("CopyCustomGif"); setTextCheck( textSting ? false : true)
+                                        renderGifById.mutate({ 
+                                            "HQ": true,
+                                            "animated_sequence": true,
+                                            "render_format": "gif",
+                                            "uids": [ gifData.uid ], 
+                                            text:[text],
+                                        }) 
+                                    } 
+                                    else{
+                                            StoreIndividualGif()
+                                        }
+                                }
+                            }}
                             style={{alignSelf:'center', margin:20 }} >
                             <CopyIcon width={RFValue(40)} height={RFValue(40)} />
                         </TouchableOpacity>
@@ -463,7 +467,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   setFileAction("RequestShareCustomGif");   setTextCheck( textSting ? false : true)
-                                        renderRenderById.mutate({ 
+                                        renderGifById.mutate({ 
                                             "HQ": true,
                                             "animated_sequence": true,
                                             "render_format": "gif",
@@ -518,7 +522,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity onPress={()=> { 
                                 setLoader(true); 
                                 Keyboard.dismiss()
-                                renderRenderById.mutate({ 
+                                renderGifById.mutate({ 
                                     text:[text],
                                     "HQ": true,
                                     "animated_sequence": true,

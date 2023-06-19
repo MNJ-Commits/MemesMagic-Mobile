@@ -1,15 +1,27 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
+import { loadAppleAccessTokenFromStorage } from "../store/asyncStorage"
 
 const useGetCustomTemplatesRequest = async<T>(tag:string)=>{
   
-let URI: string = 'http://18.143.157.105:3000/assets/templates'
-tag ? URI += `?tag=${tag}` : ''
+  let URI: string = 'http://18.143.157.105:3000/assets/templates'
+  tag ? URI += `?tag=${tag}` : ''
+
+  const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+    console.log('loadAppleAccessTokenFromStorage Error: ', error);
+  })
+  console.log('access_token: ', access_token);
+  const headers:any  = access_token ? { 
+    'Content-Type': 'application/json',
+    "X-ACCESS-TOKEN": `${access_token}`,
+  }
+  :
+  {  'Content-Type': 'application/json' }
 
   try {
     const response = await fetch(URI, 
       {
         method: 'GET',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        headers: headers
       }
     )    
     const data = await response?.json()    

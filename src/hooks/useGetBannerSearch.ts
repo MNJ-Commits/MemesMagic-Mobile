@@ -26,7 +26,7 @@ export function useGetBannerSearch<T>(
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
-    ['giphy/list'] as QueryKey, 
+    [`giphy/list/${query}`] as QueryKey, 
     () => useGetBannerSearchRequest<T>(query), 
     options)
 }

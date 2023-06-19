@@ -57,6 +57,7 @@ const BannerScreen = ({navigation}:any) => {
     },
     onError: (res: any) => console.log('getBannerSearch onError: ',res),
   });
+  // console.log("getBannerSearch: ", getBannerTemplates.data);
 
   const getFonts: any = useGetFonts({
     onSuccess: (res: any) => {
@@ -150,7 +151,7 @@ const BannerScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'BannerScreen'})}} >
+            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{ returnScreen:'BannerScreen', reRender: refresh })}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
           </View>

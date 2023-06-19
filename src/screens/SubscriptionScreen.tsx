@@ -29,18 +29,13 @@ import { openLink } from '../utils/openLink';
 const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
-  const getCustomRenders = route.params?.getCustomRenders
-  // console.log('route.params: ',route.params);
-
-  const [isVisibleModal, setVisibleModal] = useState(false);
+  const reRender = route.params?.reRender
+  // console.log('route.params: ', reRender)
 
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
     {Label: "No ads!", SVG: <NoAds width={40} height={40} style={{marginRight:10}} />  },
   ]
-
-
-  // const { connected, initConnectionError } = useIAP();
 
   const [products, setProducts] = useState<any>([])
   const [subscription, setSubscription] = useState<any>([])
@@ -50,6 +45,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [restore, setRestore] = useState<boolean>(false)
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
+  const [isVisibleModal, setVisibleModal] = useState(false);
 
   let purchaseUpdated: any
 
@@ -63,7 +59,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // console.log("here: ", expired, Date.now(), expiration);
       if (expired) { 
         setLoading(false)
-        Alert.alert("Subscription Expired", "Your monthly subscription has expired")
+        SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
       }else{
         setCheckingSubscriptions(true)
         setLoading(false)
@@ -173,9 +169,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       
       const renewal_history = validationReponse.latest_receipt_info
       getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
-      // renewal_history.map((data:any)=>{
-      //   console.log(data.expires_date_ms);
-      // })
 
       let purchaseType:any = []
       // Find Subscription
@@ -185,7 +178,21 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         // console.log("Index 0",  expired, Date.now(), expiration);
         if (expired) { 
           setLoading(false)
-          Alert.alert("Subscription Expired", "Your monthly subscription has expired")
+          Alert.alert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe",
+          [
+            {
+              text: 'Yes', onPress: () => {      
+                handleSubscription(subscription[0]?.productId) 
+              }
+            },
+            {
+              text: 'No', onPress: () => {      
+                navigation.canGoBack() ? navigation.pop() :
+                returnScreen ? navigation.push(returnScreen) :
+                navigation.push('CustomScreen')
+              }
+            }
+          ] )
         }
         else{
           // console.log("Subscription Expiration in DB: ", renewal_history[0].expires_date_ms);
@@ -200,7 +207,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
         if (expired) { 
           setLoading(false)
-          Alert.alert("Subscription Expired", "Your monthly subscription has expired")
+          SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
         }
         else{
           // console.log("Subscription Expiration in DB: ", renewal_history[1].expires_date_ms);
@@ -228,30 +235,33 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       } 
       else{
         setVerifyPayments({ one_time: false, subcription: false })
-        Alert.alert("Purchase Alert", "Your have no active payments")
+        SubscriptionAlert("Payments Expired", "Your have no active payments. Would you like to subcribe")
       }
 
-      setLoading(false)
-      if (returnScreen !== "IndividualGiphScreen")
-        getCustomRenders.refetch()
-      
+      // No paymrnts found
       if (purchaseType.length==0)
-        Alert.alert("Payments Alert", "No Payment record found")
-      else if(restore)
-        {
+        SubscriptionAlert("Payments Alert", "No payment record found. Would you like to subcribe.")
+      else if(restore) {
           Alert.alert("Payments Alert", "Payments restored successfully",
-            [
-              {text: 'Ok', onPress: () => {      
-                navigation.canGoBack() ? navigation.pop() :
-                returnScreen ? navigation.push(returnScreen) :
-                navigation.push('CustomScreen')
-              }},
-            ],
-            // { 
-            //   cancelable: true 
-            // }
+            [{
+                text: 'Ok', onPress: () => {      
+                  navigation.canGoBack() ? navigation.pop() :
+                  returnScreen ? navigation.push(returnScreen) :
+                  navigation.push('CustomScreen')
+                }
+            }]
           )
         }
+        // move this else-if to verifyPayments dependent useEffect
+      else if (returnScreen !== "IndividualGiphScreen"){
+        reRender() 
+        setTimeout(() => {
+          navigation.canGoBack() ? navigation.pop() :
+          returnScreen ? navigation.push(returnScreen) :
+          navigation.push('CustomScreen')
+        }, 2000);
+      }
+      setLoading(false)
     })
     .catch((validationError)=>{ 
       setLoading(false)
@@ -336,6 +346,20 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     },
   });
 
+  const SubscriptionAlert = (alertType: string, msg: string) => {
+    Alert.alert(alertType, msg,
+    [
+      {
+        text: 'Yes', onPress: () => {      
+          handleSubscription(subscription[0]?.productId) 
+        }
+      },
+      {
+        text: 'No'
+      }
+    ] )
+  }
+
   return (
     <Fragment >
       <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
@@ -402,9 +426,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                   <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
                 </TouchableOpacity>
                 <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscription[0]?.localizedPrice} monthly</Text>
-                {/* {(loading || checkingSubscriptions) && 
-                <ActivityIndicator size={'large'} color={'grey'} style={{position:'absolute', top:0, alignSelf:'center'}} />
-                } */}
               </View>
             </View> 
             {(loading || products?.length==0 || subscription?.length==0) && 
