@@ -168,6 +168,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     .then((validationReponse)=>{ 
       
       const renewal_history = validationReponse.latest_receipt_info
+      console.log("latest_receipt: ", validationReponse.latest_receipt);
       getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
 
       let purchaseType:any = []

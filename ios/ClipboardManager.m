@@ -10,6 +10,9 @@
 
 @interface RCT_EXTERN_MODULE(ClipboardManager, NSObject)
 
-RCT_EXTERN_METHOD(CopyGif:(NSString *) remoteURL)
+RCT_EXTERN_METHOD(CopyGif:
+                  (NSString *) remoteURL
+                  resolver: (RCTPromiseResolveBlock)resolve
+                  rejecter: (RCTPromiseRejectBlock)reject)
 
 @end

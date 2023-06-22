@@ -13,7 +13,7 @@ class ClipboardManager: NSObject {
 
   
   @objc
-  func CopyGif(_ remoteURL: String) {
+  func CopyGif(_ remoteURL: String, resolver resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
     let url = NSURL(string: remoteURL)
     guard let data: NSData = NSData(contentsOf: url! as URL) else {
       // Handle the case where yourOptionalURL is nil
@@ -21,6 +21,7 @@ class ClipboardManager: NSObject {
       return
     }
     UIPasteboard.general.setData(data as Data, forPasteboardType: "com.compuserve.gif")
+    resolve (true)
   }
   
   

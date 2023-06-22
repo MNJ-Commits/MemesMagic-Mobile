@@ -20,6 +20,7 @@ import { checkLibraryPermissions, requestLibraryPermissions } from '../utils/Per
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPaymentFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
+import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
 
  
 
@@ -44,8 +45,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const gif_state = await loadIndividualGifData().catch((error:any)=>{
             console.log('loadIndividualGifData Error: ', error);
         })
-        console.log("gif_state: ",gif_state );
-        
+        // console.log("gif_state: ",gif_state );
         setGIFData(gif_state) 
 
         const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
@@ -73,7 +73,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             setTextCheck( textSting ? false : true)
             setText(textSting ? decodeURIComponent(textSting?.split("=")[1]) : ""  )
         }
-        else{
+        else if(gifData.defaultText){
             // For custom render 
             renderGifById.mutate({ 
                 "HQ": true,
@@ -85,12 +85,27 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             setTextCheck( gifData.defaultText ? false : true)
             setText(gifData.defaultText)
         }
+        else{
+            if(route?.params?.uid && !route?.params?.defaultText)
+                getTemplateById.mutate({ uid:route?.params?.uid })
+        }
     },[gifData])
    
+    const getTemplateById: any = useGetCustomTemplateById({
+        onSuccess(res) { 
+        // console.log('res: ', res);
+        setTextCheck(false)
+        setWebp(`http://18.143.157.105:3000${res.template}`) 
+        },
+        onError(error) {
+        console.log('getCustomRenders error: ', error);
+        },
+    }); 
+
+
     const renderGifById: any = usePostCustomRenders({
         onSuccess(res) { 
-            console.log("res: ", res[0].render);
-            
+            // console.log("res: ", res[0].render);            
             setTextCheck(false)
             if(res[0].render.includes('.webp')){
                 setWebp(`http://18.143.157.105:3000${res[0].render}`) 
@@ -299,9 +314,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
     // COPY GIF'S
     const CopyCustomGif = (remoteURL: string) => {
-
-        NativeModules.ClipboardManager.CopyGif(remoteURL)
-        setCoping(false)
+        console.log("uid: ", gifData.uid, remoteURL);
+        NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { setCoping(!resp) })
     }
 
     const CopyGiphyGif = async ()=>{
@@ -420,7 +434,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription){
+                                //     if (verifyPayment?.subcription){
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
@@ -432,10 +446,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "uids": [ gifData.uid ], 
                                             text:[text],
                                         }) 
-                                    } 
-                                    else{
-                                            StoreIndividualGif()
-                                        }
+                                    // } 
+                                    // else{
+                                    //         StoreIndividualGif()
+                                    //     }
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
@@ -545,3 +559,4 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 }
 
 export default IndividualGiphScreen
+

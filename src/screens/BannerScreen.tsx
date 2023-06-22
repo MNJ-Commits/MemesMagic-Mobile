@@ -40,6 +40,7 @@ const BannerScreen = ({navigation}:any) => {
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
+  
 
   const getBannerTemplates: any = useGetBannerTemplates({
     onSuccess: (res: any) => {
@@ -115,14 +116,9 @@ const BannerScreen = ({navigation}:any) => {
     else
       getBannerTemplates.refetch()
   },[query])
- 
-  const searchInput: any = useRef()
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
+
+  const searchInput: any = useRef()
 
   
   return (

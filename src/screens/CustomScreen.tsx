@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -45,10 +45,6 @@ const CustomScreen = ({navigation, route}:any) => {
       console.log('getCustomRenders error: ', error);
     },
   });  
-
-  // console.log("getCustomTemplates :", getCustomTemplates?.data );
-  // console.log("getCustomRenders :", getCustomRenders?.data );
-  
 
   const refresh = () => {
   
@@ -223,11 +219,11 @@ const CustomScreen = ({navigation, route}:any) => {
                 })
               }}
             >
-            {/* {loader ?
+            {loader ?
               <ActivityIndicator size={'small'} />
-              : */}
+              :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
-            {/* } */}
+            }
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>

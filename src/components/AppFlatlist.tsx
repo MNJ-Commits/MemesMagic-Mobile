@@ -6,7 +6,7 @@ import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../stor
 import { useFocusEffect } from '@react-navigation/native';
 
   const AppFlatlist = ({data, giphy, refresh, isLoader, setLoader, refreshLoader, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
-    
+
     
   return (
     <MasonryList
@@ -23,7 +23,7 @@ import { useFocusEffect } from '@react-navigation/native';
           style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -70} : null]}
         />
       }
-      
+
       onRefresh={() => refresh() }
       contentContainerStyle={{margin:RFValue(10)}}
       showsVerticalScrollIndicator={false}
@@ -96,7 +96,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
           }
         else{
           storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text });
-          navigation.navigate( 'IndividualGiphScreen')
+          navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text})
         }
       }} 
       style={{ alignItems:'center', margin:RFValue(5) }} 
