@@ -9,7 +9,8 @@ const useGetCustomTemplatesRequest = async<T>(tag: string)=>{
   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
     console.log('loadAppleAccessTokenFromStorage Error: ', error);
   })
-  console.log("access_token: ", access_token);
+  // console.log("access_token: ", access_token);
+  // console.log("URI: ", URI);
   
 
   const headers:any  = access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` }

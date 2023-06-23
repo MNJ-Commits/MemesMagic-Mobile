@@ -166,8 +166,7 @@ const CustomScreen = ({navigation, route}:any) => {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor:'#FF439E' }} >
                 {
-                  // ['Random', 'TV', 'Movies', 'Sports', 'Screens']
-                  ["Crowd", "Banner", "Stage", "Cardboard", "Surprised", "Ironman", "Painting", "Tony Stark", "Car", "Road", "Crash", "Board", "Siblings", "Pencil", "Table", "The Office", "Rock", "call", "Notice Board", "Sticky Note", "Check", "Nurse", "Laser", "Road Sign"].map((data:string, index: number)=>{
+                  ["Angry", "Happy", "Mocking", "Hi", "Nervous", "Nope", " Reveal", "Sad", "Screen", "Signs", "Sports", "Clothes"].map((data:string, index: number)=>{
                   return(
                       <TouchableOpacity 
                         onPress={()=>{ 
