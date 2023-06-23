@@ -9,6 +9,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import AppFlatlist from '../components/AppFlatlist';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const CustomScreen = ({navigation, route}:any) => {
@@ -84,7 +85,12 @@ const CustomScreen = ({navigation, route}:any) => {
   }, 2000);
 
 
-  
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh()
+    }, []),
+  );
+
   return (
     <>
       {showScreen ? 

@@ -434,7 +434,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                //     if (verifyPayment?.subcription){
+                                    if (verifyPayment?.subcription){
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
@@ -446,10 +446,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "uids": [ gifData.uid ], 
                                             text:[text],
                                         }) 
-                                    // } 
-                                    // else{
-                                    //         StoreIndividualGif()
-                                    //     }
+                                    } 
+                                    else{
+                                            StoreIndividualGif()
+                                        }
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >

@@ -30,7 +30,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const returnScreen = route.params?.returnScreen
   const reRender = route.params?.reRender
-  // console.log('route.params: ', reRender)
+  // console.log('route.params: ', route.params)
 
   const Services =[
     {Label: "All gifs and memes!", SVG: <GifsMemes width={40} height={40} style={{marginRight:10}} /> },
@@ -143,11 +143,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   },[connected, restore])
 
-  // console.log("Restored", restore);
 
   const getMyPurchases = ()=>{
-    // console.log("Restore Purchase History");
-    
+    // console.log("Restore Purchase History"); 
     getAvailablePurchases().then((purchases)=>{
       console.log('purchases: ', purchases.length); 
       if(purchases.length>0){
@@ -179,21 +177,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         // console.log("Index 0",  expired, Date.now(), expiration);
         if (expired) { 
           setLoading(false)
-          Alert.alert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe",
-          [
-            {
-              text: 'Yes', onPress: () => {      
-                handleSubscription(subscription[0]?.productId) 
-              }
-            },
-            {
-              text: 'No', onPress: () => {      
-                navigation.canGoBack() ? navigation.pop() :
-                returnScreen ? navigation.push(returnScreen) :
-                navigation.push('CustomScreen')
-              }
-            }
-          ] )
+          SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
         }
         else{
           // console.log("Subscription Expiration in DB: ", renewal_history[0].expires_date_ms);
@@ -239,22 +223,29 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         SubscriptionAlert("Payments Expired", "Your have no active payments. Would you like to subcribe")
       }
 
+      const expiration = renewal_history[0].expires_date_ms
+      let not_expired = Date.now() > expiration
+      
       // No paymrnts found
       if (purchaseType.length==0)
         SubscriptionAlert("Payments Alert", "No payment record found. Would you like to subcribe.")
       else if(restore) {
-          Alert.alert("Payments Alert", "Payments restored successfully",
-            [{
-                text: 'Ok', onPress: () => {      
+        Alert.alert("Payments Alert", "Payments restored successfully",
+          [{
+              text: 'Ok',
+               onPress: () => { 
+                setRestore(false)
+                if(not_expired) {
                   navigation.canGoBack() ? navigation.pop() :
                   returnScreen ? navigation.push(returnScreen) :
                   navigation.push('CustomScreen')
                 }
-            }]
-          )
-        }
+              }
+          }]
+        )
+      }
         // move this else-if to verifyPayments dependent useEffect
-      else if (returnScreen !== "IndividualGiphScreen"){
+      else if ( returnScreen !== "IndividualGiphScreen" && not_expired ){
         reRender() 
         setTimeout(() => {
           navigation.canGoBack() ? navigation.pop() :
@@ -262,7 +253,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           navigation.push('CustomScreen')
         }, 2000);
       }
-      setLoading(false)
+      // setLoading(false)
+      console.log("I am done");
+      
     })
     .catch((validationError)=>{ 
       setLoading(false)
@@ -270,6 +263,18 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     })    
   }
 
+  const SubscriptionAlert = (alertType: string, msg: string) => {
+    Alert.alert(alertType, msg,
+    [
+      {
+        text: 'Yes', onPress: () => { handleSubscription(subscription[0]?.productId) }
+      },
+      {
+        text: 'No'
+      }
+    ] )
+  }
+  
   const handlePurchase = async (sku: string) => {
     setLoading(true)
     if(products[0].productId=='NoWatermarks')
@@ -347,19 +352,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     },
   });
 
-  const SubscriptionAlert = (alertType: string, msg: string) => {
-    Alert.alert(alertType, msg,
-    [
-      {
-        text: 'Yes', onPress: () => {      
-          handleSubscription(subscription[0]?.productId) 
-        }
-      },
-      {
-        text: 'No'
-      }
-    ] )
-  }
+
+console.log("loading: ",loading);
+console.log("restore: ",restore);
 
   return (
     <Fragment >
@@ -384,15 +379,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   disabled={ loading ? true : false}    
-                  onPress={()=>{ 
-                    setRestore(true);
-                    // deepLinkToSubscriptions({sku:subscriptions[0].productId, isAmazonDevice:false})
-                    // .then((response)=>{ console.log('SubResp: ', response) })
-                    // .catch((error)=>{ 
-                    //   console.log('SubError: ', error)
-                    //   openLink('https://apps.apple.com/account/subscriptions')
-                    // })
-                  }}>
+                  onPress={()=>{ setRestore(true) }}>
                   <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                 </TouchableOpacity>
               </View>

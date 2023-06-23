@@ -7,7 +7,24 @@ import { useFocusEffect } from '@react-navigation/native';
 
   const AppFlatlist = ({data, giphy, refresh, isLoader, setLoader, refreshLoader, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
 
-    
+  
+    const [appleAccessToken, setAppleAccessToken] = useState<string>('')
+    const getter = async () => {
+      
+      const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+          console.log('loadAppleAccessTokenFromStorage Error: ', error);
+      })
+      setAppleAccessToken(access_token) 
+    }
+  
+    useFocusEffect(
+      React.useCallback(() => {
+        getter().catch((error:any)=>{
+        console.log('getter Error: ', error);
+        })
+      }, []),
+    );
+
   return (
     <MasonryList
       data={data}
@@ -40,6 +57,7 @@ import { useFocusEffect } from '@react-navigation/native';
         navigation={navigation}
         setLoader={setLoader}
         loader={isLoader}
+        appleAccessToken={appleAccessToken}
         />
       }
     />
@@ -48,25 +66,9 @@ import { useFocusEffect } from '@react-navigation/native';
 export default AppFlatlist
 
 
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, appleAccessToken}:any)=>{
   
 
-  const [appleAccessToken, setAppleAccessToken] = useState<string>('')
-  const getter = async () => {
-    
-    const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-        console.log('loadAppleAccessTokenFromStorage Error: ', error);
-    })
-    setAppleAccessToken(access_token) 
-  }
-
-  useFocusEffect(
-    React.useCallback(() => {
-      getter().catch((error:any)=>{
-      console.log('getter Error: ', error);
-      })
-    }, []),
-  );
 
   const customURI: any =  giphy ? item?.template : 
                           item?.template ? `http://18.143.157.105:3000${item?.template}` : 
