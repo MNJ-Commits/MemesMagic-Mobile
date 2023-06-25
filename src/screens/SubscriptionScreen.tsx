@@ -166,11 +166,26 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     .then((validationReponse)=>{ 
       
       const renewal_history = validationReponse.latest_receipt_info
-      console.log("latest_receipt: ", validationReponse.latest_receipt);
       getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
 
       let purchaseType:any = []
-      // Find Subscription
+
+      // // Find Subscription
+      // const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+      // if(subscriptionObject !== undefined)
+      //   {
+      //     const expiration = subscriptionObject?.expires_date_ms
+      //     let expired = expiration !== undefined && Date.now() > expiration
+      //     if (expired) { 
+      //       setLoading(false)
+      //       SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+      //     }
+      //     else{
+      //       storePaymentsReceiptInfo(subscriptionObject)
+      //       !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+      //     }
+      //   }
+
       if(renewal_history[0]?.product_id == "MonthlySubscription"){
         const expiration = renewal_history[0].expires_date_ms
         let expired = Date.now() > expiration
@@ -201,10 +216,16 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         }
       }      
 
-      // Find Purchases
-      for (let purchaseNo = 0; purchaseNo < renewal_history.length; purchaseNo++) {
-        if(renewal_history[purchaseNo].product_id == "NoWatermarks")
+      // // Find Purchases
+      // const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+      // if (purchaseObject !== undefined) {
+      //   purchaseType.push(purchaseObject.product_id)
+      // } 
+      for (let purchaseNo = renewal_history?.length-1; purchaseNo >= 0 ; purchaseNo--) {
+        if(renewal_history[purchaseNo].product_id == "NoWatermarks"){
           purchaseType.push(renewal_history[purchaseNo].product_id)
+          break
+        }
       }
 
       // Store Payments
@@ -244,7 +265,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           }]
         )
       }
-        // move this else-if to verifyPayments dependent useEffect
       else if ( returnScreen !== "IndividualGiphScreen" && not_expired ){
         reRender() 
         setTimeout(() => {
@@ -253,9 +273,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           navigation.push('CustomScreen')
         }, 2000);
       }
-      // setLoading(false)
-      console.log("I am done");
-      
+      setLoading(false)      
     })
     .catch((validationError)=>{ 
       setLoading(false)
@@ -353,8 +371,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   });
 
 
-console.log("loading: ",loading);
-console.log("restore: ",restore);
+// console.log("loading: ",loading);
+// console.log("restore: ",restore);
 
   return (
     <Fragment >
