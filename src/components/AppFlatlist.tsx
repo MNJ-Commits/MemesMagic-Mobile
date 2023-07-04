@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, Image, ActivityIndicator, } from 'react-native';
+import { TouchableOpacity, Image, ActivityIndicator, View, Text, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 
-  const AppFlatlist = ({data, giphy, refresh, isLoader, setLoader, refreshLoader, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, page, setPage, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
 
   
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
@@ -25,25 +25,61 @@ import { useFocusEffect } from '@react-navigation/native';
       }, []),
     );
 
+    const handleScroll = (event: any) => {      
+      // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
+      
+      if(event.nativeEvent.locationY<0 && API?.data?.length == 14)
+        setPage(page + 1)
+      else if(event.nativeEvent.locationY<0 && API?.data?.length<14)
+        console.log("End reached");
+    };
+
+    const handleEndReached = (event: { nativeEvent: { layoutMeasurement: any; contentOffset: any; contentSize: any; }; }) => {
+      const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    
+      const endOfListPosition = contentOffset.y + layoutMeasurement.height;
+      const endOfContentPosition = contentSize.height;
+    
+      if (!API.isFetching && endOfListPosition >= endOfContentPosition) {
+        // End of list reached
+        console.log("End of list reached");
+        
+        // Do something, like triggering pagination or loading more data
+      }
+    };
+
+    
+
   return (
     <MasonryList
       data={data}
       numColumns={2}
-      keyExtractor={(item: { id: string; }): string => item.id}
       keyboardDismissMode={"on-drag"}
-      refreshControlProps={{ title:'Loading...', titleColor:'#7C7E81', tintColor:'transparent',  }}
-      refreshing={refreshLoader}
-      loading={refreshLoader }
-      LoadingView={
-        <Image
-          source={require('../assets/gifs/loader.gif')}
-          style={[{width: 20, height: 20, alignSelf:'center',  position:'absolute' }, isLoader ? {top: -70} : null]}
-        />
-      }
-
       onRefresh={() => refresh() }
+      refreshing={ isLoader || refreshLoader }
+      refreshControlProps={{  tintColor:'transparent' }}
+      // loading={ isLoader || refreshLoader }  // Doesn't execute on load more
+      // LoadingView={
+      //   <View style={[{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute'}, isLoader ? {top: -70} : null  ]} >
+      //     <Image
+      //       source={require('../assets/gifs/loader.gif')}
+      //       style={{width: 20, height: 20, }}
+      //     />
+      //   </View>
+      // }
       contentContainerStyle={{margin:RFValue(10)}}
       showsVerticalScrollIndicator={false}
+      keyExtractor={(item: { id: string; }): string => item.id}
+      onTouchEnd ={handleScroll}
+      // onEndReachedThreshold={0.5}
+      // onEndReached= {()=> {handleEndReached}}
+      ListEmptyComponent={
+        isLoader || refreshLoader ? 
+          <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}} >Loading ... </Text>
+        : data.length == 0 ?
+          <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}}>No Content Found</Text>
+        : <></>
+      }
       renderItem={ ({item}:any) =>
        <RenderItems 
         item={item} 
@@ -65,10 +101,8 @@ import { useFocusEffect } from '@react-navigation/native';
 
 export default AppFlatlist
 
-
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, appleAccessToken}:any)=>{
   
-
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, appleAccessToken}:any)=>{
 
   const customURI: any =  giphy ? item?.template : 
                           item?.template ? `http://18.143.157.105:3000${item?.template}` : 
@@ -145,3 +179,5 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
     </TouchableOpacity>
   )
 }
+
+ 

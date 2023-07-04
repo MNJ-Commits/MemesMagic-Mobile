@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, } from 'react-native';
+import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, Image, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -40,25 +40,25 @@ const BannerScreen = ({navigation}:any) => {
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
-  
+  const [page, setPage] = useState<number>(1);
 
-  const getBannerTemplates: any = useGetBannerTemplates({
+
+  const getBannerTemplates: any = useGetBannerTemplates(page, {
     onSuccess: (res: any) => {
       setRefreshLoader(false)
-      setAllGIF(res) 
+      setAllGIF([...new Set([...allGif, ...res])]);
     },
     onError: (res: any) => console.log('getBannerTemplates onError: ',res),
   });
 
-  const getBannerSearch: any = useGetBannerSearch(query,{
+  const getBannerSearch: any = useGetBannerSearch(query, page,{
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
       setLoader(false)
-      setAllGIF(res) 
+      setAllGIF([...new Set([...allGif, ...res])]); 
     },
     onError: (res: any) => console.log('getBannerSearch onError: ',res),
   });
-  // console.log("getBannerSearch: ", getBannerTemplates.data);
 
   const getFonts: any = useGetFonts({
     onSuccess: (res: any) => {
@@ -73,17 +73,6 @@ const BannerScreen = ({navigation}:any) => {
     onError: (res: any) => console.log('onError: ',res),
   });
 
-  const refresh = () => {
-
-    setAllGIF([]); 
-    setRefreshLoader(true)   
-
-    if(query.length!=0 )
-      getBannerSearch.refetch()
-    else
-      getBannerTemplates.refetch()
-  };
-  
   const staticFontsPair = [
     {fontname:"Arial",              fontFamily:"Arial",             fontFile:"arial.ttf"}, 
     // {fontname:"Arial Black",         fontFamily:"Arial Black",           fontFile:"arialb.ttf"}, 
@@ -106,7 +95,57 @@ const BannerScreen = ({navigation}:any) => {
     {fontname:"Rounds Black", fontFamily:"Rounds Black", fontFile: `${encodeURIComponent("Rounds Black.otf")}`}, 
     // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:"SF-Pro-Text-Regular.otf"}, 
   ]
+
+  const refresh = () => {
+
+    setRefreshLoader(true)   
+    setLoader(true)
+    setAllGIF([]); 
+    if (page > 1) {
+      setPage(1);
+    } 
+    else{
+    if(query.length!=0 )
+      getBannerSearch.refetch()
+    else
+      getBannerTemplates.refetch()
   
+    };
+  }
+
+  useEffect(() => {
+     
+    setLoader(true)       
+    if(query.length!=0 && page == 1){
+      console.log("refresh render");
+      setAllGIF([])
+      setRefreshLoader(true)  
+      getBannerSearch.refetch()
+    }
+    else if(query.length!=0 && page > 1)
+    {
+      setLoader(false)      
+      getBannerSearch.refetch()  
+    }
+    else if(text.length==0 && page == 1 ){   
+      setAllGIF([])   
+      setRefreshLoader(true)       
+      getBannerTemplates.refetch()
+    }
+    else if(text.length==0 && page > 1) {   
+      getBannerTemplates.refetch()
+    }
+    else if(text.length!==0 && page == 1) {  
+      setAllGIF([])   
+      getBannerTemplates.refetch()
+    }
+    else if(text.length!==0 && page > 1) {  
+      setLoader(false)      
+      getBannerTemplates.refetch()  //kept in synch with custom
+    }
+  }, [page]);
+
+
   useEffect(()=>{
     
     setAllGIF([]); 
@@ -117,9 +156,7 @@ const BannerScreen = ({navigation}:any) => {
       getBannerTemplates.refetch()
   },[query])
 
-
-  const searchInput: any = useRef()
-
+  const searchInput: any = useRef()  
   
   return (
     <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
@@ -140,13 +177,13 @@ const BannerScreen = ({navigation}:any) => {
             </TouchableOpacity>
           </View>
 
-          <View style={{flexDirection:'row', width:'30%', justifyContent:'space-around'}} >
-            <TouchableOpacity>
+          <View style={{flexDirection:'row', width:'30%', justifyContent:'flex-end'}} >
+            {/* <TouchableOpacity>
               <Suggestions width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
             <TouchableOpacity>
               <Download2 width={RFValue(25)} height={RFValue(25)}/>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{ returnScreen:'BannerScreen', reRender: refresh })}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
@@ -233,22 +270,35 @@ const BannerScreen = ({navigation}:any) => {
         </View>
 
         {/* GridView */}
-        <AppFlatlist 
-          data={allGif}
-          giphy={true}
-          refresh = {refresh}
-          isLoader = {loader}
-          setLoader = {setLoader}
-          refreshLoader={refreshLoader}
-          navigation={navigation}
-          text={text}
-          textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
-          textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
-          textStroke={sText}
-          color = {fontcolor} 
-          font = {fontFile}
-        />
-
+        <>
+          <AppFlatlist 
+            data={allGif}
+            API = { query.length!=0 ? getBannerSearch : getBannerTemplates }
+            giphy={true}
+            refresh = {refresh}
+            isLoader = {loader}
+            setLoader = {setLoader}
+            refreshLoader={refreshLoader}
+            text={text}
+            page = {page}
+            setPage = {setPage}
+            textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
+            textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
+            textStroke={sText}
+            color = {fontcolor} 
+            font = {fontFile}
+            navigation={navigation}
+          />
+          {(refreshLoader || loader) && 
+            <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
+              <Image
+                source={require('../assets/gifs/loader.gif')}
+                style={{width: 20, height: 20, zIndex:1 }}
+              />
+            </View>
+          } 
+        </>
+        
         {/* Apply Text */}
         <View 
           style={{ 

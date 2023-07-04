@@ -1,37 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, Image, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
 import Search from "../assets/svgs/search.svg";
 import RightTick from "../assets/svgs/right-tick.svg";
 import { RFValue } from 'react-native-responsive-fontsize';
-import AppFlatlist from '../components/AppFlatlist';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { useFocusEffect } from '@react-navigation/native';
+import MasonryList from '@react-native-seoul/masonry-list';
+import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
+import AppFlatlist  from '../components/AppFlatlist'
 
 
 const CustomScreen = ({navigation, route}:any) => {
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
+  const [API, setAPI] = useState<any>({})
   const [text, setText] = useState<string>('')
   const [tag, setTag] = useState<string>('')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
-  const [loader, setLoader] = useState<Boolean>(true)
-  const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)
+  const [loader, setLoader] = useState<Boolean>(true)   
+  const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)  // GIF Loader
   const [showScreen, setShowScreen] = useState<Boolean>(false)
+  const [page, setPage] = useState<number>(1);
 
-  const getCustomTemplates: any = useGetCustomTemplates(tag,{
+
+  const getCustomTemplates: any = useGetCustomTemplates(tag, page, {
     onSuccess: (res: any) => {
       // console.log('res: ', res);      
+      if(res.length === 0){
+        setLoader(false)
+      }
       setRefreshLoader(false)
-      setAllGIF(res) 
+      setAllGIF([...new Set([...allGif, ...res])]);
       const uids = res?.map((items: any) => {
         return  items.uid
-      });
-      setUIDs(uids)
+      });      
+      setUIDs([...new Set([...UIDs, ...uids])]);
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -39,7 +47,8 @@ const CustomScreen = ({navigation, route}:any) => {
   const getCustomRenders: any = usePostCustomRenders({
     onSuccess(res) { 
       // console.log('res: ', res);
-      setAllGIF(res) 
+      // As we render only already loaded templates so there are no duplicates
+      setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
       setRefreshLoader(false)
     },
     onError(error) {
@@ -51,25 +60,80 @@ const CustomScreen = ({navigation, route}:any) => {
   
     setRefreshLoader(true)
     setLoader(true)
-    setAllGIF([]); 
-    console.log("text: ",tag);
-       
-    if(text.length!=0 ){
-      console.log("refresh: called");
-      getCustomRenders.mutate({ text:[text], "uids": UIDs})
-    }
+    setAllGIF([]);     
+    if (page > 1) {
+      setPage(1);
+    } 
     else{
-      getCustomTemplates.refetch()
+      if(text.length!=0 ){
+        renderRequestChunk()
+        // getCustomRenders.mutate({ text:[text], "uids": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]})
+      }
+      else{
+        getCustomTemplates.refetch()
+      }
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {    
+    setLoader(true)
+    if(tag.length!=0 && page == 1 ) {   
+      setAllGIF([])   
+      setRefreshLoader(true)       
+      getCustomTemplates.refetch()
+    }
+    else if(tag.length!=0 && page > 1) {   
+      getCustomTemplates.refetch()
+    }
+    else if(text.length==0 && tag.length==0 && page == 1) {   
+      setUIDs([])
+      setAllGIF([])   
+      setRefreshLoader(true)       
+      getCustomTemplates.refetch()
+    }   
+    else if(text.length==0 && tag.length==0 && page > 1) {   
+      getCustomTemplates.refetch()
+    } 
+    else if(text.length!=0 && page == 1){
+      renderRequestChunk()
+    }
+    else if(text.length!=0 && page > 1) {
+      setLoader(false) // kept in synch with Banner
+    }
 
+  }, [page]);
+
+
+  useEffect(()=>{
+    
+    setAllGIF([])
+    setUIDs([])
     setRefreshLoader(true)
     setLoader(true)
+    // setText('')
     getCustomTemplates.refetch()
   },[tag])  
 
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refresh()
+  //   }, []),
+  // );
+
+  const renderRequestChunk =  ()=>{
+  
+    setAllGIF([])
+    setLoader(true)
+    Keyboard.dismiss()
+    for (let i = 0; i <= UIDs.length; i+=10) {
+      setTimeout(() => {
+        getCustomRenders.mutate({ 
+          text:[text],
+          "uids": UIDs.slice(i, i + 10)
+        })
+      }, i*200);
+    } 
+  }
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -82,14 +146,12 @@ const CustomScreen = ({navigation, route}:any) => {
 
   setTimeout(() => {
     setShowScreen(true) 
-  }, 2000);
+  }, 3000);
 
+// console.log(allGif?.length, text.length);
+// console.log(getCustomRenders?.isLoading);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refresh()
-    }, []),
-  );
+// console.log(allGif?.length, UIDs?.length );
 
   return (
     <>
@@ -111,13 +173,13 @@ const CustomScreen = ({navigation, route}:any) => {
               </TouchableOpacity>
             </View>
 
-            <View style={{flexDirection:'row', width:'30%', justifyContent:'space-around'}} >
-              <TouchableOpacity>
+            <View style={{flexDirection:'row', width:'30%', justifyContent:'flex-end'}} >
+              {/* <TouchableOpacity>
                 <Suggestions width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
               <TouchableOpacity>
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })}} >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
@@ -166,7 +228,7 @@ const CustomScreen = ({navigation, route}:any) => {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor:'#FF439E' }} >
                 {
-                  ["Angry", "Happy", "Mocking", "Hi", "Nervous", "Nope", " Reveal", "Sad", "Screen", "Signs", "Sports", "Clothes"].map((data:string, index: number)=>{
+                  ["Random", "Angry", "Happy", "Hi", "Mocking", "Nervous", "Nope", "Reveal", "Sad", "Screen", "Signs", "Sports", "Clothes"].map((data:string, index: number)=>{
                   return(
                       <TouchableOpacity 
                         onPress={()=>{ 
@@ -184,16 +246,29 @@ const CustomScreen = ({navigation, route}:any) => {
           </View>
 
           {/* Grid View */}
+          <>
             <AppFlatlist 
               data={allGif ? allGif : []}
+              API={getCustomTemplates }
               giphy={false}
               refresh = {refresh}
               isLoader={loader}
               setLoader={setLoader}
               refreshLoader={refreshLoader}
               text={text}
+              page = {page}
+              setPage = {setPage}
               navigation={navigation}
             />
+            {(refreshLoader || loader) && 
+              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
+                <Image
+                  source={require('../assets/gifs/loader.gif')}
+                  style={{width: 20, height: 20, zIndex:1 }}
+                />
+              </View>
+            } 
+          </>          
             
           {/* Text Ipnut */}
           <View style={{ marginTop:RFValue(5), flexDirection:'row', alignItems:'center',  alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
@@ -215,14 +290,7 @@ const CustomScreen = ({navigation, route}:any) => {
               }}            
             />
             <TouchableOpacity 
-              onPress={()=> { 
-                setLoader(true)
-                Keyboard.dismiss()
-                getCustomRenders.mutate({ 
-                  text:[text],
-                  "uids": UIDs,
-                })
-              }}
+              onPress={renderRequestChunk}
             >
             {loader ?
               <ActivityIndicator size={'small'} />

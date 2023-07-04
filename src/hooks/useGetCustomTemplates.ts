@@ -1,21 +1,25 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 import { loadAppleAccessTokenFromStorage } from "../store/asyncStorage"
 
-const useGetCustomTemplatesRequest = async<T>(tag: string)=>{
+const useGetCustomTemplatesRequest = async<T>(tag: string, page:number)=>{
   
-  let URI: string = 'http://18.143.157.105:3000/assets/templates'
-      tag ? URI += `?tag=${tag}` : ''
+  let URI: string = `http://18.143.157.105:3000/assets/templates?p=${page}&l=14`
+    tag ? URI += `&tag=${tag}` : ''
 
   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
     console.log('loadAppleAccessTokenFromStorage Error: ', error);
   })
   // console.log("access_token: ", access_token);
+<<<<<<< HEAD
   // console.log("URI: ", URI);
+=======
+>>>>>>> Pagination
   
 
   const headers:any  = access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` }
                        : {  'Content-Type': 'application/json' }
-
+  console.log("URI: ",URI);
+  
   try {
     const response = await fetch(URI, 
       {
@@ -23,7 +27,9 @@ const useGetCustomTemplatesRequest = async<T>(tag: string)=>{
         headers: headers
       }
     )    
-    const data = await response?.json()        
+    const data = await response?.json()   
+    // console.log("data?.data: ", data?.data);
+         
     return data?.data
   } catch (err: any) {
     throw new Error(err.response.data.message);
@@ -33,10 +39,11 @@ const useGetCustomTemplatesRequest = async<T>(tag: string)=>{
 
 export function useGetCustomTemplates<T>( 
   tag: string,
+  page: number,
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
     ['assets/templates'] as QueryKey, 
-    () => useGetCustomTemplatesRequest<T>(tag), 
+    () => useGetCustomTemplatesRequest<T>(tag, page), 
     options)
 }

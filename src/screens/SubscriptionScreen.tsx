@@ -328,7 +328,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     // console.log("handleSubscription");
     if(subscription[0].productId = 'MonthlySubscription')
     {
-      await requestSubscription({sku, appAccountToken: UUID})
+      await requestSubscription({sku, andDangerouslyFinishTransactionAutomaticallyIOS: false, appAccountToken: UUID})
       .then((subscriptionReponse: any)=>{
         // console.log("subscriptionReponse: ", subscriptionReponse);
         const receipt = subscriptionReponse?.transactionReceipt
@@ -371,8 +371,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   });
 
 
-// console.log("loading: ",loading);
-// console.log("restore: ",restore);
 
   return (
     <Fragment >

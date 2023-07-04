@@ -1,11 +1,12 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 
-const useGetBannerSearchRequest = async<T>(query: string)=>{
+const useGetBannerSearchRequest = async<T>(query: string, page: number)=>{
 
-  console.log("query: ", query);
+  let URI: string = `http://18.143.157.105:3000/giphy/search?q=${query}&n=14&p=${page}`
+  console.log("URI: ", URI);
   
   try {
-    const response = await fetch(`http://18.143.157.105:3000/giphy/search?q=${query}&n=10`, 
+    const response = await fetch(URI, 
       {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
@@ -23,10 +24,11 @@ const useGetBannerSearchRequest = async<T>(query: string)=>{
 
 export function useGetBannerSearch<T>( 
   query: string,
+  page: number,
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
     [`giphy/list`] as QueryKey, 
-    () => useGetBannerSearchRequest<T>(query), 
+    () => useGetBannerSearchRequest<T>(query, page), 
     options)
 }
