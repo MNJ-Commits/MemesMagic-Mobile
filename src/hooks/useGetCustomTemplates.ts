@@ -10,10 +10,6 @@ const useGetCustomTemplatesRequest = async<T>(tag: string, page:number)=>{
     console.log('loadAppleAccessTokenFromStorage Error: ', error);
   })
   // console.log("access_token: ", access_token);
-<<<<<<< HEAD
-  // console.log("URI: ", URI);
-=======
->>>>>>> Pagination
   
 
   const headers:any  = access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` }
