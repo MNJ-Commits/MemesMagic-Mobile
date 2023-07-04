@@ -353,8 +353,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   });
 
 
-console.log("loading: ",loading);
-console.log("restore: ",restore);
 
   return (
     <Fragment >

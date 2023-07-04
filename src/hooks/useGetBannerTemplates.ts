@@ -1,9 +1,12 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 
-const useGetBannerTemplatesRequest = async<T>()=>{
+const useGetBannerTemplatesRequest = async<T>(page: number)=>{
 
+  let URI: string = `http://18.143.157.105:3000/giphy/list?&n=14&p=${page}`
+  console.log("URI: ", URI);
+      
   try {
-    const response = await fetch('http://18.143.157.105:3000/giphy/list', 
+    const response = await fetch(URI, 
       {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
@@ -18,10 +21,11 @@ const useGetBannerTemplatesRequest = async<T>()=>{
 
 
 export function useGetBannerTemplates<T>( 
+  page: number,
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
     ['giphy/list'] as QueryKey, 
-    () => useGetBannerTemplatesRequest<T>(), 
+    () => useGetBannerTemplatesRequest<T>(page), 
     options)
 }

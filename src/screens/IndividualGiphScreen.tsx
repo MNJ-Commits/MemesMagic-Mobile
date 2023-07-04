@@ -31,7 +31,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [loader, setLoader] = useState<Boolean>(false)
     const [downloading, setDownloading] = useState<Boolean>(false)
     const [sharing, setSharing] = useState<Boolean>(false)
-    const [coping, setCoping] = useState<Boolean>(false)
+    const [copying, setCopying] = useState<Boolean>(false)
     const [webp, setWebp] = useState<string>('')
     const [verifyPayment, setVerifyPayment] = useState<any>({})
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
@@ -315,12 +315,12 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // COPY GIF'S
     const CopyCustomGif = (remoteURL: string) => {
         console.log("uid: ", gifData.uid, remoteURL);
-        NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { setCoping(!resp) })
+        NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { setCopying(!resp) })
     }
 
     const CopyGiphyGif = async ()=>{
 
-        setCoping(true)
+        setCopying(true)
         await RNFetchBlob
             .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
                 header, JSON.stringify({
@@ -335,10 +335,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 }).then((base64Data:any) => {
                     let remoteURL = `data:image/png;base64,${base64Data}`
                     NativeModules.ClipboardManager.CopyGif(remoteURL)
-                    setCoping(false)
+                    setCopying(false)
                 })
                 .catch((writeFile:any)=>{
-                    setCoping(false)
+                    setCopying(false)
                     console.log('writeFile error: ',writeFile) 
                 })
     }
@@ -438,7 +438,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
-                                        setCoping(true); setFileAction("CopyCustomGif"); setTextCheck( textSting ? false : true)
+                                        setCopying(true); setFileAction("CopyCustomGif"); setTextCheck( textSting ? false : true)
                                         renderGifById.mutate({ 
                                             "HQ": true,
                                             "animated_sequence": true,
@@ -506,8 +506,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
                             : sharing ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
-                            : coping ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Coping...</Text>
+                            : copying ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Copying...</Text>
                             : null
                         }
                     </View>
