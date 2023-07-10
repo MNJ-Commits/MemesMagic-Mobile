@@ -26,11 +26,11 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
     );
 
     const handleScroll = (event: any) => {      
-      // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
+      console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
       
-      if(event.nativeEvent.locationY<0 && API?.data?.length == 30)
+      if(event.nativeEvent.locationY<0 && API?.data?.length == 10)
         setPage(page + 1)
-      else if(event.nativeEvent.locationY<0 && API?.data?.length<30)
+      else if(event.nativeEvent.locationY<0 && API?.data?.length<10)
         console.log("End reached");
     };
 

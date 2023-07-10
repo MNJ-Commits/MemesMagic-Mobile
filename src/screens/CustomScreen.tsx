@@ -23,7 +23,7 @@ const CustomScreen = ({navigation, route}:any) => {
   const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)  // GIF Loader
   const [showScreen, setShowScreen] = useState<Boolean>(false)
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(30);
+  const [limit, setLimit] = useState<number>(10);
 
   const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
     onSuccess: (res: any) => {
@@ -260,7 +260,7 @@ const CustomScreen = ({navigation, route}:any) => {
           {/* Grid View */}
           <>
             <AppFlatlist 
-              data={allGif ? allGif : []}
+              data={allGif}
               API={getCustomTemplates }
               giphy={false}
               refresh = {refresh}
