@@ -1,9 +1,10 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 import { loadAppleAccessTokenFromStorage } from "../store/asyncStorage"
 
-const useGetCustomTemplatesRequest = async<T>(tag: string, page:number)=>{
+const useGetCustomTemplatesRequest = async<T>(tag: string, page:number, limit: number)=>{
   
-  let URI: string = `http://18.143.157.105:3000/assets/templates?p=${page}&l=14`
+  let URI: string = `http://18.143.157.105:3000/assets/templates?p=${page}`
+    page==1 ? URI += `&l=${limit}` : ''
     tag ? URI += `&tag=${tag}` : ''
 
   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
@@ -36,10 +37,11 @@ const useGetCustomTemplatesRequest = async<T>(tag: string, page:number)=>{
 export function useGetCustomTemplates<T>( 
   tag: string,
   page: number,
+  limit: number,
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
     ['assets/templates'] as QueryKey, 
-    () => useGetCustomTemplatesRequest<T>(tag, page), 
+    () => useGetCustomTemplatesRequest<T>(tag, page, limit), 
     options)
 }

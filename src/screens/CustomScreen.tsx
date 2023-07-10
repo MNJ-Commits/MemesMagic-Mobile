@@ -9,8 +9,6 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { useFocusEffect } from '@react-navigation/native';
-import MasonryList from '@react-native-seoul/masonry-list';
-import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
 import AppFlatlist  from '../components/AppFlatlist'
 
 
@@ -18,17 +16,16 @@ const CustomScreen = ({navigation, route}:any) => {
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
-  const [API, setAPI] = useState<any>({})
   const [text, setText] = useState<string>('')
-  const [tag, setTag] = useState<string>('')
+  const [tag, setTag] = useState<string>('Random')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)   
   const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)  // GIF Loader
   const [showScreen, setShowScreen] = useState<Boolean>(false)
   const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(30);
 
-
-  const getCustomTemplates: any = useGetCustomTemplates(tag, page, {
+  const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
     onSuccess: (res: any) => {
       // console.log('res: ', res);      
       if(res.length === 0){
@@ -77,10 +74,17 @@ const CustomScreen = ({navigation, route}:any) => {
 
   useEffect(() => {    
     setLoader(true)
+    // setLimit(1)
     if(tag.length!=0 && page == 1 ) {   
       setAllGIF([])   
-      setRefreshLoader(true)       
+      setRefreshLoader(true)   
       getCustomTemplates.refetch()
+    //   for (let i = 1; i <= 14; i += 1) {    
+    //     setLimit(i);  
+    //     setTimeout(() => {
+    //       getCustomTemplates.refetch();
+    //     }, i*1000);
+    //   } 
     }
     else if(tag.length!=0 && page > 1) {   
       getCustomTemplates.refetch()
@@ -103,7 +107,6 @@ const CustomScreen = ({navigation, route}:any) => {
 
   }, [page]);
 
-
   useEffect(()=>{
     
     setAllGIF([])
@@ -125,14 +128,24 @@ const CustomScreen = ({navigation, route}:any) => {
     setAllGIF([])
     setLoader(true)
     Keyboard.dismiss()
-    for (let i = 0; i <= UIDs.length; i+=10) {
+    
+    for (let i = 0; i <= UIDs.length-1; i += 1) {      
       setTimeout(() => {
         getCustomRenders.mutate({ 
           text:[text],
-          "uids": UIDs.slice(i, i + 10)
+          "uids": [UIDs[i]]
         })
       }, i*200);
     } 
+
+    // for (let i = 0; i <= UIDs.length; i+=10) {
+    //   setTimeout(() => {
+    //     getCustomRenders.mutate({ 
+    //       text:[text],
+    //       "uids": UIDs.slice(i, i + 10)
+    //     })
+    //   }, i*200);
+    // } 
   }
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
@@ -150,7 +163,6 @@ const CustomScreen = ({navigation, route}:any) => {
 
 // console.log(allGif?.length, text.length);
 // console.log(getCustomRenders?.isLoading);
-
 // console.log(allGif?.length, UIDs?.length );
 
   return (
@@ -292,11 +304,11 @@ const CustomScreen = ({navigation, route}:any) => {
             <TouchableOpacity 
               onPress={renderRequestChunk}
             >
-            {loader ?
-              <ActivityIndicator size={'small'} />
-              :
+            {/* {loader ?
+              <ActivityIndicator size={'small'} color={'#8d8d8d'} />
+              : */}
               <RightTick width={RFValue(20)} height={RFValue(20)} />
-            }
+            {/* }  */}
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>
