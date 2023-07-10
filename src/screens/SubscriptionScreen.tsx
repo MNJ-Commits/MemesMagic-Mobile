@@ -118,23 +118,25 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     if(connected){
       // console.log('Connected')
       getInventory()
-      // purchaseUpdated = purchaseUpdatedListener((purchase)=>{
-      //   try{     
-      //     const receipt = purchase?.transactionReceipt
-      //     if(receipt){
-      //       finishTransaction({purchase: purchase})
-      //       .then((AckResult)=>{
-      //         console.log('Purchase Acknowledged: ', AckResult);
-      //         validateReceipt(receipt)    
-      //       }).catch((AckResultError)=>{
-      //         console.log('Purchase Acknowledgement Error: ', AckResultError);
-      //       })
-      //     }
-      //   }
-      //   catch{
-      //     console.log('purchaseListener error');
-      //   }
-      // })
+      purchaseUpdated = purchaseUpdatedListener((purchase)=>{
+
+        console.log("purchaseUpdatedListener called", purchase);
+        try{     
+          const receipt = purchase?.transactionReceipt
+          if(receipt){
+            finishTransaction({purchase: purchase})
+            .then((AckResult)=>{
+              // console.log('Purchase Acknowledged: ', AckResult);
+              validateReceipt(receipt)    
+            }).catch((AckResultError)=>{
+              console.log('Purchase Acknowledgement Error: ', AckResultError);
+            })
+          }
+        }
+        catch{
+          console.log('purchaseListener error');
+        }
+      })
     }
     if (restore){
       setLoading(true);
@@ -170,63 +172,63 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
       let purchaseType:any = []
 
-      // // Find Subscription
-      // const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-      // if(subscriptionObject !== undefined)
-      //   {
-      //     const expiration = subscriptionObject?.expires_date_ms
-      //     let expired = expiration !== undefined && Date.now() > expiration
-      //     if (expired) { 
-      //       setLoading(false)
-      //       SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-      //     }
-      //     else{
-      //       storePaymentsReceiptInfo(subscriptionObject)
-      //       !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
-      //     }
+      // Find Subscription
+      const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+      const expiration = subscriptionObject.expires_date_ms
+      let not_expired = expiration !== undefined && Date.now() > expiration
+      if(subscriptionObject !== undefined)
+        {
+          console.log("subscriptionObject: ", subscriptionObject);
+          if (not_expired){
+            storePaymentsReceiptInfo(subscriptionObject)
+            !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+          } 
+          else { 
+            setLoading(false)
+            console.log(Date.now() > expiration);
+            // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+          }
+        }
+
+      // if(renewal_history[0]?.product_id == "MonthlySubscription"){
+      //   const expiration = renewal_history[0].expires_date_ms
+      //   let expired = Date.now() > expiration
+      //   // console.log("Index 0",  expired, Date.now(), expiration);
+      //   if (expired) { 
+      //     setLoading(false)
+      //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
       //   }
+      //   else{
+      //     // console.log("Subscription Expiration in DB: ", renewal_history[0].expires_date_ms);
+      //     storePaymentsReceiptInfo(renewal_history[0])
+      //     !purchaseType.includes(renewal_history[0].product_id) ? purchaseType.push(renewal_history[0].product_id) : null
+      //   }
+      // }
+      // else if(renewal_history[1]?.product_id=="MonthlySubscription"){
+      //   const expiration = renewal_history[1].expires_date_ms
+      //   let expired = Date.now() > expiration
+      //   // console.log("Index 1",  expired, Date.now(), expiration);
 
-      if(renewal_history[0]?.product_id == "MonthlySubscription"){
-        const expiration = renewal_history[0].expires_date_ms
-        let expired = Date.now() > expiration
-        // console.log("Index 0",  expired, Date.now(), expiration);
-        if (expired) { 
-          setLoading(false)
-          SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-        }
-        else{
-          // console.log("Subscription Expiration in DB: ", renewal_history[0].expires_date_ms);
-          storePaymentsReceiptInfo(renewal_history[0])
-          !purchaseType.includes(renewal_history[0].product_id) ? purchaseType.push(renewal_history[0].product_id) : null
-        }
-      }
-      else if(renewal_history[1]?.product_id=="MonthlySubscription"){
-        const expiration = renewal_history[1].expires_date_ms
-        let expired = Date.now() > expiration
-        // console.log("Index 1",  expired, Date.now(), expiration);
+      //   if (expired) { 
+      //     setLoading(false)
+      //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+      //   }
+      //   else{
+      //     // console.log("Subscription Expiration in DB: ", renewal_history[1].expires_date_ms);
+      //     storePaymentsReceiptInfo(renewal_history[1])
+      //     !purchaseType.includes(renewal_history[1].product_id) ? purchaseType.push(renewal_history[1].product_id) : null
+      //   }
+      // }      
 
-        if (expired) { 
-          setLoading(false)
-          SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-        }
-        else{
-          // console.log("Subscription Expiration in DB: ", renewal_history[1].expires_date_ms);
-          storePaymentsReceiptInfo(renewal_history[1])
-          !purchaseType.includes(renewal_history[1].product_id) ? purchaseType.push(renewal_history[1].product_id) : null
-        }
-      }      
-
-      // // Find Purchases
-      // const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
-      // if (purchaseObject !== undefined) {
-      //   purchaseType.push(purchaseObject.product_id)
-      // } 
-      for (let purchaseNo = renewal_history?.length-1; purchaseNo >= 0 ; purchaseNo--) {
-        if(renewal_history[purchaseNo].product_id == "NoWatermarks"){
-          purchaseType.push(renewal_history[purchaseNo].product_id)
-          break
-        }
-      }
+      // Find Purchases
+      const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+      if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+      // for (let purchaseNo = renewal_history?.length-1; purchaseNo >= 0 ; purchaseNo--) {
+      //   if(renewal_history[purchaseNo].product_id == "NoWatermarks"){
+      //     purchaseType.push(renewal_history[purchaseNo].product_id)
+      //     break
+      //   }
+      // }
 
       // Store Payments
       console.log("purchaseType: ", purchaseType);
@@ -243,9 +245,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         setVerifyPayments({ one_time: false, subcription: false })
         SubscriptionAlert("Payments Expired", "Your have no active payments. Would you like to subcribe")
       }
-
-      const expiration = renewal_history[0].expires_date_ms
-      let not_expired = Date.now() > expiration
       
       // No paymrnts found
       if (purchaseType.length==0)
@@ -325,12 +324,14 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const handleSubscription = async (sku: string) => {
     setLoading(true)
-    // console.log("handleSubscription");
-    if(subscription[0].productId = 'MonthlySubscription')
+    if(sku)
     {
-      await requestSubscription({sku, andDangerouslyFinishTransactionAutomaticallyIOS: false, appAccountToken: UUID})
+      await requestSubscription({
+        sku, 
+        andDangerouslyFinishTransactionAutomaticallyIOS: false, 
+        appAccountToken: UUID})
       .then((subscriptionReponse: any)=>{
-        // console.log("subscriptionReponse: ", subscriptionReponse);
+        console.log("subscriptionReponse: ", subscriptionReponse);
         const receipt = subscriptionReponse?.transactionReceipt
         if(receipt){
           finishTransaction({purchase: subscriptionReponse})
@@ -341,7 +342,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             console.log('Subscription Acknowledgement Error: ', AckResultError);
           })
         }
-
       })
       .catch((subscriptionError)=>{
         setLoading(false)
