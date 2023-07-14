@@ -1,3 +1,6 @@
+#import "SDImageCodersManager.h"
+#import <SDWebImageWebPCoder/SDImageWebPCoder.h>
+
 // Add the header at the top of the file:
 #import <React/RCTLinkingManager.h>
 
@@ -33,6 +36,8 @@ static void InitializeFlipper(UIApplication *application) {
 #ifdef FB_SONARKIT_ENABLED
   InitializeFlipper(application);
 #endif
+  
+  [SDImageCodersManager.sharedManager addCoder:SDImageWebPCoder.sharedCoder];
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge

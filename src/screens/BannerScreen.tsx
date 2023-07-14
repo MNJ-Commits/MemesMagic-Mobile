@@ -46,7 +46,8 @@ const BannerScreen = ({navigation}:any) => {
   const getBannerTemplates: any = useGetBannerTemplates(page, {
     onSuccess: (res: any) => {
       setRefreshLoader(false)
-      setAllGIF([...new Set([...allGif, ...res])]);
+      setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
+      // setAllGIF([...new Set([...allGif, ...res])]);
     },
     onError: (res: any) => console.log('getBannerTemplates onError: ',res),
   });
@@ -55,7 +56,8 @@ const BannerScreen = ({navigation}:any) => {
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
       setLoader(false)
-      setAllGIF([...new Set([...allGif, ...res])]); 
+      setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
+      // setAllGIF([...new Set([...allGif, ...res])]); 
     },
     onError: (res: any) => console.log('getBannerSearch onError: ',res),
   });
@@ -143,6 +145,7 @@ const BannerScreen = ({navigation}:any) => {
       setLoader(false)      
       getBannerTemplates.refetch()  //kept in synch with custom
     }
+
   }, [page]);
 
 
@@ -154,6 +157,7 @@ const BannerScreen = ({navigation}:any) => {
       getBannerSearch.refetch()
     else
       getBannerTemplates.refetch()
+ 
   },[query])
 
   const searchInput: any = useRef()  
@@ -195,11 +199,10 @@ const BannerScreen = ({navigation}:any) => {
           { visibleSearch ?    
           <View style={{flexDirection:'row', alignItems:'center', width:'100%', alignSelf:'center', }}>     
             <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center', width:'80%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35.5)  }} >
-              {/* <TouchableOpacity onPress={()=> { setVisibleSearch(false) }} > */}
-                <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10),}} />
-              {/* </TouchableOpacity> */}
+              <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10)}} />
               <TextInput
                 ref={searchInput}
+                defaultValue={query}
                 editable={true}
                 placeholderTextColor={'#ffffff'}
                 // onChangeText={(e: any) => { setQuery(e) }}
@@ -208,6 +211,7 @@ const BannerScreen = ({navigation}:any) => {
                   onSubmitEditing ={ (e)=>{
                     setLoader(true)
                     setQuery(e?.nativeEvent?.text)
+                    setVisibleSearch(false)
                     Keyboard.dismiss()
                   }}
                 style= {{ 

@@ -21,6 +21,7 @@ import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPaymentFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
+import FastImage from 'react-native-fast-image';
 
  
 
@@ -401,22 +402,26 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                  >
                     {/* Gif */}
                     <>
-                        <Image
+                        <FastImage
                             source={{uri: gifData?.giphy ? gifData.src : webp }}
-                            style={[{width: '100%', aspectRatio: gifData.width/gifData.height, resizeMode:'contain', borderRadius:RFValue(30), margin:RFValue(20),  } ]}
+                            resizeMode={FastImage.resizeMode.contain}
+                            style={[{width: '100%', aspectRatio: gifData.width/gifData.height,borderRadius:RFValue(30), margin:RFValue(20),  } ]}
                         />        
                     
                         {
                         gifData.giphy && 
-                            <Image 
+                            <FastImage 
                                 source={appleAccessToken ?
                                     {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
-                                        headers:{ "X-ACCESS-TOKEN": appleAccessToken }
+                                        headers:{ "X-ACCESS-TOKEN": appleAccessToken },
+                                        priority: FastImage.priority.normal,
                                     }
                                     :
-                                    { uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }
+                                    { uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                                      priority: FastImage.priority.normal,
+                                    }
                                 }
-                                resizeMode={'contain'}
+                                resizeMode={FastImage.resizeMode.contain}
                                 style={{
                                     width:'100%', 
                                     aspectRatio: gifData.width/gifData.height,

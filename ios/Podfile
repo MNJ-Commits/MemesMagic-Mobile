@@ -13,6 +13,8 @@ target 'InputDemoApp' do
     :hermes_enabled => false
   )
 
+  pod 'SDWebImageWebPCoder'
+  
   pod 'RNIap', :path => '../node_modules/react-native-iap'
 
   pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
