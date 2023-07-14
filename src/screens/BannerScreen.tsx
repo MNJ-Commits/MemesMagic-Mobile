@@ -46,8 +46,7 @@ const BannerScreen = ({navigation}:any) => {
   const getBannerTemplates: any = useGetBannerTemplates(page, {
     onSuccess: (res: any) => {
       setRefreshLoader(false)
-      setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
-      // setAllGIF([...new Set([...allGif, ...res])]);
+      setAllGIF([...new Set([...allGif, ...res])]);
     },
     onError: (res: any) => console.log('getBannerTemplates onError: ',res),
   });
@@ -56,8 +55,7 @@ const BannerScreen = ({navigation}:any) => {
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
       setLoader(false)
-      setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
-      // setAllGIF([...new Set([...allGif, ...res])]); 
+      setAllGIF([...new Set([...allGif, ...res])]); 
     },
     onError: (res: any) => console.log('getBannerSearch onError: ',res),
   });

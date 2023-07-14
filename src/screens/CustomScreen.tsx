@@ -28,8 +28,11 @@ const CustomScreen = ({navigation, route}:any) => {
   const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
     // enabled:false,
     onSuccess: async (res: any) => {
-      // console.log('res: ', res);      
-      setAllGIF((prevAllGIF: any) => [...prevAllGIF, ...res]);
+      // console.log('res: ', res);     
+      if(res.length === 0){
+        setLoader(false)
+      } 
+      setAllGIF([...new Set([...allGif, ...res])]);
       setRefreshLoader(false)
       const uids = res?.map((items: any) => {  return  items.uid  });      
       setUIDs([...new Set([...UIDs, ...uids])]);
