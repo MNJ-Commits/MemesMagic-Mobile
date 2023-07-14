@@ -2,7 +2,7 @@ import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 
 const useGetBannerSearchRequest = async<T>(query: string, page: number)=>{
 
-  let URI: string = `http://18.143.157.105:3000/giphy/search?q=${query}&n=14&p=${page}`
+  let URI: string = `http://18.143.157.105:3000/giphy/search?q=${query}&n=40&p=${page}`
   console.log("URI: ", URI);
   
   try {

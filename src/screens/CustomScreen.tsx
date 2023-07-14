@@ -9,8 +9,6 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { useFocusEffect } from '@react-navigation/native';
-import MasonryList from '@react-native-seoul/masonry-list';
-import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
 import AppFlatlist  from '../components/AppFlatlist'
 
 
@@ -18,27 +16,22 @@ const CustomScreen = ({navigation, route}:any) => {
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
-  const [API, setAPI] = useState<any>({})
   const [text, setText] = useState<string>('')
-  const [tag, setTag] = useState<string>('')
+  const [tag, setTag] = useState<string>('Random')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)   
   const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)  // GIF Loader
   const [showScreen, setShowScreen] = useState<Boolean>(false)
   const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(30);
 
-
-  const getCustomTemplates: any = useGetCustomTemplates(tag, page, {
-    onSuccess: (res: any) => {
+  const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
+    // enabled:false,
+    onSuccess: async (res: any) => {
       // console.log('res: ', res);      
-      if(res.length === 0){
-        setLoader(false)
-      }
+      setAllGIF((prevAllGIF: any) => [...prevAllGIF, ...res]);
       setRefreshLoader(false)
-      setAllGIF([...new Set([...allGif, ...res])]);
-      const uids = res?.map((items: any) => {
-        return  items.uid
-      });      
+      const uids = res?.map((items: any) => {  return  items.uid  });      
       setUIDs([...new Set([...UIDs, ...uids])]);
     },
     onError: (res: any) => console.log('onError: ',res),
@@ -56,34 +49,48 @@ const CustomScreen = ({navigation, route}:any) => {
     },
   });  
 
+  const renderRequestChunk =  ()=>{
+  
+    setAllGIF([])
+    setLoader(true)
+    Keyboard.dismiss()
+    
+    for (let i = 0; i <= UIDs.length-1; i += 1) {      
+      setTimeout(() => {
+        getCustomRenders.mutate({ 
+          // text:["Meme Magic"],
+          // "uids": [  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",  "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",  "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",  "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",  "41", "42", "43", "44", "45", "46", "47"]
+          text:[text],
+          "uids": [UIDs[i]]
+        })
+      }, i*200);
+    }  
+  }
+
   const refresh = () => {
   
     setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]);     
-    if (page > 1) {
-      setPage(1);
-    } 
+    if (page > 1) { setPage(1); } 
     else{
-      if(text.length!=0 ){
-        renderRequestChunk()
-        // getCustomRenders.mutate({ text:[text], "uids": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]})
-      }
-      else{
-        setUIDs([])
+      if(text.length!=0 ){ renderRequestChunk() }
+      else{ 
         getCustomTemplates.refetch()
-      }
+       }
     }
   };
 
-  useEffect(() => {    
+  useEffect(() => {   
+
     setLoader(true)
     if(tag.length!=0 && page == 1 ) {   
+      setUIDs([])
       setAllGIF([])   
-      setRefreshLoader(true)       
+      setRefreshLoader(true)   
       getCustomTemplates.refetch()
     }
-    else if(tag.length!=0 && page > 1) {   
+    else if(tag.length!=0 && text.length==0 && page > 1) {   
       getCustomTemplates.refetch()
     }
     else if(text.length==0 && tag.length==0 && page == 1) {   
@@ -104,7 +111,6 @@ const CustomScreen = ({navigation, route}:any) => {
 
   }, [page]);
 
-
   useEffect(()=>{
     
     setAllGIF([])
@@ -113,6 +119,7 @@ const CustomScreen = ({navigation, route}:any) => {
     setLoader(true)
     // setText('')
     getCustomTemplates.refetch()
+
   },[tag])  
 
   // useFocusEffect(
@@ -121,20 +128,14 @@ const CustomScreen = ({navigation, route}:any) => {
   //   }, []),
   // );
 
-  const renderRequestChunk =  ()=>{
-  
-    setAllGIF([])
-    setLoader(true)
-    Keyboard.dismiss()
-    for (let i = 0; i <= UIDs.length; i+=10) {
-      setTimeout(() => {
-        getCustomRenders.mutate({ 
-          text:[text],
-          "uids": UIDs.slice(i, i + 10)
-        })
-      }, i*200);
-    } 
-  }
+  // useEffect(()=>{
+  //   getCustomRenders.mutate({ 
+  //     text:["Meme Magic"],
+  //     "uids": [  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",  "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",  "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",  "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",  "41", "42", "43", "44", "45", "46", "47"]
+  //     // text:[text],
+  //     // "uids": [UIDs[i]]
+  //   })
+  // },[])
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -151,7 +152,6 @@ const CustomScreen = ({navigation, route}:any) => {
 
 // console.log(allGif?.length, text.length);
 // console.log(getCustomRenders?.isLoading);
-
 // console.log(allGif?.length, UIDs?.length );
 
   return (
@@ -181,7 +181,9 @@ const CustomScreen = ({navigation, route}:any) => {
               <TouchableOpacity>
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity> */}
-              <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })}} >
+              <TouchableOpacity onPress={()=>{
+                // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+              } } >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
             </View>
@@ -249,7 +251,7 @@ const CustomScreen = ({navigation, route}:any) => {
           {/* Grid View */}
           <>
             <AppFlatlist 
-              data={allGif ? allGif : []}
+              data={allGif}
               API={getCustomTemplates }
               giphy={false}
               refresh = {refresh}
@@ -294,10 +296,10 @@ const CustomScreen = ({navigation, route}:any) => {
               onPress={renderRequestChunk}
             >
             {loader ?
-              <ActivityIndicator size={'small'} />
+              <ActivityIndicator size={'small'} color={'#8d8d8d'} />
               :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
-            }
+            } 
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>
