@@ -118,28 +118,27 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     if(connected){
       // console.log('Connected')
       getInventory()
-      purchaseUpdated = purchaseUpdatedListener((purchase)=>{
+      // purchaseUpdated = purchaseUpdatedListener((purchase)=>{
 
-        console.log("purchaseUpdatedListener called", purchase);
-        try{     
-          const receipt = purchase?.transactionReceipt
-          if(receipt){
-            finishTransaction({purchase: purchase})
-            .then((AckResult)=>{
-              // console.log('Purchase Acknowledged: ', AckResult);
-              validateReceipt(receipt)    
-            }).catch((AckResultError)=>{
-              console.log('Purchase Acknowledgement Error: ', AckResultError);
-            })
-          }
-        }
-        catch{
-          console.log('purchaseListener error');
-        }
-      })
+      //   console.log("purchaseUpdatedListener called", purchase);
+      //   try{     
+      //     const receipt = purchase?.transactionReceipt
+      //     if(receipt){
+      //       finishTransaction({purchase: purchase})
+      //       .then((AckResult)=>{
+      //         // console.log('Purchase Acknowledged: ', AckResult);
+      //         if(AckResult) { validateReceipt(receipt) }    
+      //       }).catch((AckResultError)=>{
+      //         console.log('Purchase Acknowledgement Error: ', AckResultError);
+      //       })
+      //     }
+      //   }
+      //   catch{
+      //     console.log('purchaseListener error');
+      //   }
+      // })
     }
     if (restore){
-      setLoading(true);
       getMyPurchases()
     }
 
@@ -175,60 +174,24 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // Find Subscription
       const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
       const expiration = subscriptionObject.expires_date_ms
-      let not_expired = expiration !== undefined && Date.now() > expiration
+      let not_expired = expiration && Date.now() < expiration
       if(subscriptionObject !== undefined)
         {
-          console.log("subscriptionObject: ", subscriptionObject);
+          // console.log("subscriptionObject: ", subscriptionObject);
           if (not_expired){
             storePaymentsReceiptInfo(subscriptionObject)
             !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
           } 
           else { 
             setLoading(false)
-            console.log(Date.now() > expiration);
-            // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+            console.log(Date.now() > expiration, Date.now(), expiration);
+            SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
           }
-        }
-
-      // if(renewal_history[0]?.product_id == "MonthlySubscription"){
-      //   const expiration = renewal_history[0].expires_date_ms
-      //   let expired = Date.now() > expiration
-      //   // console.log("Index 0",  expired, Date.now(), expiration);
-      //   if (expired) { 
-      //     setLoading(false)
-      //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-      //   }
-      //   else{
-      //     // console.log("Subscription Expiration in DB: ", renewal_history[0].expires_date_ms);
-      //     storePaymentsReceiptInfo(renewal_history[0])
-      //     !purchaseType.includes(renewal_history[0].product_id) ? purchaseType.push(renewal_history[0].product_id) : null
-      //   }
-      // }
-      // else if(renewal_history[1]?.product_id=="MonthlySubscription"){
-      //   const expiration = renewal_history[1].expires_date_ms
-      //   let expired = Date.now() > expiration
-      //   // console.log("Index 1",  expired, Date.now(), expiration);
-
-      //   if (expired) { 
-      //     setLoading(false)
-      //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-      //   }
-      //   else{
-      //     // console.log("Subscription Expiration in DB: ", renewal_history[1].expires_date_ms);
-      //     storePaymentsReceiptInfo(renewal_history[1])
-      //     !purchaseType.includes(renewal_history[1].product_id) ? purchaseType.push(renewal_history[1].product_id) : null
-      //   }
-      // }      
+        }    
 
       // Find Purchases
       const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
       if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
-      // for (let purchaseNo = renewal_history?.length-1; purchaseNo >= 0 ; purchaseNo--) {
-      //   if(renewal_history[purchaseNo].product_id == "NoWatermarks"){
-      //     purchaseType.push(renewal_history[purchaseNo].product_id)
-      //     break
-      //   }
-      // }
 
       // Store Payments
       console.log("purchaseType: ", purchaseType);
@@ -247,9 +210,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       }
       
       // No paymrnts found
-      if (purchaseType.length==0)
+      if (purchaseType.length==0){
         SubscriptionAlert("Payments Alert", "No payment record found. Would you like to subcribe.")
-      else if(restore) {
+      } else if(restore) {
         Alert.alert("Payments Alert", "Payments restored successfully",
           [{
               text: 'Ok',
@@ -308,7 +271,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             finishTransaction({purchase: purchaseReponse})
             .then((AckResult)=>{
               // console.log('Purchase Acknowledged: ', AckResult);
-              validateReceipt(receipt)    
+              if(AckResult) { validateReceipt(receipt) }    
             }).catch((AckResultError)=>{
               setLoading(false)
               console.log('Purchase Acknowledgement Error: ', AckResultError);
@@ -330,14 +293,13 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         sku, 
         andDangerouslyFinishTransactionAutomaticallyIOS: false, 
         appAccountToken: UUID})
-      .then((subscriptionReponse: any)=>{
-        console.log("subscriptionReponse: ", subscriptionReponse);
+      .then(async (subscriptionReponse: any)=>{
         const receipt = subscriptionReponse?.transactionReceipt
         if(receipt){
-          finishTransaction({purchase: subscriptionReponse})
+          await finishTransaction({purchase: subscriptionReponse})
           .then((AckResult)=>{
-            // console.log('Subscription Acknowledged: ', AckResult);
-            validateReceipt(receipt)    
+            console.log('Subscription Acknowledged: ', AckResult);
+            if(AckResult) { validateReceipt(receipt) }
           }).catch((AckResultError)=>{
             console.log('Subscription Acknowledgement Error: ', AckResultError);
           })
@@ -395,7 +357,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   disabled={ loading ? true : false}    
-                  onPress={()=>{ setRestore(true) }}>
+                  onPress={()=>{ setLoading(true); setRestore(true) }}>
                   <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                 </TouchableOpacity>
               </View>
