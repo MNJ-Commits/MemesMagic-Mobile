@@ -51,6 +51,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
             console.log('loadVerifyPaymentFromStorage Error: ', error);
         })
+        console.log("paymentStatus: ",paymentStatus );
         setVerifyPayment(paymentStatus) 
         
         const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
@@ -128,8 +129,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             console.log("renderGifById", error);
         },
     }); 
+
+
     const textSting = gifData?.src2?.split("&w")[1] 
-    
     let BannerURI: string = ''
     text ? BannerURI+=`?text=${encodeURIComponent(text)}&w`+textSting : gifData?.src2
 

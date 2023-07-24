@@ -57,7 +57,7 @@ const CustomScreen = ({navigation, route}:any) => {
   });  
 
   const refresh = () => {
-  
+    console.log('Custom refresh');
     setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]);     
@@ -91,6 +91,8 @@ const CustomScreen = ({navigation, route}:any) => {
       setAllGIF([])   
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
+      console.log('here');
+      
     }   
     else if(text.length==0 && tag.length==0 && page > 1) {   
       getCustomTemplates.refetch()
@@ -115,11 +117,11 @@ const CustomScreen = ({navigation, route}:any) => {
     getCustomTemplates.refetch()
   },[tag])  
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh()
+    }, []),
+  );
 
   const renderRequestChunk =  ()=>{
   
@@ -155,8 +157,8 @@ const CustomScreen = ({navigation, route}:any) => {
 // console.log(allGif?.length, UIDs?.length );
 
   return (
-    <>
-      {showScreen ? 
+    // <>
+    //   {showScreen ? 
        <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
         <KeyboardAvoidingView
           style={{flex: 1}}
@@ -166,7 +168,7 @@ const CustomScreen = ({navigation, route}:any) => {
           {/* Header */}
           <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:15 }}>
             <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
-              <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
+              <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
                 <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
@@ -302,23 +304,23 @@ const CustomScreen = ({navigation, route}:any) => {
           </View> 
         </KeyboardAvoidingView>
        </SafeAreaView>
-     :
-      <Animated.View
-          collapsable={false}
-          style={[{flex:1, backgroundColor:'#3386FF', justifyContent:"center", alignItems:'center', opacity: containerOpacity }]}
-        >
-          <Animated.Image
-            source={require("../assets/pngs/AppLogo.png")}
-            style={[ {    
-              width: 250,
-              height: 250, 
-              opacity: imageOpacity 
-            }]}
-            resizeMode="contain"
-          />
-      </Animated.View>
-    }
-    </>
+    //  :
+    //   <Animated.View
+    //       collapsable={false}
+    //       style={[{flex:1, backgroundColor:'#3386FF', justifyContent:"center", alignItems:'center', opacity: containerOpacity }]}
+    //     >
+    //       <Animated.Image
+    //         source={require("../assets/pngs/AppLogo.png")}
+    //         style={[ {    
+    //           width: 250,
+    //           height: 250, 
+    //           opacity: imageOpacity 
+    //         }]}
+    //         resizeMode="contain"
+    //       />
+    //   </Animated.View>
+    // }
+    // </>
   );
 };
 

@@ -1,7 +1,7 @@
 // Libraries
 import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Image, } from 'react-native';
-import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection, getPendingPurchasesIOS} from 'react-native-iap';
+import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection, getPendingPurchasesIOS, purchaseErrorListener, clearTransactionIOS} from 'react-native-iap';
 import { getUniqueId } from 'react-native-device-info';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { PaymentsReceiptInfo, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppleAccessToken, storePaymentsReceiptInfo, storeVerifyPayment } from '../store/asyncStorage';
@@ -40,28 +40,33 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [products, setProducts] = useState<any>([])
   const [subscription, setSubscription] = useState<any>([])
   const [connected, setConnected] = useState<boolean>(false)
-  const [checkingSubscriptions, setCheckingSubscriptions] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const [restore, setRestore] = useState<boolean>(false)
   const [UUID, setUUID] = useState<string>('')
+  const [transactionDate, setTransactionDate] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
 
-  let purchaseUpdated: any
+
+
 
   const getter = async () =>{
+
+    const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+      console.log('loadVerifyPaymentFromStorage Error: ', error);
+    })
 
     await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
       
       // console.log("receipt_info_res: ", receipt_info_res);
       const expiration = receipt_info_res?.expires_date_ms
-      let expired = Date.now() > Number(expiration)
+      let expired = expiration && Date.now() > Number(expiration)
       // console.log("here: ", expired, Date.now(), expiration);
-      if (expired) { 
+      if (expired && receipt_info_res.subscribed) { 
         setLoading(false)
-        SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
+        // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
       }else{
-        setCheckingSubscriptions(true)
         setLoading(false)
       }
     })
@@ -71,27 +76,175 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   }
 
-  useLayoutEffect( ()=>{
+  const PendingTransaction=async ()=>{
 
+    // Get Pending Purchases
+    let pendingPurchases = await getPendingPurchasesIOS()
+    // Alert.alert("pendingPurchases: "+ JSON.stringify(pendingPurchases.length));
+
+    for(let i=0; i<pendingPurchases.length; i++){
+      await finishTransaction({purchase: pendingPurchases[i]})
+    }
+
+    setTimeout(async () => {
+      pendingPurchases = await getPendingPurchasesIOS()
+      console.log("pendingPurchases: ", pendingPurchases.length);
+        if(pendingPurchases.length!==0)
+          PendingTransaction()
+        else
+          setLoading(false)
+    },2000);
+
+  }
+
+  useEffect( ()=>{
+    
     getter()
-    connection().catch((error)=>{ console.log("connection error: ", JSON.stringify(error))})
+    // connection().catch((error)=>{ console.log("connection error: ", JSON.stringify(error))})
+    let purchaseUpdatedListenser: any
+    let pendingPurchases 
+    let TransactionArray: any = []
+
+    initConnection()
+    .then(async ()=>{ 
+      console.log('connected') 
+
+      // Get Products from Store
+      getInventory()  
+
+      // Resolve Pending Purchases
+      let pendingPurchases = await getPendingPurchasesIOS()
+      console.log("length: ", pendingPurchases.length);
+      if(pendingPurchases.length!==0)
+        PendingTransaction()
+      else
+        setLoading(false)
+
+    })
+    .catch((error)=>{ 
+      setLoading(false)
+      console.log('Not connected: ', error) 
+    })
+  
+    // purchaseUpdatedListenser = purchaseUpdatedListener(async (purchaseUpdated:any)=>{
+    //   TransactionArray.push(purchaseUpdated)
+    // })
+
+          
+    // setTimeout(async () => {
+    //   // console.log("Lenghts: ", TransactionArray?.length, pendingPurchases?.length);
+    //   if(TransactionArray.length <= pendingPurchases.length ){
+    //     console.log('Pendings');
+    //     const sortedTransactionArray:any  = TransactionArray.sort( (a, b) => b.transactionDate - a.transactionDate ); 
+    //     for(let i=sortedTransactionArray.length-1; i >= 0; i--){
+    //       console.log(i);
+          
+    //       await finishTransaction({purchase: sortedTransactionArray[i]})
+    //         .then(async (AckResult)=>{
+    //           console.log('finishTransaction Acknowledged: ', AckResult, sortedTransactionArray[i].transactionDate, transactionDate );  
+    //           let receipt = sortedTransactionArray[0].transactionReceipt
+    //           if(AckResult && receipt && i===0 && sortedTransactionArray[0].transactionDate){
+    //             {
+    //               await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
+    //               .then( (validationReponse)=>{ 
+                    
+    //                 // Store Receipt
+    //                 getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
+                    
+    //                 // Extract Purchase Records
+    //                 let purchaseType:any = []
+    //                 const renewal_history = validationReponse.latest_receipt_info
+                   
+    //                 // Find Subscription
+    //                 const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+    //                 const expiration = subscriptionObject.expires_date_ms
+    //                 let not_expired = expiration && Date.now() < expiration
+    //                 if(subscriptionObject !== undefined)
+    //                   {
+    //                     // console.log("subscriptionObject: ", subscriptionObject);
+    //                     if (not_expired){
+    //                       storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+    //                       !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+    //                     } 
+    //                   }   
+              
+    //                 // Find Purchases
+    //                 const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+    //                 if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+                    
+    //                 // Store Purchase Records
+    //                 console.log("purchaseType: ", purchaseType);
+    //                 if(purchaseType.length == 1){
+    //                   if(purchaseType[0] === "NoWatermarks")
+    //                     setVerifyPayments({ one_time: true, subcription: false })
+    //                   else if (purchaseType[0] ===  "MonthlySubscription")
+    //                     setVerifyPayments({ one_time: false, subcription: true })
+    //                 } 
+    //                 else if(purchaseType.length == 2){
+    //                   setVerifyPayments({ one_time: true, subcription: true })
+    //                 } 
+                            
+    //                 setLoading(false)  
+    //               })
+    //               .catch((validationError)=>{ 
+    //                 setLoading(false)
+    //                 console.log('validationError: ', validationError)
+    //               })  
+    //             }
+    //           }
+    //         }).catch((AckResultError)=>{
+    //           setLoading(false)
+    //           console.log('finishTransaction Error: ', AckResultError);
+    //         }) 
+    //     }
+    //   }
+    //   else if(pendingPurchases.length===0) {
+    //     console.log('No Pendings');
+        
+    //     await finishTransaction({purchase: TransactionArray})
+    //       .then((AckResult)=>{
+    //         console.log('finishTransaction Acknowledged: ', AckResult, TransactionArray.transactionDate, transactionDate );  
+    //         let receipt = TransactionArray.transactionReceipt
+    //         if(AckResult && receipt && (TransactionArray.transactionDate > transactionDate ))
+    //           validateReceipt(receipt)
+    //       }).catch((AckResultError)=>{
+    //         setLoading(false)
+    //         console.log('finishTransaction Error: ', AckResultError);
+    //       })  
+    //   }
+    //   else{
+    //     console.log("Lenghts: ", TransactionArray?.length, pendingPurchases?.length);
+
+    //     console.log("failed");
+        
+    //   }
+      
+    // }, 1500);
+
+    const purchaseErrorListenser = purchaseErrorListener( (error)=>{
+      console.log("purchaseErrorListener: ", error)
+    })
+ 
+
     //  Unmount
     return () => {
-      purchaseUpdated?.remove()
+      purchaseUpdatedListenser?.remove()
+      purchaseErrorListenser?.remove()
       endConnection()
     };
+
   },[])
 
-  const connection = async () =>{
+  // const connection = async () =>{
 
-    await initConnection()
-    .then(()=>{
-      setConnected(true)
-    }).catch((error)=>{
-      console.log('Not connected: ', error);
-      connection()
-    })
-  }
+  //   await initConnection()
+  //   .then(()=>{
+  //     setConnected(true)
+  //   }).catch((error)=>{
+  //     console.log('Not connected: ', error);
+  //     connection()
+  //   })
+  // }
 
   const getInventory = async () =>{
 
@@ -108,51 +261,50 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       setLoading(false)
       console.log('getSubscriptionsError: ', currentPurchaseError) 
     })
-    // console.log("Inventory loaded");
-    
-    setLoading(false)
   }
 
-  useEffect(()=>{
-    // console.log("Restored", restore);
-    if(connected){
-      // console.log('Connected')
-      getInventory()
-      // purchaseUpdated = purchaseUpdatedListener((purchase)=>{
+  // useEffect(()=>{
+  //   // Get Inventory & Activate Purchase Listener
+  //   if(connected){
+  //     // console.log("Connected");
+  //     getInventory()
+       
+  //     purchaseUpdated = purchaseUpdatedListener(async (purchase)=>{
+  //       console.log("purchaseUpdatedListener");
+  //       if(purchase?.transactionReceipt){
+  //         validateReceipt(purchase)
+  //       } 
+  //     })
 
-      //   console.log("purchaseUpdatedListener called", purchase);
-      //   try{     
-      //     const receipt = purchase?.transactionReceipt
-      //     if(receipt){
-      //       finishTransaction({purchase: purchase})
-      //       .then((AckResult)=>{
-      //         // console.log('Purchase Acknowledged: ', AckResult);
-      //         if(AckResult) { validateReceipt(receipt) }    
-      //       }).catch((AckResultError)=>{
-      //         console.log('Purchase Acknowledgement Error: ', AckResultError);
-      //       })
-      //     }
-      //   }
-      //   catch{
-      //     console.log('purchaseListener error');
-      //   }
-      // })
-    }
-    if (restore){
-      getMyPurchases()
-    }
+  //     setTimeout(() => {
+  //       getter()
+  //     }, 1000);
+ 
+  //   }
 
-  },[connected, restore])
+  //   return () => {
+  //     purchaseUpdated?.remove()
+  //   };
+  // },[connected])
 
-
-  const getMyPurchases = ()=>{
-    // console.log("Restore Purchase History"); 
-    getAvailablePurchases().then((purchases)=>{
-      console.log('purchases: ', purchases.length); 
-      if(purchases.length>0){
-        const sortedAvailablePurchases = purchases.sort( (a, b) => b.transactionDate - a.transactionDate );
+  const restorePurchases = async ()=>{
+    console.log("Restore Purchase History"); 
+    getAvailablePurchases()
+    .then(async (availablePurchasesRes: any)=>{
+      console.log('availablePurchasesRes: ', availablePurchasesRes.length); 
+      if(availablePurchasesRes.length>0){
+        const sortedAvailablePurchases = availablePurchasesRes.sort( (a, b) => b.transactionDate - a.transactionDate );
         const latestAvailableReceipt = sortedAvailablePurchases[0].transactionReceipt;
-        validateReceipt(latestAvailableReceipt)
+        // console.log("sortedAvailablePurchases[0]: ", sortedAvailablePurchases[0]);
+        await finishTransaction({purchase: sortedAvailablePurchases[0]})
+          .then((AckResult)=>{
+            console.log('finishTransaction Acknowledged: ', AckResult);  
+            if(latestAvailableReceipt)
+              validateReceipt(latestAvailableReceipt)
+          }).catch((AckResultError)=>{
+            setLoading(false)
+            console.log('finishTransaction Error: ', AckResultError);
+          })
       }
     }).catch((error: any)=>{
       setLoading(false)
@@ -160,17 +312,89 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     })
   }
 
+  // Restore Purchases
+  useEffect(()=>{
+    if (restore){
+      restorePurchases()
+    }
+  },[restore])
+
+
   // Apple expires subscription after 6 attempts or 5 minutes in sandbox automatically
+
+  const SubscriptionAlert = (alertType: string, msg: string) => {
+    Alert.alert(alertType, msg,
+    [
+      {
+        text: 'Yes', onPress: () => handleSubscription() 
+      },
+      {
+        text: 'No'
+      }
+    ] )
+  }
+  
+  const handlePurchase = async (productId: string) => {
+
+    console.log("productId: ", productId);
+    setLoading(true)
+    await requestPurchase({ sku: productId, appAccountToken: UUID })
+      .then(async (purchaseResponse: any)=>{
+        // // console.log("purchaseResponse: ", purchaseResponse);
+        // await finishTransaction({purchase: purchaseResponse})
+        //   .then((AckResult)=>{
+        //     console.log('finishTransaction Acknowledged: ', AckResult);  
+        //     let receipt = purchaseResponse.transactionReceipt
+        //     if(AckResult && receipt)
+        //       validateReceipt(receipt)
+        //   }).catch((AckResultError)=>{
+        //     setLoading(false)
+        //     console.log('finishTransaction Error: ', AckResultError);
+        //   })
+      })
+      .catch((purchaseError)=>{
+        setLoading(false)
+        console.log('purchaseError: ', purchaseError);
+      })
+  };
+
+  const handleSubscription = async () => {
+   
+    setLoading(true)
+    const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
+    await requestSubscription({ sku: productId, appAccountToken: UUID }) 
+    .then(async (subscriptionResponse: any)=>{ 
+      // console.log("subscriptionResponse: ", subscriptionResponse);
+      await finishTransaction({purchase: subscriptionResponse})
+      .then((AckResult)=>{
+        console.log('finishTransaction Acknowledged: ', AckResult);  
+        let receipt = subscriptionResponse.transactionReceipt
+        if(AckResult && receipt)
+          validateReceipt(receipt)
+      }).catch((AckResultError)=>{
+        setLoading(false)
+        console.log('finishTransaction Error: ', AckResultError);
+      })
+    })
+    .catch(async (subscriptionError)=>{
+      setLoading(false)
+      console.log('subscriptionError: ', subscriptionError);
+    })
+  };  
+ 
   const validateReceipt = async (receipt: string)=>{
-
+    
     await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
-    .then((validationReponse)=>{ 
+    .then( async (validationReponse)=>{ 
       
-      const renewal_history = validationReponse.latest_receipt_info
+      // Store Receipt
       getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
-
+      
+      // Extract Purchase Records
       let purchaseType:any = []
-
+      const renewal_history = validationReponse.latest_receipt_info
+      // console.log("renewal_history: ", renewal_history);
+      
       // Find Subscription
       const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
       const expiration = subscriptionObject.expires_date_ms
@@ -179,23 +403,27 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         {
           // console.log("subscriptionObject: ", subscriptionObject);
           if (not_expired){
-            storePaymentsReceiptInfo(subscriptionObject)
+            storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
             !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
           } 
           else { 
+            // console.log(Date.now() > expiration, Date.now(), expiration);
             setLoading(false)
-            console.log(Date.now() > expiration, Date.now(), expiration);
             SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
           }
-        }    
+        }   
 
       // Find Purchases
       const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
       if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
-
-      // Store Payments
+      
+      // Store Purchase Records
       console.log("purchaseType: ", purchaseType);
-      if(purchaseType.length == 1){
+      if (purchaseType.length==0){
+        setVerifyPayments({ one_time: false, subcription: false })
+        SubscriptionAlert("Payments Alert", "Your have no active payments. Would you like to subcribe")
+      } 
+      else if(purchaseType.length == 1){
         if(purchaseType[0] === "NoWatermarks")
           setVerifyPayments({ one_time: true, subcription: false })
         else if (purchaseType[0] ===  "MonthlySubscription")
@@ -204,15 +432,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       else if(purchaseType.length == 2){
         setVerifyPayments({ one_time: true, subcription: true })
       } 
-      else{
-        setVerifyPayments({ one_time: false, subcription: false })
-        SubscriptionAlert("Payments Expired", "Your have no active payments. Would you like to subcribe")
-      }
-      
-      // No paymrnts found
-      if (purchaseType.length==0){
-        SubscriptionAlert("Payments Alert", "No payment record found. Would you like to subcribe.")
-      } else if(restore) {
+
+      if(restore) {
         Alert.alert("Payments Alert", "Payments restored successfully",
           [{
               text: 'Ok',
@@ -228,90 +449,31 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         )
       }
       else if ( returnScreen !== "IndividualGiphScreen" && not_expired ){
-        reRender() 
+        // reRender() create store to record refresh status for each screen after Purchase i.e
+        // once purchase is made set status for each screen seperatly
+        // onNavigation Back refresh and reset status for each screen seperatly
         setTimeout(() => {
           navigation.canGoBack() ? navigation.pop() :
           returnScreen ? navigation.push(returnScreen) :
           navigation.push('CustomScreen')
         }, 2000);
       }
-      setLoading(false)      
+
+      // Get Pending Purchases
+      const pendingPurchases = await getPendingPurchasesIOS()
+      console.log("pendingPurchases: ",pendingPurchases.length);
+      if(pendingPurchases.length!==0)
+        PendingTransaction()
+      else
+        setLoading(false)  
     })
     .catch((validationError)=>{ 
       setLoading(false)
       console.log('validationError: ', validationError)
     })    
-  }
-
-  const SubscriptionAlert = (alertType: string, msg: string) => {
-    Alert.alert(alertType, msg,
-    [
-      {
-        text: 'Yes', onPress: () => { handleSubscription(subscription[0]?.productId) }
-      },
-      {
-        text: 'No'
-      }
-    ] )
+   
   }
   
-  const handlePurchase = async (sku: string) => {
-    setLoading(true)
-    if(products[0].productId=='NoWatermarks')
-    {
-      await requestPurchase({
-        sku,
-        andDangerouslyFinishTransactionAutomaticallyIOS: false,
-        appAccountToken: UUID
-      })
-      .then((purchaseReponse)=>{
-        // console.log("purchaseReponse: ", purchaseReponse);
-        const receipt = purchaseReponse?.transactionReceipt
-          if(receipt){
-            finishTransaction({purchase: purchaseReponse})
-            .then((AckResult)=>{
-              // console.log('Purchase Acknowledged: ', AckResult);
-              if(AckResult) { validateReceipt(receipt) }    
-            }).catch((AckResultError)=>{
-              setLoading(false)
-              console.log('Purchase Acknowledgement Error: ', AckResultError);
-            })
-          }
-      })
-      .catch((purchaseError)=>{
-        setLoading(false)
-        console.log('purchaseError: ', purchaseError);
-      })
-    }
-  };
-
-  const handleSubscription = async (sku: string) => {
-    setLoading(true)
-    if(sku)
-    {
-      await requestSubscription({
-        sku, 
-        andDangerouslyFinishTransactionAutomaticallyIOS: false, 
-        appAccountToken: UUID})
-      .then(async (subscriptionReponse: any)=>{
-        const receipt = subscriptionReponse?.transactionReceipt
-        if(receipt){
-          await finishTransaction({purchase: subscriptionReponse})
-          .then((AckResult)=>{
-            console.log('Subscription Acknowledged: ', AckResult);
-            if(AckResult) { validateReceipt(receipt) }
-          }).catch((AckResultError)=>{
-            console.log('Subscription Acknowledgement Error: ', AckResultError);
-          })
-        }
-      })
-      .catch((subscriptionError)=>{
-        setLoading(false)
-        console.log('subscriptionError: ', subscriptionError);
-      })
-    }
-  };  
- 
   getUniqueId().then((uniqueId) => {
     setUUID(uniqueId)
   }).catch((error) => {
@@ -319,7 +481,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   });
 
   useEffect(()=>{  
-    storeVerifyPayment(isVerifyPayments)
+    if(Object.keys(isVerifyPayments).length > 0)
+      storeVerifyPayment(isVerifyPayments)
   },[isVerifyPayments])
 
   const getAppleAccessToken: any = usePostAppleAccessToken({
@@ -331,7 +494,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       console.log(error);
     },
   });
-
 
 
   return (
@@ -377,17 +539,19 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               </View>
 
               {/* Subscribe */}
-              <View>
-                <Subcribe width={RFValue(230)} height={RFValue(30)} style={{marginTop:RFValue(30)}}/>
+              <View style={{alignItems:"center"}} >
+                <Subcribe width={RFValue(250)} height={RFValue(35)} style={{marginTop:RFValue(30)}}/>
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => {
-                  // isVerifyPayments?.subcription ? 
-                  // Alert.alert("Auto-renewable subscription is active") :
-                  handleSubscription(subscription[0]?.productId) }}  
-                  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
-              
+                  onPress={() => { 
+                    if(subscription[0]?.productId){ 
+                      handleSubscription()
+                      // isVerifyPayments?.subcription ? 
+                      // Alert.alert("Auto-renewable subscription is active") :
+                    }}}  
+                    style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
+                
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
                 </TouchableOpacity>
