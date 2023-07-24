@@ -529,8 +529,8 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 50a73168582868421112609d2fb155e607e34ec8
   React-jsinspector: 953260b8580780a6e81f2a6d319a8d42fd5028d8
   React-logger: fa4ff1e9c7e115648f7c5dafb7c20822ab4f7a7e
-  react-native-cameraroll: f750b9d05192ebf21e3474696a78c0df419abb33
-  react-native-safe-area-context: 5b8a418400eb3d8364aa87300e865c0262cc17b9
+  react-native-cameraroll: 8ffb0af7a5e5de225fd667610e2979fc1f0c2151
+  react-native-safe-area-context: 9e40fb181dac02619414ba1294d6c2a807056ab9
   React-perflogger: 169fb34f60c5fd793b370002ee9c916eba9bc4ae
   React-RCTActionSheet: 2355539e02ad5cd4b1328682ab046487e1e1e920
   React-RCTAnimation: 150644a38c24d80f1f761859c10c727412303f57
@@ -546,14 +546,14 @@ SPEC CHECKSUMS:
   ReactNativeWebPFormat: f5f043cc9ded052e535c3869ec341f91ba5a67c5
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAppleAuthentication: 0571c08da8c327ae2afc0261b48b4a515b0286a6
-  RNCAsyncStorage: 138c9b908c5569e7e9f633df75aa71a089690a0c
-  RNDeviceInfo: 5a3cc16daa72631bb7bf37720b98ce861255caee
+  RNCAsyncStorage: b90b71f45b8b97be43bc4284e71a6af48ac9f547
+  RNDeviceInfo: 475a4c447168d0ad4c807e48ef5e0963a0f4eb1b
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
-  RNIap: 0da98384deeb4e71a7deeae94c7c40d7b9a21fe2
-  RNInAppBrowser: 9066f16e763951ea2a70c191934274b955cb6ec8
-  RNPermissions: fe47fdaf7bb2783c8adeb0b9d2b489fd60bcb65f
+  RNIap: c397f49db45af3b10dca64b2325f21bb8078ad21
+  RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
+  RNPermissions: 08aab83e07ac9ac67f052df2fa36e7b6a4802c0c
   RNReanimated: c13da804217e13f6ee1188fab76d36d74b1488f1
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNShare: d82e10f6b7677f4b0048c23709bd04098d5aee6c

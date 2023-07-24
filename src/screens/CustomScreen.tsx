@@ -71,7 +71,7 @@ const CustomScreen = ({navigation, route}:any) => {
   }
 
   const refresh = () => {
-  
+    console.log('Custom refresh');
     setRefreshLoader(true)
     setLoader(true)
     setAllGIF([]);     
@@ -101,6 +101,8 @@ const CustomScreen = ({navigation, route}:any) => {
       setAllGIF([])   
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
+      console.log('here');
+      
     }   
     else if(text.length==0 && tag.length==0 && page > 1) {   
       getCustomTemplates.refetch()
@@ -125,11 +127,11 @@ const CustomScreen = ({navigation, route}:any) => {
 
   },[tag])  
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh()
+    }, []),
+  );
 
   // useEffect(()=>{
   //   getCustomRenders.mutate({ 
@@ -169,7 +171,7 @@ const CustomScreen = ({navigation, route}:any) => {
           {/* Header */}
           <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:15 }}>
             <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
-              <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
+              <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
                 <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
@@ -185,7 +187,7 @@ const CustomScreen = ({navigation, route}:any) => {
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity> */}
               <TouchableOpacity onPress={()=>{
-                // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+                navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
               } } >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>

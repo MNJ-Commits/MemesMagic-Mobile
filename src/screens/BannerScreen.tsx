@@ -36,7 +36,7 @@ const BannerScreen = ({navigation}:any) => {
   const [text, setText] = useState<string>("")
   const [query, setQuery] = useState<string>("")
   const [loader, setLoader] = useState<Boolean>(false)
-  const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)
+  const [refreshLoader, setRefreshLoader] = useState<Boolean>(false)
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
@@ -44,6 +44,7 @@ const BannerScreen = ({navigation}:any) => {
 
 
   const getBannerTemplates: any = useGetBannerTemplates(page, {
+    enabled:false,
     onSuccess: (res: any) => {
       setRefreshLoader(false)
       setAllGIF([...new Set([...allGif, ...res])]);
@@ -52,6 +53,7 @@ const BannerScreen = ({navigation}:any) => {
   });
 
   const getBannerSearch: any = useGetBannerSearch(query, page,{
+    enabled:false,
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
       setLoader(false)
@@ -97,7 +99,8 @@ const BannerScreen = ({navigation}:any) => {
   ]
 
   const refresh = () => {
-
+    console.log('Giphy refresh');
+    
     setRefreshLoader(true)   
     setLoader(true)
     setAllGIF([]); 
@@ -105,11 +108,10 @@ const BannerScreen = ({navigation}:any) => {
       setPage(1);
     } 
     else{
-    if(query.length!=0 )
-      getBannerSearch.refetch()
-    else
-      getBannerTemplates.refetch()
-  
+      if(query.length!=0 )
+        getBannerSearch.refetch()
+      else
+        getBannerTemplates.refetch()
     };
   }
 
@@ -129,8 +131,9 @@ const BannerScreen = ({navigation}:any) => {
     }
     else if(text.length==0 && page == 1 ){   
       setAllGIF([])   
-      setRefreshLoader(true)       
-      getBannerTemplates.refetch()
+      setRefreshLoader(true)   
+      console.log('extra refetch()');
+      // getBannerTemplates.refetch()
     }
     else if(text.length==0 && page > 1) {   
       getBannerTemplates.refetch()
@@ -157,6 +160,12 @@ const BannerScreen = ({navigation}:any) => {
       getBannerTemplates.refetch()
  
   },[query])
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refresh()
+  //   }, []),
+  // );
 
   const searchInput: any = useRef()  
   

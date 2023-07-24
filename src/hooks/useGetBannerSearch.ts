@@ -12,8 +12,8 @@ const useGetBannerSearchRequest = async<T>(query: string, page: number)=>{
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
       }
     )        
-    // console.log("response: ", response); 
     const data = await response?.json()  
+    console.log("data?.data: ", data?.data); 
     
     return data?.data
   } catch (err: any) {
@@ -28,7 +28,7 @@ export function useGetBannerSearch<T>(
   options: UseQueryOptions<T, Error, T>,
 ) {
   return useQuery(
-    [`giphy/list`] as QueryKey, 
+    [`giphy/search`] as QueryKey, 
     () => useGetBannerSearchRequest<T>(query, page), 
     options)
 }
