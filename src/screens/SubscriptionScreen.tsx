@@ -39,16 +39,17 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const [products, setProducts] = useState<any>([])
   const [subscription, setSubscription] = useState<any>([])
-  const [connected, setConnected] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const [restore, setRestore] = useState<boolean>(false)
   const [UUID, setUUID] = useState<string>('')
-  const [transactionDate, setTransactionDate] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
 
 
-
+  // Ckears Penfding Queue
+  useEffect(() => {
+    void clearTransactionIOS();
+  }, [])
 
   const getter = async () =>{
 
@@ -62,12 +63,12 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       const expiration = receipt_info_res?.expires_date_ms
       let expired = expiration && Date.now() > Number(expiration)
       // console.log("here: ", expired, Date.now(), expiration);
-      if (expired && receipt_info_res.subscribed) { 
-        setLoading(false)
+      if (expired) { 
+        // setLoading(false)
         setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
-        // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+        // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
       }else{
-        setLoading(false)
+        // setLoading(false)
       }
     })
     .catch((error:any)=>{
@@ -77,34 +78,30 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   }
 
   const PendingTransaction=async ()=>{
-
+    
     // Get Pending Purchases
     let pendingPurchases = await getPendingPurchasesIOS()
-    // Alert.alert("pendingPurchases: "+ JSON.stringify(pendingPurchases.length));
-
-    for(let i=0; i<pendingPurchases.length; i++){
-      await finishTransaction({purchase: pendingPurchases[i]})
-    }
 
     setTimeout(async () => {
       pendingPurchases = await getPendingPurchasesIOS()
-      console.log("pendingPurchases: ", pendingPurchases.length);
-        if(pendingPurchases.length!==0)
+        if(pendingPurchases.length!==0){
+          console.log("Pending");
           PendingTransaction()
-        else
+        }else{
+          console.log("finished");
           setLoading(false)
+        }
     },2000);
 
   }
 
   useEffect( ()=>{
     
-    getter()
-    // connection().catch((error)=>{ console.log("connection error: ", JSON.stringify(error))})
     let purchaseUpdatedListenser: any
-    let pendingPurchases 
-    let TransactionArray: any = []
+    // Local Storage
+    getter()
 
+    // Initialize Connection
     initConnection()
     .then(async ()=>{ 
       console.log('connected') 
@@ -112,115 +109,19 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // Get Products from Store
       getInventory()  
 
-      // Resolve Pending Purchases
+      // Check Pending Purchases
       let pendingPurchases = await getPendingPurchasesIOS()
       console.log("length: ", pendingPurchases.length);
       if(pendingPurchases.length!==0)
         PendingTransaction()
       else
         setLoading(false)
-
     })
-    .catch((error)=>{ 
+    .catch((error: any)=>{ 
       setLoading(false)
       console.log('Not connected: ', error) 
     })
   
-    // purchaseUpdatedListenser = purchaseUpdatedListener(async (purchaseUpdated:any)=>{
-    //   TransactionArray.push(purchaseUpdated)
-    // })
-
-          
-    // setTimeout(async () => {
-    //   // console.log("Lenghts: ", TransactionArray?.length, pendingPurchases?.length);
-    //   if(TransactionArray.length <= pendingPurchases.length ){
-    //     console.log('Pendings');
-    //     const sortedTransactionArray:any  = TransactionArray.sort( (a, b) => b.transactionDate - a.transactionDate ); 
-    //     for(let i=sortedTransactionArray.length-1; i >= 0; i--){
-    //       console.log(i);
-          
-    //       await finishTransaction({purchase: sortedTransactionArray[i]})
-    //         .then(async (AckResult)=>{
-    //           console.log('finishTransaction Acknowledged: ', AckResult, sortedTransactionArray[i].transactionDate, transactionDate );  
-    //           let receipt = sortedTransactionArray[0].transactionReceipt
-    //           if(AckResult && receipt && i===0 && sortedTransactionArray[0].transactionDate){
-    //             {
-    //               await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
-    //               .then( (validationReponse)=>{ 
-                    
-    //                 // Store Receipt
-    //                 getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
-                    
-    //                 // Extract Purchase Records
-    //                 let purchaseType:any = []
-    //                 const renewal_history = validationReponse.latest_receipt_info
-                   
-    //                 // Find Subscription
-    //                 const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-    //                 const expiration = subscriptionObject.expires_date_ms
-    //                 let not_expired = expiration && Date.now() < expiration
-    //                 if(subscriptionObject !== undefined)
-    //                   {
-    //                     // console.log("subscriptionObject: ", subscriptionObject);
-    //                     if (not_expired){
-    //                       storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
-    //                       !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
-    //                     } 
-    //                   }   
-              
-    //                 // Find Purchases
-    //                 const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
-    //                 if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
-                    
-    //                 // Store Purchase Records
-    //                 console.log("purchaseType: ", purchaseType);
-    //                 if(purchaseType.length == 1){
-    //                   if(purchaseType[0] === "NoWatermarks")
-    //                     setVerifyPayments({ one_time: true, subcription: false })
-    //                   else if (purchaseType[0] ===  "MonthlySubscription")
-    //                     setVerifyPayments({ one_time: false, subcription: true })
-    //                 } 
-    //                 else if(purchaseType.length == 2){
-    //                   setVerifyPayments({ one_time: true, subcription: true })
-    //                 } 
-                            
-    //                 setLoading(false)  
-    //               })
-    //               .catch((validationError)=>{ 
-    //                 setLoading(false)
-    //                 console.log('validationError: ', validationError)
-    //               })  
-    //             }
-    //           }
-    //         }).catch((AckResultError)=>{
-    //           setLoading(false)
-    //           console.log('finishTransaction Error: ', AckResultError);
-    //         }) 
-    //     }
-    //   }
-    //   else if(pendingPurchases.length===0) {
-    //     console.log('No Pendings');
-        
-    //     await finishTransaction({purchase: TransactionArray})
-    //       .then((AckResult)=>{
-    //         console.log('finishTransaction Acknowledged: ', AckResult, TransactionArray.transactionDate, transactionDate );  
-    //         let receipt = TransactionArray.transactionReceipt
-    //         if(AckResult && receipt && (TransactionArray.transactionDate > transactionDate ))
-    //           validateReceipt(receipt)
-    //       }).catch((AckResultError)=>{
-    //         setLoading(false)
-    //         console.log('finishTransaction Error: ', AckResultError);
-    //       })  
-    //   }
-    //   else{
-    //     console.log("Lenghts: ", TransactionArray?.length, pendingPurchases?.length);
-
-    //     console.log("failed");
-        
-    //   }
-      
-    // }, 1500);
-
     const purchaseErrorListenser = purchaseErrorListener( (error)=>{
       console.log("purchaseErrorListener: ", error)
     })
@@ -234,17 +135,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     };
 
   },[])
-
-  // const connection = async () =>{
-
-  //   await initConnection()
-  //   .then(()=>{
-  //     setConnected(true)
-  //   }).catch((error)=>{
-  //     console.log('Not connected: ', error);
-  //     connection()
-  //   })
-  // }
 
   const getInventory = async () =>{
 
@@ -262,30 +152,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       console.log('getSubscriptionsError: ', currentPurchaseError) 
     })
   }
-
-  // useEffect(()=>{
-  //   // Get Inventory & Activate Purchase Listener
-  //   if(connected){
-  //     // console.log("Connected");
-  //     getInventory()
-       
-  //     purchaseUpdated = purchaseUpdatedListener(async (purchase)=>{
-  //       console.log("purchaseUpdatedListener");
-  //       if(purchase?.transactionReceipt){
-  //         validateReceipt(purchase)
-  //       } 
-  //     })
-
-  //     setTimeout(() => {
-  //       getter()
-  //     }, 1000);
- 
-  //   }
-
-  //   return () => {
-  //     purchaseUpdated?.remove()
-  //   };
-  // },[connected])
 
   const restorePurchases = async ()=>{
     console.log("Restore Purchase History"); 
@@ -369,7 +235,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       .then((AckResult)=>{
         console.log('finishTransaction Acknowledged: ', AckResult);  
         let receipt = subscriptionResponse.transactionReceipt
-        if(AckResult && receipt)
+        if(receipt)
           validateReceipt(receipt)
       }).catch((AckResultError)=>{
         setLoading(false)
@@ -459,13 +325,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         }, 2000);
       }
 
-      // Get Pending Purchases
-      const pendingPurchases = await getPendingPurchasesIOS()
-      console.log("pendingPurchases: ",pendingPurchases.length);
-      if(pendingPurchases.length!==0)
-        PendingTransaction()
-      else
-        setLoading(false)  
+      setLoading(false)  
+
     })
     .catch((validationError)=>{ 
       setLoading(false)
