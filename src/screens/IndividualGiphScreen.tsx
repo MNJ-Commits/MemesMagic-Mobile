@@ -84,12 +84,12 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 "uids": [ gifData.uid ],
                 text:[gifData?.defaultText]
             })
+            // setWebp(gifData.src)
             setTextCheck( gifData.defaultText ? false : true)
             setText(gifData.defaultText)
         }
-        else{
-            if(route?.params?.uid && !route?.params?.defaultText)
-                getTemplateById.mutate({ uid:route?.params?.uid })
+        else if(route?.params?.uid && !route?.params?.defaultText){
+            getTemplateById.mutate({ uid:route?.params?.uid })
         }
     },[gifData])
    

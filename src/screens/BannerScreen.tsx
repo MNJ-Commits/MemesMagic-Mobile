@@ -41,9 +41,9 @@ const BannerScreen = ({navigation}:any) => {
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
   const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(30);
 
-
-  const getBannerTemplates: any = useGetBannerTemplates(page, {
+  const getBannerTemplates: any = useGetBannerTemplates(page, limit, {
     enabled:false,
     onSuccess: (res: any) => {
       setRefreshLoader(false)
@@ -52,7 +52,7 @@ const BannerScreen = ({navigation}:any) => {
     onError: (res: any) => console.log('getBannerTemplates onError: ',res),
   });
 
-  const getBannerSearch: any = useGetBannerSearch(query, page,{
+  const getBannerSearch: any = useGetBannerSearch(query, page, limit,{
     enabled:false,
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
@@ -132,8 +132,7 @@ const BannerScreen = ({navigation}:any) => {
     else if(text.length==0 && page == 1 ){   
       setAllGIF([])   
       setRefreshLoader(true)   
-      console.log('extra refetch()');
-      // getBannerTemplates.refetch()
+      getBannerTemplates.refetch() // refresh refetch()
     }
     else if(text.length==0 && page > 1) {   
       getBannerTemplates.refetch()
@@ -167,6 +166,7 @@ const BannerScreen = ({navigation}:any) => {
   //   }, []),
   // );
 
+  
   const searchInput: any = useRef()  
   
   return (
@@ -293,6 +293,7 @@ const BannerScreen = ({navigation}:any) => {
             text={text}
             page = {page}
             setPage = {setPage}
+            setLimit = {setLimit}
             textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
             textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
             textStroke={sText}

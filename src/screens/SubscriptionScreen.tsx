@@ -40,6 +40,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [products, setProducts] = useState<any>([])
   const [subscription, setSubscription] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const [backBlocked, setBackBlocked] = useState<boolean>(false)
   const [restore, setRestore] = useState<boolean>(false)
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
@@ -49,6 +50,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   // Ckears Penfding Queue
   useEffect(() => {
     void clearTransactionIOS();
+    return()=>{}
   }, [])
 
   const getter = async () =>{
@@ -124,6 +126,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   
     const purchaseErrorListenser = purchaseErrorListener( (error)=>{
       console.log("purchaseErrorListener: ", error)
+      setBackBlocked(false)
+      setLoading(false)
     })
  
 
@@ -183,6 +187,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     if (restore){
       restorePurchases()
     }
+    return()=>{}
   },[restore])
 
 
@@ -204,17 +209,20 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
     console.log("productId: ", productId);
     setLoading(true)
+    setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
       .then(async (purchaseResponse: any)=>{
         // console.log("purchaseResponse: ", purchaseResponse);
         await finishTransaction({purchase: purchaseResponse})
-          .then((AckResult)=>{
+        .then((AckResult)=>{
+            setBackBlocked(false)
             console.log('finishTransaction Acknowledged: ', AckResult);  
             let receipt = purchaseResponse.transactionReceipt
             if(AckResult && receipt)
               validateReceipt(receipt)
           }).catch((AckResultError)=>{
             setLoading(false)
+            setBackBlocked(false)
             console.log('finishTransaction Error: ', AckResultError);
           })
       })
@@ -227,18 +235,21 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handleSubscription = async () => {
    
     setLoading(true)
+    setBackBlocked(true)
     const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
     await requestSubscription({ sku: productId, appAccountToken: UUID }) 
     .then(async (subscriptionResponse: any)=>{ 
       // console.log("subscriptionResponse: ", subscriptionResponse);
       await finishTransaction({purchase: subscriptionResponse})
       .then((AckResult)=>{
+        setBackBlocked(false)
         console.log('finishTransaction Acknowledged: ', AckResult);  
         let receipt = subscriptionResponse.transactionReceipt
         if(receipt)
           validateReceipt(receipt)
       }).catch((AckResultError)=>{
         setLoading(false)
+        setBackBlocked(false)
         console.log('finishTransaction Error: ', AckResultError);
       })
     })
@@ -344,6 +355,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   useEffect(()=>{  
     if(Object.keys(isVerifyPayments).length > 0)
       storeVerifyPayment(isVerifyPayments)
+    return()=>{}
   },[isVerifyPayments])
 
   const getAppleAccessToken: any = usePostAppleAccessToken({
@@ -365,11 +377,13 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <ScrollView contentContainerStyle={{ marginTop:10 }} >
             
             <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
-              <TouchableOpacity onPress={()=>{
-                navigation.canGoBack() ? navigation.pop() :
-                returnScreen ? navigation.push(returnScreen) :
-                navigation.push('CustomScreen')
-              }} 
+              <TouchableOpacity
+                disabled={backBlocked}
+                onPress={()=>{
+                  navigation.canGoBack() ? navigation.pop() :
+                  returnScreen ? navigation.push(returnScreen) :
+                  navigation.push('CustomScreen')
+                }} 
               >
                 <BackButton width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>

@@ -8,7 +8,7 @@ import RenderItems from './RenderItem';
 
 
 
-const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, page, setPage, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, page, setPage, setLimit, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
 
   
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
@@ -31,8 +31,11 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
     const handleScroll = (event: any) => {      
       // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
       
-      if(event.nativeEvent.locationY<0 && API?.data?.length == 30)
-        setPage(page + 1)
+      if(event.nativeEvent.locationY<0 && API?.data?.length == 30 && page<=3)
+        {
+          if (page===2){ setLimit(40) }
+          setPage(page + 1)
+        }
       else if(event.nativeEvent.locationY<0 && API?.data?.length<30)
         console.log("End reached");
     };
