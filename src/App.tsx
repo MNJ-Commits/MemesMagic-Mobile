@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
 import { ActivityIndicator } from 'react-native';
 import { clearTransactionIOS } from 'react-native-iap';
+import { PaymentsReceiptInfo, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage } from './store/asyncStorage';
 
 
 const Stack = createNativeStackNavigator(); 
@@ -51,6 +52,31 @@ const AppBootStrap = React.memo(function () {
       void clearTransactionIOS();
     }, []),
   );
+
+  const getter = async () =>{
+
+    const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+      console.log('loadVerifyPaymentFromStorage Error: ', error);
+    })
+
+    await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
+      
+      // console.log("receipt_info_res: ", receipt_info_res);
+      const expiration = receipt_info_res?.expires_date_ms
+      let expired = expiration && Date.now() > Number(expiration)
+      // console.log("here: ", expired, Date.now(), expiration);
+      if (expired) { 
+        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
+      }
+    })
+    .catch((error:any)=>{
+      console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    })
+  }
+  
+  useEffect(()=>{
+    getter()
+  },[])
   
   return(
 
@@ -73,6 +99,10 @@ export default App
 
 
 
+
+function setVerifyPayments(arg0: { one_time: any; subcription: boolean; }) {
+  throw new Error('Function not implemented.');
+}
 //       CustomScreen:{
 //   screens:{
 //     IndividualGiphScreen:"IndividualGiphScreen"

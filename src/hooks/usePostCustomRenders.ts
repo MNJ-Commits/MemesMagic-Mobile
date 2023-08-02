@@ -9,7 +9,7 @@ const usePostCustomRendersRequest = async (params: any)=>{
         console.log('loadAppleAccessTokenFromStorage Error: ', error);
     })
 
-    console.log('params: ',params);
+    // console.log('params: ',params);
 
     try {
         const response = await fetch('http://18.143.157.105:3000/renderer/render', 
@@ -19,7 +19,7 @@ const usePostCustomRendersRequest = async (params: any)=>{
                 headers: access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` } : {  'Content-Type': 'application/json' }
             })    
         const data = await response?.json()        
-        // console.log("data?.data: ", data?.data);
+        // console.log("data?.data: ", response.status );
         
         return data?.data
     }

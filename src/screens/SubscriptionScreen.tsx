@@ -325,7 +325,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           }]
         )
       }
-      else if ( returnScreen !== "IndividualGiphScreen" && not_expired ){
+      else if ( not_expired ){
         // reRender() create store to record refresh status for each screen after Purchase i.e
         // once purchase is made set status for each screen seperatly
         // onNavigation Back refresh and reset status for each screen seperatly

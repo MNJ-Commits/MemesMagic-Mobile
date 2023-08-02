@@ -57,12 +57,13 @@ const CustomScreen = ({navigation, route}:any) => {
     setAllGIF([])
     setLoader(true)
     Keyboard.dismiss()
-    
-    for (let i = 0; i <= UIDs.length-1; i += 1) {      
+    // getCustomRenders.mutate({ 
+    //   text:[text],
+    //   "uids": UIDs
+    // })
+    for (let i = 0; i <= UIDs.length-1; i += 1) {          
       setTimeout(() => {
         getCustomRenders.mutate({ 
-          // text:["Meme Magic"],
-          // "uids": [  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",  "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",  "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",  "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",  "41", "42", "43", "44", "45", "46", "47"]
           text:[text],
           "uids": [UIDs[i]]
         })
@@ -74,8 +75,9 @@ const CustomScreen = ({navigation, route}:any) => {
     console.log('Custom refresh');
     setRefreshLoader(true)
     setLoader(true)
+    setLimit(30)
     setAllGIF([]);     
-    if (page > 1) { setPage(1); } 
+    if (page > 1 && text.length ==0 ) { setPage(1); } 
     else{
       if(text.length!=0 ){ renderRequestChunk() }
       else{ 
@@ -97,20 +99,21 @@ const CustomScreen = ({navigation, route}:any) => {
       getCustomTemplates.refetch()
     }
     else if(text.length==0 && tag.length==0 && page == 1) {   
-      setUIDs([])
       setAllGIF([])   
+      setUIDs([])
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
       console.log('here');
       
     }   
     else if(text.length==0 && tag.length==0 && page > 1) {   
+      console.log('Without tag');
       getCustomTemplates.refetch()
     } 
     else if(text.length!=0 && page == 1){
       renderRequestChunk()
     }
-    else if(text.length!=0 && page > 1) {
+    else if(text.length!=0 && page > 1 ) {
       setLoader(false) // kept in synch with Banner
     }
 
@@ -120,11 +123,13 @@ const CustomScreen = ({navigation, route}:any) => {
     
     setAllGIF([])
     setUIDs([])
+    setPage(1)
+    setLimit(30)
     setRefreshLoader(true)
     setLoader(true)
     // setText('')
     getCustomTemplates.refetch()
-
+    
   },[tag])  
 
   // useFocusEffect(
@@ -133,6 +138,9 @@ const CustomScreen = ({navigation, route}:any) => {
   //   }, []),
   // );
 
+  // useEffect(()=>{
+  //   setRefreshLoader(false)
+  // },[UIDs?.length===allGif?.length])
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -147,9 +155,11 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 3000);
 
-// console.log(allGif?.length, text.length);
+console.log(allGif?.length);
+// console.log(UIDs?.length);
 // console.log(getCustomRenders?.isLoading);
 // console.log(allGif?.length, UIDs?.length );
+
 
   return (
     <>
@@ -178,9 +188,10 @@ const CustomScreen = ({navigation, route}:any) => {
               <TouchableOpacity>
                 <Download2 width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity> */}
-              <TouchableOpacity onPress={()=>{
-                navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
-              } } >
+              <TouchableOpacity 
+                onPress={()=>{
+                  navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+                }} >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
             </View>
@@ -230,7 +241,8 @@ const CustomScreen = ({navigation, route}:any) => {
                 {
                   ["Random", "Angry", "Happy", "Hi", "Mocking", "Nervous", "Nope", "Reveal", "Sad", "Screen", "Signs", "Sports", "Clothes"].map((data:string, index: number)=>{
                   return(
-                      <TouchableOpacity 
+                      <TouchableOpacity
+                        disabled={UIDs?.length !== allGif?.length}
                         onPress={()=>{ 
                           if(data==tag){setTag('')} 
                           else{ setTag(data); setLoader(true);} }} 
@@ -255,14 +267,16 @@ const CustomScreen = ({navigation, route}:any) => {
               isLoader={loader}
               setLoader={setLoader}
               refreshLoader={refreshLoader}
+              UIDsLength = {UIDs?.length}
+              allGifLength = {allGif?.length}
               text={text}
               page = {page}
               setPage = {setPage}
               setLimit={setLimit}
               navigation={navigation}
             />
-            {(refreshLoader || loader) && 
-              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
+            { UIDs?.length !== allGif?.length  && 
+              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:140  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}
                   style={{width: 20, height: 20, zIndex:1 }}

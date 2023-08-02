@@ -46,6 +46,7 @@ const BannerScreen = ({navigation}:any) => {
   const getBannerTemplates: any = useGetBannerTemplates(page, limit, {
     enabled:false,
     onSuccess: (res: any) => {
+      console.log("res: ",res.length);
       setRefreshLoader(false)
       setAllGIF([...new Set([...allGif, ...res])]);
     },
@@ -104,7 +105,7 @@ const BannerScreen = ({navigation}:any) => {
     setRefreshLoader(true)   
     setLoader(true)
     setAllGIF([]); 
-    if (page > 1) {
+    if (page > 1 && text.length==0) {
       setPage(1);
     } 
     else{
@@ -153,6 +154,7 @@ const BannerScreen = ({navigation}:any) => {
     
     setAllGIF([]); 
     setRefreshLoader(true) 
+    setPage(1)
     if(query.length!=0 )
       getBannerSearch.refetch()
     else
@@ -301,7 +303,7 @@ const BannerScreen = ({navigation}:any) => {
             font = {fontFile}
             navigation={navigation}
           />
-          {(refreshLoader || loader) && 
+          {(refreshLoader ) && 
             <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
               <Image
                 source={require('../assets/gifs/loader.gif')}

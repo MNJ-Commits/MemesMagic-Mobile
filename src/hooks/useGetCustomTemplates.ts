@@ -3,8 +3,7 @@ import { loadAppleAccessTokenFromStorage } from "../store/asyncStorage"
 
 const useGetCustomTemplatesRequest = async<T>(tag: string, page:number, limit: number)=>{
   
-  let URI: string = `http://18.143.157.105:3000/assets/templates?p=${page}`
-    // page==1 ? URI += `&l=${limit}` : ''
+  let URI: string = `http://18.143.157.105:3000/assets/templates?p=${page}&l=${limit}`
     tag ? URI += `&tag=${tag}` : ''
 
   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{

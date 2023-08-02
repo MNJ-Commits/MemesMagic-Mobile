@@ -1,12 +1,11 @@
 import { TouchableOpacity, Image, ActivityIndicator } from "react-native"
 import { RFValue } from "react-native-responsive-fontsize"
 import { storeIndividualGifData } from "../store/asyncStorage"
-// import WebpImageView from 'react-native-webp';
 import FastImage from 'react-native-fast-image'
 import React from "react"
 
   
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, appleAccessToken}:any)=>{
+const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
     const customURI: any =  giphy ? item?.template : 
                             item?.template ? `http://18.143.157.105:3000${item?.template}` : 
@@ -43,19 +42,6 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
         style={{ alignItems:'center', margin:RFValue(5) }} 
         >  
         < >               
-            {/* source={require('../assets/gifs/sherlock.gif')} */}
-          {/* <WebpImageView 
-            key={item.index}
-            source={{uri: customURI}}
-            resizeMode={'contain'}
-            onLoadEnd={()=>setLoader(false)}
-            style={{ 
-              zIndex: -1, 
-              width:'100%', 
-              height: RFValue(150/width*height),
-              borderRadius:RFValue(10),   
-            }}
-          /> */}
            <FastImage
             key={item.index}
             source={{ 
@@ -71,19 +57,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               borderRadius:RFValue(10),   
             }}
           />
-          {/* <Image
-            key={item.index}
-            source={{uri: customURI}}
-            resizeMode={'contain'}
-            onLoadEnd={()=>setLoader(false)}
-            style={{ 
-              zIndex: -1, 
-              width:'100%', 
-              height: RFValue(150/width*height),
-              borderRadius:RFValue(10),   
-            }}
-          /> */}
-            {(loader && !giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
+          {(loader && !giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
           {
             giphy && 
               <Image 
