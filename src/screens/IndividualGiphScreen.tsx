@@ -38,6 +38,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const [gifData, setGIFData] = useState<any>({})
     const [fileAction, setFileAction] = useState<string>('')
+    const [responseTime, setRresponseTime] = useState<any>('')
 
 
     // GET Store
@@ -91,6 +92,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         else if(route?.params?.uid && !route?.params?.defaultText){
             getTemplateById.mutate({ uid:route?.params?.uid })
         }
+
+        return()=>{}
     },[gifData])
    
     const getTemplateById: any = useGetCustomTemplateById({
@@ -107,7 +110,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
     const renderGifById: any = usePostCustomRenders({
         onSuccess(res) { 
-            // console.log("res: ", res[0].render);            
+            // console.log("res: ", res[0].render);     
             setTextCheck(false)
             if(res[0].render.includes('.webp')){
                 setWebp(`http://18.143.157.105:3000${res[0].render}`) 
@@ -140,6 +143,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const DownloadPermissions = ()=> {
         checkLibraryPermissions( ).then((resp:any)=>{
             setDownloading(true);  
+            startTime()
             renderGifById.mutate({ 
                 "HQ": true,
                 "animated_sequence": true,
@@ -173,6 +177,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // DOWNLOAD GIF'S
     const RequestDownloadCustomGif  = async (remoteURL: string)=>{
 
+        const endTime:any = new Date(); 
+        const timeDifference = endTime-responseTime
+        console.log("remoteURL Response Time: ", timeDifference / 1000) 
+
         //Define path and directory to store files to
         // const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.png`
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
@@ -185,14 +193,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             toFile: filePath,
             headers: header
         } 
-
+        const startTime:any = new Date();
         let response = await downloadFile(options);
         return response.promise.then(async (res: any) => {
             console.log('res: ', res, filePath);    
              // TO SAVE GIF'S TO IOS PHOTO 
+             const endTime:any = new Date(); 
+                const timeDifference = endTime-startTime
+                console.log("Download Document Response Time: ", timeDifference / 1000)    
+
             await CameraRoll.save(remoteURL).then((res:any)=>{
+                const endTime:any = new Date(); 
+                const timeDifference = endTime-startTime
+                console.log("Download Photos Response Time: ", timeDifference / 1000)    
                 setDownloading(false)
-                console.log('res: ', res);
+                // console.log('res: ', res);
             }).catch((error:any)=>{
                 setDownloading(false)
                 console.log('error: ', error);
@@ -261,6 +276,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             let data: any = await resp.base64();            
             return data
         }).then((base64Data:any) => {
+            const endTime:any = new Date(); 
+            const timeDifference = endTime-responseTime
+            console.log("Share Response Time: ", timeDifference / 1000)    
             // Share
             Share.open({
                 type: 'image/gif',
@@ -318,7 +336,12 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // COPY GIF'S
     const CopyCustomGif = (remoteURL: string) => {
         console.log("uid: ", gifData.uid, remoteURL);
-        NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { setCopying(!resp) })
+        NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { 
+            const endTime:any = new Date(); 
+            const timeDifference = endTime-responseTime
+            console.log("Share Response Time: ", timeDifference / 1000)    
+            setCopying(!resp) 
+        })
     }
 
     const CopyGiphyGif = async ()=>{
@@ -384,9 +407,14 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // console.log('appleAccessToken: ', appleAccessToken);
     //  console.log("text.length: ", text.length);
   
+    const startTime=()=>{
+        const startTime = new Date(); 
+        setRresponseTime(startTime)   
+    }
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
-          {gifData.src &&  <KeyboardAvoidingView
+            {gifData.src &&  
+            <KeyboardAvoidingView
                 style={{flex: 1}}
                 behavior={Platform.OS === 'ios' ? 'padding': undefined }
                 keyboardVerticalOffset={20}
@@ -399,19 +427,26 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 </TouchableOpacity>
                 <ScrollView 
                     style={{flex:1, }} 
-                    contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20) }}
+                    showsVerticalScrollIndicator={false}
+                    // onScrollBeginDrag={()=>Keyboard.dismiss()}
+                    contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20), paddingBottom:50 }}
                     keyboardShouldPersistTaps='handled' 
                  >
-                    {/* Gif */}
-                    <>
-                        <FastImage
-                            source={{uri: gifData?.giphy ? gifData.src : webp }}
+                    {/* Gif View*/}
+                    <View>
+                        <Image
+                            // source={{uri: gifData?.giphy ? gifData.src : webp }}
+                            source={{
+                                uri: webp ? webp : gifData.src,  
+                                // priority: FastImage.priority.normal, 
+                                cache: 'force-cache' 
+                            }}
                             resizeMode={FastImage.resizeMode.contain}
                             style={[{width: '100%', aspectRatio: gifData.width/gifData.height,borderRadius:RFValue(30), margin:RFValue(20),  } ]}
                         />        
                     
                         {
-                        gifData.giphy && 
+                        gifData.giphy && (text || gifData.defaultText) &&
                             <FastImage 
                                 source={appleAccessToken ?
                                     {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
@@ -433,8 +468,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             />
                         }
                         { (!gifData.giphy && !webp )&&
-                            <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', top: RFValue(gifData.height/3) }}/>}
-                    </>
+                            <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', alignSelf:'center', top: RFValue(gifData.height/3) }}/>}
+                    </View>
                   
                     {/* Copy/Download/Share */}
                     <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
@@ -446,12 +481,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
                                         setCopying(true); setFileAction("CopyCustomGif"); setTextCheck( textSting ? false : true)
+                                        startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
                                             "animated_sequence": true,
                                             "render_format": "gif",
                                             "uids": [ gifData.uid ], 
-                                            text:[text],
+                                            "text":[text],
                                         }) 
                                     } 
                                     else{
@@ -488,12 +524,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   setFileAction("RequestShareCustomGif");   setTextCheck( textSting ? false : true)
+                                        startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
                                             "animated_sequence": true,
                                             "render_format": "gif",
                                             "uids": [ gifData.uid ], 
-                                            text:[text],
+                                            "text":[text],
                                         })      
                                     } 
                                     else{
@@ -507,7 +544,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     </View>
                     
                     {/* Activity Indicator */}
-                    <View style={{paddingTop:20}} >
+                    <View style={{paddingVertical:20}} >
                         {
                             downloading ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
@@ -520,7 +557,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     </View>
 
                     {/* Text Ipnut */}
-                    <View style={{ marginTop:RFValue(50), flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
+                    <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
                         <TextInput
                             editable={true}
                             placeholderTextColor={'#25282D'}
@@ -532,7 +569,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             style= {{ 
                             fontSize: RFValue(15),
                             fontFamily:'arial',
-                            width:'82%',
+                            width:'75%',
                             alignSelf:'center',
                             height: RFValue(40), 
                             marginLeft: RFValue(20),
@@ -540,22 +577,26 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             }}            
                         />
                         {!gifData.giphy &&
-                        <TouchableOpacity onPress={()=> { 
+                        <TouchableOpacity 
+                            onPress={()=> { 
                                 setLoader(true); 
                                 Keyboard.dismiss()
                                 renderGifById.mutate({ 
                                     text:[text],
                                     "HQ": true,
                                     "animated_sequence": true,
+                                    "render_format": "webp",
                                     "uids": [ gifData.uid ], 
                                 }) 
                          
                         }} >
-                            {loader ?
-                                <ActivityIndicator size={'small'} />
-                                :
-                                <RightTick width={RFValue(20)} height={RFValue(20)} />
-                            }
+                            <View style={{padding:15}} >
+                                {loader ?
+                                    <ActivityIndicator size={'small'} />
+                                    :
+                                    <RightTick width={RFValue(20)} height={RFValue(20)} />
+                                }
+                            </View>
                         </TouchableOpacity>
                         }
                     </View> 

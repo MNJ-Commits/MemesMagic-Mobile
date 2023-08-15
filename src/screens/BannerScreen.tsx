@@ -41,7 +41,7 @@ const BannerScreen = ({navigation}:any) => {
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [allGif, setAllGIF] = useState<any>([])  
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(30);
+  const [limit, setLimit] = useState<number>(25);
 
   const getBannerTemplates: any = useGetBannerTemplates(page, limit, {
     enabled:false,
@@ -57,7 +57,7 @@ const BannerScreen = ({navigation}:any) => {
     enabled:false,
     onSuccess: (res: any) => { 
       setRefreshLoader(false)
-      setLoader(false)
+      // setLoader(false) 1st attmpt
       setAllGIF([...new Set([...allGif, ...res])]); 
     },
     onError: (res: any) => console.log('getBannerSearch onError: ',res),
@@ -102,10 +102,10 @@ const BannerScreen = ({navigation}:any) => {
   const refresh = () => {
     console.log('Giphy refresh');
     
+    setAllGIF([]); 
     setRefreshLoader(true)   
     setLoader(true)
-    setAllGIF([]); 
-    if (page > 1 && text.length==0) {
+    if (page > 1 && text.length===0) {
       setPage(1);
     } 
     else{
@@ -127,7 +127,7 @@ const BannerScreen = ({navigation}:any) => {
     }
     else if(query.length!=0 && page > 1)
     {
-      setLoader(false)      
+       // setLoader(false) 2nd attmpt    
       getBannerSearch.refetch()  
     }
     else if(text.length==0 && page == 1 ){   
@@ -143,7 +143,7 @@ const BannerScreen = ({navigation}:any) => {
       getBannerTemplates.refetch()
     }
     else if(text.length!==0 && page > 1) {  
-      setLoader(false)      
+       // setLoader(false) 3rd attmpt      
       getBannerTemplates.refetch()  //kept in synch with custom
     }
 
@@ -180,13 +180,13 @@ const BannerScreen = ({navigation}:any) => {
         keyboardVerticalOffset={10}
       >
         {/* Header */}
-        <View style={{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#000000',padding:15 }}>
-          <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
-            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10)  }} >
-              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(3.5), fontFamily:'Lucita-Regular' }} >CUSTOM</Text>
+        <View style={{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#000000',padding:RFValue(15) }}>
+          <View style={{flexDirection:'row', alignItems:'center', width:'48%', justifyContent:'space-around'}} >
+            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10)  }} >
+              <Text style={{color:'white', fontSize:RFValue(8), fontFamily:'Lucita-Regular' }} >CUSTOM</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10)  }} >
-              <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(3.5), fontFamily:'Lucita-Regular' }} >BANNER</Text>
+            <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10)  }} >
+              <Text style={{color:'white', fontSize:RFValue(8), fontFamily:'Lucita-Regular' }} >BANNER</Text>
             </TouchableOpacity>
           </View>
 
@@ -334,19 +334,18 @@ const BannerScreen = ({navigation}:any) => {
               color:'#000000',  
             }}          
           />
-          {/* <TouchableOpacity 
+          <TouchableOpacity 
             onPress={()=> {
-              setLoader(true);
               Keyboard.dismiss()
               // getBannerTemplates.refetch()
             }} 
           >
-            {loader ?
+            {refreshLoader ?
               <ActivityIndicator size={'small'} />
               :
               <RightTick width={RFValue(20)} height={RFValue(20)} />
             }
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
       

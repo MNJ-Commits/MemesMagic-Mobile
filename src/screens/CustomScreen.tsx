@@ -23,7 +23,7 @@ const CustomScreen = ({navigation, route}:any) => {
   const [refreshLoader, setRefreshLoader] = useState<Boolean>(true)  // GIF Loader
   const [showScreen, setShowScreen] = useState<Boolean>(false)
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(30);
+  const [limit, setLimit] = useState<number>(25);
 
   const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
     // enabled:false,
@@ -51,7 +51,7 @@ const CustomScreen = ({navigation, route}:any) => {
       console.log('getCustomRenders error: ', error);
     },
   });  
-
+  
   const renderRequestChunk =  ()=>{
   
     setAllGIF([])
@@ -75,7 +75,7 @@ const CustomScreen = ({navigation, route}:any) => {
     console.log('Custom refresh');
     setRefreshLoader(true)
     setLoader(true)
-    setLimit(30)
+    setLimit(25)
     setAllGIF([]);     
     if (page > 1 && text.length ==0 ) { setPage(1); } 
     else{
@@ -104,7 +104,6 @@ const CustomScreen = ({navigation, route}:any) => {
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
       console.log('here');
-      
     }   
     else if(text.length==0 && tag.length==0 && page > 1) {   
       console.log('Without tag');
@@ -117,6 +116,7 @@ const CustomScreen = ({navigation, route}:any) => {
       setLoader(false) // kept in synch with Banner
     }
 
+    return()=>{}
   }, [page]);
 
   useEffect(()=>{
@@ -124,12 +124,12 @@ const CustomScreen = ({navigation, route}:any) => {
     setAllGIF([])
     setUIDs([])
     setPage(1)
-    setLimit(30)
+    setLimit(25)
     setRefreshLoader(true)
     setLoader(true)
     // setText('')
     getCustomTemplates.refetch()
-    
+    return()=>{}
   },[tag])  
 
   // useFocusEffect(
@@ -171,7 +171,7 @@ console.log(allGif?.length);
           keyboardVerticalOffset={10}
         >
           {/* Header */}
-          <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:15 }}>
+          <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:RFValue(15) }}>
             <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
               <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
                 <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
@@ -269,6 +269,7 @@ console.log(allGif?.length);
               refreshLoader={refreshLoader}
               UIDsLength = {UIDs?.length}
               allGifLength = {allGif?.length}
+              tag={tag}
               text={text}
               page = {page}
               setPage = {setPage}
@@ -295,7 +296,7 @@ console.log(allGif?.length);
               placeholder={'Type your text here'}
               returnKeyType='next'
               style= {{ 
-                width:'82%',
+                width:'77%',
                 fontSize: RFValue(15),
                 fontFamily:'arial',
                 height: RFValue(40), 
@@ -307,11 +308,13 @@ console.log(allGif?.length);
             <TouchableOpacity 
               onPress={renderRequestChunk}
             >
-            {loader ?
-              <ActivityIndicator size={'small'} color={'#8d8d8d'} />
-              :
-              <RightTick width={RFValue(20)} height={RFValue(20)} />
-            } 
+            <View style={{padding:RFValue(10)}} >
+              {loader ?
+                <ActivityIndicator size={'small'} color={'#8d8d8d'} />
+                :
+                <RightTick width={RFValue(20)} height={RFValue(20)} />
+              }
+            </View> 
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>

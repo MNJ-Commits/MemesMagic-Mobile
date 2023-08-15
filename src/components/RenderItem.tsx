@@ -41,33 +41,36 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
         }} 
         style={{ alignItems:'center', margin:RFValue(5) }} 
         >  
-        < >               
-           <FastImage
+        < >  
+          <FastImage
             key={item.index}
             source={{ 
               uri: customURI, 
               priority: FastImage.priority.normal,
+              cache:'immutable'
             }}
             resizeMode={FastImage.resizeMode.contain}
             onLoadEnd={()=>setLoader(false)}
             style={{ 
-              zIndex: -1, 
+              zIndex: 0, 
               width:'100%', 
               height: RFValue(150/width*height),
               borderRadius:RFValue(10),   
             }}
           />
-          {(loader && !giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
+          {/* {(loader && !giphy) &&  */}
+          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+     
           {
             giphy && 
               <Image 
                 key={item.index}
                 source={appleAccessToken ? 
                         { 
-                          uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
+                          uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : customURI,
                           headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
                         }
-                      : {  uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}` }}
+                      : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : customURI }}
                 resizeMode={'contain'}
                 onLoadStart={()=>setLoader(true)}
                 onLoadEnd={()=>setLoader(false)}
@@ -80,7 +83,9 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               />
             }
           {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-         {(loader && giphy) && <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
+         {(loader && giphy) &&
+          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+          }
         </>
   
       </TouchableOpacity>

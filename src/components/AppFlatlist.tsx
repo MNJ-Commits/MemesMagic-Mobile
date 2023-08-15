@@ -8,8 +8,7 @@ import RenderItems from './RenderItem';
 
 
 
-const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
-
+const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
   
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const getter = async () => {
@@ -30,14 +29,17 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
 
     const handleScroll = (event: any) => {      
       // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
+      // && API?.data?.length == 25 
       
-      if(event.nativeEvent.locationY<0 && API?.data?.length == 30)
-        { setPage(page + 1) }
-      else if(event.nativeEvent.locationY<0 && API?.data?.length<30)
+      if(event.nativeEvent.locationY<0 && data.length/25===page && page <= 3  )
+        setPage(page + 1) 
+      else if(event.nativeEvent.locationY<0 && data.length/25===page && !tag && !giphy )
+        setPage(page + 1)
+      else if(event.nativeEvent.locationY<0 && API?.data?.length<25)
         console.log("End reached");
     };
-  
-  return (
+
+    return (
     <MasonryList
       keyExtractor={(item: { id: string; }): string => item.id}
       data={data}
@@ -48,7 +50,9 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       refreshControlProps={{  tintColor:'transparent' }}
       contentContainerStyle={{margin:RFValue(10)}}
       showsVerticalScrollIndicator={false}
+      removeClippedSubviews={true}
       onTouchEnd ={handleScroll}
+      // onEndReachedThreshold={0.1}
       ListEmptyComponent={
         isLoader || refreshLoader ? 
           <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}} >Loading ... </Text>

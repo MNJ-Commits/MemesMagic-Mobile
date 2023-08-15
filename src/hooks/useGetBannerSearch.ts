@@ -13,7 +13,7 @@ const useGetBannerSearchRequest = async<T>(query: string, page: number, limit: n
       }
     )        
     const data = await response?.json()  
-    console.log("data?.data: ", data?.data); 
+    // console.log("data?.data: ", data?.data); 
     
     return data?.data
   } catch (err: any) {

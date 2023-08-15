@@ -404,7 +404,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
               <View style={{ marginTop:40 }} >
                 { Services.map((data:any, index:number)=>{
                     return(
-                    <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(10)  }}  >
+                    <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(5)  }}  >
                       {data.SVG}
                       <Text style={{color:'white', fontFamily:'Lucita-Regular', fontSize:RFValue(18), fontWeight:'900', paddingVertical:10 }} >{data.Label}</Text>
                     </TouchableOpacity>
@@ -415,26 +415,21 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
               {/* Subscribe */}
               <View style={{alignItems:"center"}} >
-                <Subcribe width={RFValue(250)} height={RFValue(35)} style={{marginTop:RFValue(30)}}/>
+                <Subcribe width={RFValue(250)} height={RFValue(35)} style={{marginTop:RFValue(20)}}/>
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => { 
-                    if(subscription[0]?.productId){ 
-                      handleSubscription()
-                      // isVerifyPayments?.subcription ? 
-                      // Alert.alert("Auto-renewable subscription is active") :
-                    }}}  
+                  onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
                 
                 >
-                  <Text style={{color:'#ffffff', fontSize:RFValue(20), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
+                  <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
                 </TouchableOpacity>
                 <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscription[0]?.localizedPrice} monthly</Text>
               </View>
             </View> 
             {(loading || products?.length==0 || subscription?.length==0) && 
-              <ActivityIndicator size={'large'} color={'grey'} style={{position:'relative', top: RFValue(20), alignSelf:'center'}} />
+              <ActivityIndicator size={'large'} color={'grey'} style={{position:'relative', top: RFValue(10), alignSelf:'center'}} />
             } 
           </ScrollView>  
 
@@ -442,13 +437,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
               disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ 
-                // isVerifyPayments?.one_time ? 
-                // Alert.alert("No Watermarks already purchased") :
-                handlePurchase(products[0]?.productId) 
-              }} 
+              onPress={() =>{ handlePurchase(products[0]?.productId) }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
-             
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
               <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>

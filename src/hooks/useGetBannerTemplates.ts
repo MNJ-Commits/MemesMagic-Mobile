@@ -2,7 +2,7 @@ import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query"
 
 const useGetBannerTemplatesRequest = async<T>(page: number, limit: number)=>{
 
-  let URI: string = `http://18.143.157.105:3000/giphy/list?&n=${limit}&p=${page}`
+  let URI: string = `http://18.143.157.105:3000/giphy/list?n=${limit}&p=${page}`
   console.log("URI: ", URI);
       
   try {
