@@ -56,7 +56,7 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       ListEmptyComponent={
         isLoader || refreshLoader ? 
           <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}} >Loading ... </Text>
-        : data.length == 0 ?
+        : data.length === 0 ?
           <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}}>No Content Found</Text>
         : <></>
       }

@@ -2,8 +2,9 @@ import { TouchableOpacity, Image, ActivityIndicator } from "react-native"
 import { RFValue } from "react-native-responsive-fontsize"
 import { storeIndividualGifData } from "../store/asyncStorage"
 import FastImage from 'react-native-fast-image'
+import Video from 'react-native-video';
 import React from "react"
-
+import AnimatedPlayer from 'react-native-animated-webp';
   
 const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
@@ -25,9 +26,12 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
       // console.log('BannerURI: ', BannerURI);
       // console.log('customURI: ', customURI);
       
+      const customURI_parts = customURI.split("/")
+      // console.log(customURI_parts[customURI_parts.length - 2]);
+
       return(
       <TouchableOpacity 
-        key={item.uid}
+        key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
         onPress={()=>{
           if(giphy)
             {
@@ -40,9 +44,32 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
           }
         }} 
         style={{ alignItems:'center', margin:RFValue(5) }} 
-        >  
+      >  
         < >  
-          <FastImage
+        <AnimatedPlayer
+          animatedSource={customURI}
+          autoplay={true}
+          loop={true}
+        />
+          {/* <Video 
+            key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+            // source={require('../assets/video/big_buck_bunny_720p_1mb.mp4')}  // Can be a URL or a local file.
+            source={{uri: customURI}}
+            repeat={true}
+            controls={false}
+            resizeMode="contain"
+            playInBackground={true}
+            disableFocus={true}
+            removeClippedSubviews={true}
+            onLoadEnd={()=>setLoader(false)}
+            style={{ 
+              zIndex: 0, 
+              width:'100%', 
+              height: RFValue(150/width*height),
+              borderRadius:RFValue(10),   
+            }}
+          />  */}
+          {/* <FastImage
             key={item.index}
             source={{ 
               uri: customURI, 
@@ -57,12 +84,12 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               height: RFValue(150/width*height),
               borderRadius:RFValue(10),   
             }}
-          />
+          /> */}
           {/* {(loader && !giphy) &&  */}
           <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
      
           {
-            giphy && 
+            giphy &&  
               <Image 
                 key={item.index}
                 source={appleAccessToken ? 

@@ -260,7 +260,8 @@ console.log(allGif?.length);
           {/* Grid View */}
           <>
             <AppFlatlist 
-              data={allGif}
+              // data={allGif}
+              data={[]}
               API={getCustomTemplates }
               giphy={false}
               refresh = {refresh}
