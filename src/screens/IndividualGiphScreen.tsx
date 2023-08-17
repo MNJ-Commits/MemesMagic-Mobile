@@ -576,19 +576,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             color:'#000000',
                             }}            
                         />
-                        {!gifData.giphy &&
+                        
                         <TouchableOpacity 
                             onPress={()=> { 
-                                setLoader(true); 
                                 Keyboard.dismiss()
-                                renderGifById.mutate({ 
-                                    text:[text],
-                                    "HQ": true,
-                                    "animated_sequence": true,
-                                    "render_format": "webp",
-                                    "uids": [ gifData.uid ], 
-                                }) 
-                         
+                                if(!gifData.giphy)
+                                    {
+                                        setLoader(true); 
+                                        renderGifById.mutate({ 
+                                        text:[text],
+                                        "HQ": true,
+                                        "animated_sequence": true,
+                                        "render_format": "webp",
+                                        "uids": [ gifData.uid ], 
+                                    }) 
+                                }
                         }} >
                             <View style={{padding:15}} >
                                 {loader ?
@@ -598,7 +600,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 }
                             </View>
                         </TouchableOpacity>
-                        }
+                        
                     </View> 
                 </ScrollView>
             </KeyboardAvoidingView>}

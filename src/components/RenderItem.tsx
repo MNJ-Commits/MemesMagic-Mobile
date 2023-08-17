@@ -4,7 +4,6 @@ import { storeIndividualGifData } from "../store/asyncStorage"
 import FastImage from 'react-native-fast-image'
 import Video from 'react-native-video';
 import React from "react"
-import AnimatedPlayer from 'react-native-animated-webp';
   
 const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
@@ -46,11 +45,21 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
         style={{ alignItems:'center', margin:RFValue(5) }} 
       >  
         < >  
-        <AnimatedPlayer
-          animatedSource={customURI}
-          autoplay={true}
-          loop={true}
-        />
+          {/* <Image
+            // source={{uri: gifData?.giphy ? gifData.src : webp }}
+            source={{
+              uri: customURI,
+              cache: 'force-cache' 
+            }}
+            resizeMode={FastImage.resizeMode.contain}
+            style={{ 
+              zIndex: 0, 
+              width:'100%', 
+              height: RFValue(150/width*height),
+              borderRadius:RFValue(10),   
+            }}
+         />  */}
+
           {/* <Video 
             key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
             // source={require('../assets/video/big_buck_bunny_720p_1mb.mp4')}  // Can be a URL or a local file.
@@ -86,7 +95,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
             }}
           /> */}
           {/* {(loader && !giphy) &&  */}
-          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+          {/* <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
      
           {
             giphy &&  
@@ -94,10 +103,10 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
                 key={item.index}
                 source={appleAccessToken ? 
                         { 
-                          uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : customURI,
+                          uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
                           headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
                         }
-                      : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : customURI }}
+                      : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : null }}
                 resizeMode={'contain'}
                 onLoadStart={()=>setLoader(true)}
                 onLoadEnd={()=>setLoader(false)}
@@ -110,9 +119,9 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               />
             }
           {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-         {(loader && giphy) &&
+         {/* {(loader && giphy) &&
           <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-          }
+          } */}
         </>
   
       </TouchableOpacity>
