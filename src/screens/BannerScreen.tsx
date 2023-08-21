@@ -292,6 +292,7 @@ const BannerScreen = ({navigation}:any) => {
             isLoader = {loader}
             setLoader = {setLoader}
             refreshLoader={refreshLoader}
+            allGifLength = {allGif?.length}
             text={text}
             page = {page}
             setPage = {setPage}

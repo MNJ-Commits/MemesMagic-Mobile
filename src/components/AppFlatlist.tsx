@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Image, ActivityIndicator, View, Text, RefreshControl, FlatList, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
@@ -11,6 +11,7 @@ import LottieView from 'lottie-react-native';
 
 const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
   
+    const [endReached, setEndReached] = useState<Boolean>(false) 
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const getter = async () => {
       
@@ -28,16 +29,34 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       }, []),
     );
 
+    useEffect(()=>{
+      setEndReached(false)
+    },[tag])
+
     const handleScroll = (event: any) => {      
       // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
       // && API?.data?.length == 25 
-      
+      // console.log("page no: ",data.length, data.length/25, page);
       if(event.nativeEvent.locationY<0 && data.length/25===page && page <= 3  )
+       {
+        console.log("load");
         setPage(page + 1) 
+        setEndReached(false)
+       }
       else if(event.nativeEvent.locationY<0 && data.length/25===page && !tag && !giphy )
-        setPage(page + 1)
+        {
+          setPage(page + 1)
+          setEndReached(false)}
       else if(event.nativeEvent.locationY<0 && API?.data?.length<25)
-        console.log("End reached");
+        {
+          console.log("End reached");
+          setEndReached(true)
+        }
+      else if(event.nativeEvent.locationY<0) 
+        {
+          console.log("Yes");
+          setEndReached(true)
+        }
     };
 
     return (
@@ -53,6 +72,13 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       showsVerticalScrollIndicator={false}
       removeClippedSubviews={true}
       onTouchEnd ={handleScroll}
+      ListFooterComponent={ 
+        endReached && allGifLength!==0 ?
+        <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >End Reached</Text>: 
+        !endReached && allGifLength!==0 ? 
+        <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
+        <Text></Text>
+      }
       // onEndReachedThreshold={0.1}
       ListEmptyComponent={
         isLoader || refreshLoader ? 
