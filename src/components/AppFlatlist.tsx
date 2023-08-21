@@ -5,6 +5,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import RenderItems from './RenderItem';
+import LottieView from 'lottie-react-native';
 
 
 
@@ -46,8 +47,8 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       numColumns={2}
       keyboardDismissMode={"on-drag"}
       onRefresh={() => refresh() }
-      refreshing={ giphy ? ( refreshLoader ) : UIDsLength !== allGifLength }
-      refreshControlProps={{  tintColor:'transparent' }}
+      refreshing={ giphy ? ( refreshLoader ) : UIDsLength !== allGifLength }  // drag down's the list
+      refreshControlProps={{ tintColor:'transparent' }}
       contentContainerStyle={{margin:RFValue(10)}}
       showsVerticalScrollIndicator={false}
       removeClippedSubviews={true}
@@ -61,6 +62,10 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
         : <></>
       }
       renderItem={ ({item}:any) =>
+      // <>
+      //   <LottieView source={require('../assets/json/animation_llf4yqxh.json')} style={{ height:200}} autoPlay loop />
+      //   {/* <LottieView source={require('../assets/json/lottie.json')} style={{ height:100}} autoPlay loop /> */}
+      // </>
        <RenderItems 
         item={item} 
         giphy={giphy} 

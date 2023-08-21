@@ -4,6 +4,7 @@ import { storeIndividualGifData } from "../store/asyncStorage"
 import FastImage from 'react-native-fast-image'
 import Video from 'react-native-video';
 import React from "react"
+
   
 const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
@@ -78,7 +79,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               borderRadius:RFValue(10),   
             }}
           />  */}
-          {/* <FastImage
+          <FastImage
             key={item.index}
             source={{ 
               uri: customURI, 
@@ -93,14 +94,14 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               height: RFValue(150/width*height),
               borderRadius:RFValue(10),   
             }}
-          /> */}
+          />
           {/* {(loader && !giphy) &&  */}
-          {/* <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-     
+          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+        
           {
             giphy &&  
               <Image 
-                key={item.index}
+                key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
                 source={appleAccessToken ? 
                         { 
                           uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
@@ -119,9 +120,9 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               />
             }
           {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-         {/* {(loader && giphy) &&
+         {(loader && giphy) &&
           <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-          } */}
+          }
         </>
   
       </TouchableOpacity>

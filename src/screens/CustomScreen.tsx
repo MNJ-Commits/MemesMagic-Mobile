@@ -260,8 +260,8 @@ console.log(allGif?.length);
           {/* Grid View */}
           <>
             <AppFlatlist 
-              // data={allGif}
-              data={[]}
+              data={allGif}
+              // data={[]}
               API={getCustomTemplates }
               giphy={false}
               refresh = {refresh}
@@ -277,8 +277,10 @@ console.log(allGif?.length);
               setLimit={setLimit}
               navigation={navigation}
             />
-            { UIDs?.length !== allGif?.length  && 
-              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:140  }} >
+            {
+            // loader && 
+            UIDs?.length !== allGif?.length  && 
+              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:160  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}
                   style={{width: 20, height: 20, zIndex:1 }}
