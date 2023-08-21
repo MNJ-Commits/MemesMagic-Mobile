@@ -22,6 +22,7 @@ import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPayme
 import { useFocusEffect } from '@react-navigation/native';
 import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
 import FastImage from 'react-native-fast-image';
+import { usePostForceAppStatus } from '../hooks/usePostForceAppStatus';
 
  
 
@@ -40,6 +41,14 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [fileAction, setFileAction] = useState<string>('')
     const [responseTime, setRresponseTime] = useState<any>('')
 
+    const forceAppStatus: any = usePostForceAppStatus({
+        onSuccess: async (res: any) => {
+            console.log("forceAppStatus: ", res);
+            
+        // setStorage
+        },
+        onError: (res: any) => console.log('onError: ',res),
+      });
 
     // GET Store
     const getter = async () => {
