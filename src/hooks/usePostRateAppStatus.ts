@@ -1,17 +1,18 @@
 import {QueryKey, useMutation, UseMutationOptions, useQuery, UseQueryOptions} from '@tanstack/react-query';
 import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
 
-const usePostForceAppStatusRequest = async <T>()=>{
+const usePostRateAppStatusRequest = async <T>()=>{
 
     try {
-        const response = await fetch('http://104.131.250.165:3015/all_app/api/list_app_setting'+ new URLSearchParams({"app_id" : "com.MemeWork"}), 
+        const response = await fetch('http://104.131.250.165:3015/all_app/api/list_app_setting',
             {
                 method: 'POST',
-                // body: new URLSearchParams({"app_id" : "com.MemeWork"}),
+                headers: {'Content-Type': 'application/json'},
+                body:  JSON.stringify({ "app_id": "com.MemesWork" })
             },
         )    
         const data = await response?.json()        
-        console.log("data?.data: ", response );
+        // console.log("data?.data: ", data );
         
         return data?.data
     }
@@ -22,11 +23,11 @@ const usePostForceAppStatusRequest = async <T>()=>{
 
 
 
-export function usePostForceAppStatus<T>( 
+export function usePostRateAppStatus<T>( 
     options: UseQueryOptions<T, Error, T>,
   ) {
     return useQuery(
       ['appRateStatus'] as QueryKey, 
-      () => usePostForceAppStatusRequest<T>(), 
+      () => usePostRateAppStatusRequest<T>(), 
       options)
   }

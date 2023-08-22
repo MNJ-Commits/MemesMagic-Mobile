@@ -7,6 +7,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 import { DownloadFileOptions, downloadFile, writeFile } from 'react-native-fs';
 var RNFS = require('react-native-fs');
+import InAppReview from 'react-native-in-app-review';
 
 // SVG's
 import BackButton from "../assets/svgs/back-button.svg";
@@ -22,7 +23,7 @@ import { loadAppleAccessTokenFromStorage, loadIndividualGifData, loadVerifyPayme
 import { useFocusEffect } from '@react-navigation/native';
 import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
 import FastImage from 'react-native-fast-image';
-import { usePostForceAppStatus } from '../hooks/usePostForceAppStatus';
+import { usePostRateAppStatus } from '../hooks/usePostRateAppStatus';
 
  
 
@@ -40,15 +41,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [gifData, setGIFData] = useState<any>({})
     const [fileAction, setFileAction] = useState<string>('')
     const [responseTime, setRresponseTime] = useState<any>('')
-
-    const forceAppStatus: any = usePostForceAppStatus({
-        onSuccess: async (res: any) => {
-            console.log("forceAppStatus: ", res);
-            
-        // setStorage
-        },
-        onError: (res: any) => console.log('onError: ',res),
-      });
+    const [popupInterval, setPopupInterval] = useState<boolean>(false)
 
     // GET Store
     const getter = async () => {
@@ -105,6 +98,17 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         return()=>{}
     },[gifData])
    
+    const rateAppStatus: any = usePostRateAppStatus({
+        onSuccess: async (res: any) => {
+            console.log("forceAppStatus: ", res);
+            
+        // setStorage
+        },
+        onError: (res: any) => console.log('onError: ',res),
+      });
+
+    const isAvailable = InAppReview.isAvailable();
+      
     const getTemplateById: any = useGetCustomTemplateById({
         onSuccess(res) { 
         // console.log('res: ', res);
@@ -408,8 +412,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             }
     }
 
- 
-
     // console.log('BannerURI: ', BannerURI);
     // console.log('gifData: ', gifData);
     // console.log('verifyPayment: ', verifyPayment);
@@ -420,6 +422,36 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const startTime = new Date(); 
         setRresponseTime(startTime)   
     }
+
+    const requestReview = ()=> {
+        setTextCheck(false) 
+        Alert.alert("Rate Us", "This is a paid feature.  To complete this task for free, please leave a 5 star review",
+            [
+                {
+                text: 'Maybe Later', onPress: () => {
+                        if(rateAppStatus.data[0].show_popup===1)
+                            DownloadPermissions()
+                    }
+                },
+                {
+                text: 'Rate Now', onPress: () => {
+            
+                    InAppReview.RequestInAppReview()
+                    .then((hasFlowFinishedSuccessfully) => {
+                    console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
+                    
+                    if (hasFlowFinishedSuccessfully) {
+                        // do something for ios
+                    }
+                    })
+                    .catch((error) => { console.log("RequestInAppReview: ", error) });
+                }
+            
+                }
+            ] )
+    }
+
+   
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
             {gifData.src &&  
@@ -511,16 +543,19 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             onPress={ ()=>{
                                 if( isValidateInput() ){
                                     if (verifyPayment?.subcription){
-                                    gifData?.giphy ?
-                                        DownloadGiphyGif() : 
-                                        // For custom .GIF download
-                                        setFileAction("RequestDownloadCustomGif"); 
-                                        setTextCheck( textSting ? false : true)
-                                        DownloadPermissions()
+                                        gifData?.giphy ? DownloadGiphyGif() : 
+                                            // For custom .GIF download
+                                            setFileAction("RequestDownloadCustomGif"); 
+                                            setTextCheck( textSting ? false : true)
+                                            DownloadPermissions()
                                     } 
                                     else{
-                                            StoreIndividualGif()
-                                        }
+                                        StoreIndividualGif()
+                                        if(isAvailable && rateAppStatus.data[0].show_popup===0 && !verifyPayment?.subcription)
+                                            requestReview() 
+                                        else if(isAvailable && rateAppStatus.data[0].show_popup===1 && !verifyPayment?.subcription && popupInterval  )
+                                            DownloadPermissions()
+                                    }
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
