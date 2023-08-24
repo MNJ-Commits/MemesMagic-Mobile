@@ -14,7 +14,7 @@
     "@invertase/react-native-apple-authentication": "^2.2.2",
     "@react-native-async-storage/async-storage": "^1.15.9",
     "@react-native-camera-roll/camera-roll": "^5.4.0",
-    "@react-native-seoul/masonry-list": "^1.4.1",
+    "@react-native-seoul/masonry-list": "^1.4.2",
     "@react-native/normalize-color": "^2.1.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.9.12",
@@ -44,6 +44,7 @@
     "react-native-video": "^6.0.0-alpha.6",
     "react-native-webp-format": "^1.2.0",
     "react-redux": "^8.0.5",
+    "recyclerlistview": "^4.2.0",
     "rn-fetch-blob": "^0.12.0",
     "typescript": "^3.8.3"
   },

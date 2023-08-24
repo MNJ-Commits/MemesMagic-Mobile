@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, Image, ActivityIndicator, View, Text, RefreshControl, FlatList, } from 'react-native';
+import { TouchableOpacity, Image, ActivityIndicator, View, Text, RefreshControl, FlatList, Dimensions, } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import RenderItems from './RenderItem';
 import LottieView from 'lottie-react-native';
-
+import { RecyclerListView, DataProvider, LayoutProvider, Dimension } from "recyclerlistview";
 
 
 const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
   
+  // console.log("API: ", API.data.length);
+  
+    // const columnCount = 2; // Number of columns
+    // const totalWidth = Dimensions.get('window').width;
+    // const marginBetweenItems = 10; // Set your desired margin
+
+    // const itemWidth = (totalWidth - (marginBetweenItems * (columnCount - 1))) / columnCount;
+    
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const getter = async () => {
       
@@ -40,6 +48,24 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
         console.log("End reached");
     };
 
+    // const dataProvider = new DataProvider((r1, r2) => {    
+    //   return r1 !== r2;
+    // });
+  
+    // const layoutProvider = new LayoutProvider(
+    //   index => index, // Assigns unique keys to items
+    //   (type, dim, index) => {
+    //     // Calculate the dimensions of each item here
+    //     const width: number = data[index]?.size[0]/1.2
+    //     const height: number = data[index]?.size[1]
+
+    //     const itemWidth = Dimensions.get('window').width / 2; // Divide screen width by 2 for 2 columns
+    //     const itemHeight =  150/width*height; // Set your desired item height
+    //     dim.width = itemWidth;
+    //     dim.height = itemHeight;
+    //   }
+    // );
+    
     return (
     <MasonryList
       keyExtractor={(item: { id: string; }): string => item.id}
@@ -53,7 +79,8 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
       showsVerticalScrollIndicator={false}
       removeClippedSubviews={true}
       onTouchEnd ={handleScroll}
-      // onEndReachedThreshold={0.1}
+      // onEndReachedThreshold={0.5}
+      // onEndReached={()=> setPage(page + 1)}
       ListEmptyComponent={
         isLoader || refreshLoader ? 
           <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}} >Loading ... </Text>
@@ -82,6 +109,31 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
         />
       }
     />
+
+    // <RecyclerListView
+    //   // onEndReachedThreshold={1}
+    //   // onEndReached={API.data.length===25 ? setPage(page + 1) : null}
+    //   dataProvider={dataProvider.cloneWithRows(data)}
+    //   layoutProvider={layoutProvider}
+    //   rowRenderer={(type, item) => {
+    //     return (
+    //       <RenderItems 
+    //         item={item} 
+    //         giphy={giphy} 
+    //         text={text} 
+    //         textPosition={textPosition}
+    //         textBackground={textBackground} 
+    //         textStroke={textStroke} 
+    //         color={color} 
+    //         font={font} 
+    //         navigation={navigation}
+    //         setLoader={setLoader}
+    //         loader={isLoader}
+    //         appleAccessToken={appleAccessToken}
+    //         />
+    //     )
+    //   }}
+    // />
   )}
 
 export default AppFlatlist

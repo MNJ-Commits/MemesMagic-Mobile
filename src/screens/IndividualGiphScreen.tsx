@@ -55,7 +55,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
             console.log('loadVerifyPaymentFromStorage Error: ', error);
         })
-        console.log("paymentStatus: ",paymentStatus );
+        // console.log("paymentStatus: ",paymentStatus );
         setVerifyPayment(paymentStatus) 
         
         const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
@@ -64,11 +64,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         setAppleAccessToken(access_token) 
    
         await loadFreeGifAccess().then((res:any)=>{
-            console.log('loadFreeGifAccess res: ', res);
+            // console.log('loadFreeGifAccess res: ', res);
             setFreeGifAccess(res.access) 
         })
         .catch((error:any)=>{
-            console.log('loadFreeGifAccess Error: ', error);
+            // console.log('loadFreeGifAccess Error: ', error);
         })
     }
 
