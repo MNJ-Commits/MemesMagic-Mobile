@@ -26,7 +26,9 @@ export interface PaymentsReceiptInfo {
 export const receiptKey = 'receiptKey';
 export const accessKey = 'accessKey';
 export const paymentKey = 'paymentKey';
-export const individualGif = 'individualGif';
+export const individualGifKey = 'individualGifKey';
+export const freeGifAccessKey = 'freeGifAccessKey';
+export const restartCountKey = 'restartCountKey';
 
 
 
@@ -54,11 +56,25 @@ export const storeVerifyPayment = async (data: { one_time?: boolean; subcription
   };
 export const storeIndividualGifData = async (data: {src: string, width: number, height: number, uid?:number, defaultText?:string, giphy?: boolean, src2?: string}) => {
     try {
-      await AsyncStorage.setItem(individualGif, JSON.stringify(data));
+      await AsyncStorage.setItem(individualGifKey, JSON.stringify(data));
     } catch (error) {
       console.log( 'storeVerifyPayment error: ',error);
     }
   };
+export const storeFreeGifAccess = async (data: { access: boolean }) => {
+  try {
+    await AsyncStorage.setItem(freeGifAccessKey, JSON.stringify(data));
+  } catch (error) {
+    console.log( 'storeVerifyPayment error: ',error);
+  }
+};
+export const storeAppRestartCount = async (data: { count: number }) => {
+  try {
+    await AsyncStorage.setItem(restartCountKey, JSON.stringify(data));
+  } catch (error) {
+    console.log( 'restart count error: ',error);
+  }
+};
 
 // Get Storage 
 export const loadPaymentsReceiptInfo = async () => {
@@ -90,10 +106,28 @@ export const loadVerifyPaymentFromStorage = async () => {
   };
 export const loadIndividualGifData = async () => {
     try {
-      const savedGifData: any = await AsyncStorage.getItem(individualGif);
+      const savedGifData: any = await AsyncStorage.getItem(individualGifKey);
       const gifData = JSON.parse(savedGifData);
       return gifData
     } catch (error) {
       console.log('loadVerifyPaymentFromStorage error: ',error);
     }
   };
+export const loadFreeGifAccess = async () => {
+  try {
+    const savedFreeGifAccess: any = await AsyncStorage.getItem(freeGifAccessKey);
+    const gifAccess = JSON.parse(savedFreeGifAccess);
+    return gifAccess
+  } catch (error) {
+    console.log('loadVerifyPaymentFromStorage error: ',error);
+  }
+};
+export const loadAppRestartCount = async () => {
+  try {
+    const savedAppRestartCount: any = await AsyncStorage.getItem(restartCountKey);
+    const restartCount = JSON.parse(savedAppRestartCount);
+    return restartCount
+  } catch (error) {
+    console.log('loadVerifyPaymentFromStorage error: ',error);
+  }
+};

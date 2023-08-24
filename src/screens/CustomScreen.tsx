@@ -64,7 +64,8 @@ const CustomScreen = ({navigation, route}:any) => {
     for (let i = 0; i <= UIDs.length-1; i += 1) {          
       setTimeout(() => {
         getCustomRenders.mutate({ 
-          text:[text],
+          "render_format": "gif",
+          "text":[text],
           "uids": [UIDs[i]]
         })
       }, i*200);

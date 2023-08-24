@@ -1,7 +1,7 @@
-import {QueryKey, useMutation, UseMutationOptions, useQuery, UseQueryOptions} from '@tanstack/react-query';
-import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
+import {QueryKey, useQuery, UseQueryOptions} from '@tanstack/react-query';
 
 const usePostRateAppStatusRequest = async <T>()=>{
+console.log("params");
 
     try {
         const response = await fetch('http://104.131.250.165:3015/all_app/api/list_app_setting',
