@@ -84,7 +84,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
             source={{ 
               uri: customURI, 
               priority: FastImage.priority.normal,
-              cache:'immutable'
+              // cache:'immutable'
             }}
             resizeMode={FastImage.resizeMode.contain}
             onLoadEnd={()=>setLoader(false)}

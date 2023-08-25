@@ -74,7 +74,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       }
     })
     .catch((error:any)=>{
-      console.log('loadAppleAccessTokenFromStorage Error: ', error);
+      console.log('loadPaymentsReceiptInfo Error: ', error);
     })
 
   }

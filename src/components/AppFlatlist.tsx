@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, Image, ActivityIndicator, View, Text, RefreshControl, FlatList, } from 'react-native';
+import { Text } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { loadAppleAccessTokenFromStorage, storeIndividualGifData } from '../store/asyncStorage';
+import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import RenderItems from './RenderItem';
-import LottieView from 'lottie-react-native';
-
 
 
 const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
@@ -79,7 +77,6 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
         <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
         <Text></Text>
       }
-      // onEndReachedThreshold={0.1}
       ListEmptyComponent={
         isLoader || refreshLoader ? 
           <Text style={{fontSize:12, color:'#7C7E81', alignSelf:'center', marginTop:100}} >Loading ... </Text>
@@ -88,10 +85,6 @@ const AppFlatlist = ({ data, API, giphy, refresh, isLoader, setLoader, refreshLo
         : <></>
       }
       renderItem={ ({item}:any) =>
-      // <>
-      //   <LottieView source={require('../assets/json/animation_llf4yqxh.json')} style={{ height:200}} autoPlay loop />
-      //   {/* <LottieView source={require('../assets/json/lottie.json')} style={{ height:100}} autoPlay loop /> */}
-      // </>
        <RenderItems 
         item={item} 
         giphy={giphy} 

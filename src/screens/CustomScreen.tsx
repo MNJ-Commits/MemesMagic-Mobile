@@ -64,7 +64,8 @@ const CustomScreen = ({navigation, route}:any) => {
     for (let i = 0; i <= UIDs.length-1; i += 1) {          
       setTimeout(() => {
         getCustomRenders.mutate({ 
-          text:[text],
+          "render_format": "webp",
+          "text":[text],
           "uids": [UIDs[i]]
         })
       }, i*200);
@@ -280,7 +281,7 @@ console.log(allGif?.length);
             {
             // loader && 
             UIDs?.length !== allGif?.length  && 
-              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:160  }} >
+              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:140  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}
                   style={{width: 20, height: 20, zIndex:1 }}
