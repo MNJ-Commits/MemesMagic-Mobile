@@ -61,7 +61,7 @@ export const storeIndividualGifData = async (data: {src: string, width: number, 
       console.log( 'storeVerifyPayment error: ',error);
     }
   };
-export const storeFreeGifAccess = async (data: { access: boolean }) => {
+export const storeFreeGifAccess = async (data: { access: string }) => {
   try {
     await AsyncStorage.setItem(freeGifAccessKey, JSON.stringify(data));
   } catch (error) {

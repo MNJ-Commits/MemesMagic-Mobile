@@ -11,7 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
 import { ActivityIndicator, Alert, AppState } from 'react-native';
 import { clearTransactionIOS } from 'react-native-iap';
-import { PaymentsReceiptInfo, loadAppRestartCount, loadFreeGifAccess, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppRestartCount } from './store/asyncStorage';
+import { PaymentsReceiptInfo, loadAppRestartCount, loadFreeGifAccess, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppRestartCount, storeFreeGifAccess } from './store/asyncStorage';
 import InAppReview from 'react-native-in-app-review';
 import { usePostRateAppStatus } from './hooks/usePostRateAppStatus';
 
@@ -50,7 +50,7 @@ const AppBootStrap = React.memo(function () {
 
   const [appRestartCount, setAppRestartCount] = useState<number>(0)
   const [rateStatus, setRateStatus] = useState<any>({})
-  const [freeGifAccess, setFreeGifAccess] = useState<boolean>(false)
+  const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
   const isAvailable = InAppReview.isAvailable();
 
   useFocusEffect(
@@ -62,10 +62,14 @@ const AppBootStrap = React.memo(function () {
 
   useEffect(()=>{
     getter()
-    setTimeout(() => {
-      requestReview()
-    }, 5000);
   },[])
+
+  useEffect(()=>{
+    setTimeout(() => {
+      if(rateAppStatus?.data)
+        requestReview()
+    }, 5000);
+  },[rateStatus])
 
   const getter = async () =>{
 
@@ -78,7 +82,7 @@ const AppBootStrap = React.memo(function () {
       const expiration = receipt_info_res?.expires_date_ms
       let expired = expiration && Date.now() > Number(expiration)
       // console.log("here: ", expired, Date.now(), expiration);
-      if (expired) { 
+      if (expired && paymentStatus !== undefined || paymentStatus !== null) { 
         setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
       }
     })
@@ -89,39 +93,50 @@ const AppBootStrap = React.memo(function () {
     await loadAppRestartCount().then((resp)=>{
       console.log("resp: ", resp);
       if (resp !==undefined && resp !==null && AppState.currentState==='active'){
-        console.log("here");
         storeAppRestartCount({ count: resp.count+1 }) 
-        setAppRestartCount(resp.count)
+        setAppRestartCount(resp.count+1)
       } 
       else {
         storeAppRestartCount( { count: 1 })
+        setAppRestartCount(1)
       }
     })
     .catch((error:any)=>{
       console.log('loadAppRestartCount Error: ', error);
     })
  
-    await loadFreeGifAccess().then((res:any)=>{
+    await loadFreeGifAccess().then((resp:any)=>{
       // console.log('loadFreeGifAccess res: ', res);
-      setFreeGifAccess(res.access) 
+      if (resp !==undefined && resp !==null && AppState.currentState==='active'){
+          setFreeGifAccess(resp.access) 
+        }
+      else{
+        storeFreeGifAccess({access:"Denied"})
+        setFreeGifAccess("Denied")
+      }    
     })
     .catch((error:any)=>{
-        // console.log('loadFreeGifAccess Error: ', error);
+        console.log('loadFreeGifAccess Error: ', error);
     })
  
   }
 
+  console.log("freeGifAccess: ",freeGifAccess, appRestartCount);
+  
 
   const rateAppStatus: any = usePostRateAppStatus({
     onSuccess: async (res: any) => {
-      // console.log("forceAppStatus: ", res);
+      // console.log("forceAppStatus: ", res[0]);
       setRateStatus(res[0])
     },
     onError: (res: any) => console.log('onError: ',res),
   });
   
-  const requestReview = ()=> {
-    if(isAvailable && rateStatus?.show_popup===0 && !freeGifAccess && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
+  const requestReview = ()=> {    
+    console.log(isAvailable, rateStatus.show_popup, freeGifAccess, appRestartCount)
+    console.log(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15))
+    
+    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
       Alert.alert("Rate Us", "This is a paid feature. To complete this task for free, please leave a 5 star review",
         [
           { text: 'Maybe Later' },

@@ -144,7 +144,8 @@ const BannerScreen = ({navigation}:any) => {
     }
     else if(text.length!==0 && page > 1) {  
        // setLoader(false) 3rd attmpt      
-      getBannerTemplates.refetch()  //kept in synch with custom
+      // getBannerTemplates.refetch()  //kept in synch with custom 
+                                      // not rendering on text
     }
 
   }, [page]);
@@ -287,6 +288,7 @@ const BannerScreen = ({navigation}:any) => {
           <AppFlatlist 
             data={allGif}
             API = { query.length!=0 ? getBannerSearch : getBannerTemplates }
+            API2 = { query.length!=0 ? getBannerSearch : getBannerTemplates }
             giphy={true}
             refresh = {refresh}
             isLoader = {loader}

@@ -6,8 +6,10 @@ import Video from 'react-native-video';
 import React from "react"
 
   
-const RenderItems = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
+const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
+  // console.log('item:', item )
+  
     const customURI: any =  giphy ? item?.template : 
                             item?.template ? `http://18.143.157.105:3000${item?.template}` : 
                             `http://18.143.157.105:3000${item.render}`
@@ -27,7 +29,6 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
       // console.log('customURI: ', customURI);
       
       const customURI_parts = customURI.split("/")
-      // console.log(customURI_parts[customURI_parts.length - 2]);
 
       return(
       <TouchableOpacity 
@@ -43,7 +44,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
             navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text})
           }
         }} 
-        style={{ alignItems:'center', margin:RFValue(5) }} 
+        style={{ alignItems:'center', width:'100%', margin:RFValue(5), height: RFValue(150/width*height), borderRadius:RFValue(15) }} 
       >  
         < >  
           {/* <Image
@@ -92,7 +93,7 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               zIndex: 0, 
               width:'100%', 
               height: RFValue(150/width*height),
-              borderRadius:RFValue(10),   
+              borderRadius:RFValue(15),   
             }}
           />
           {/* {(loader && !giphy) &&  */}
@@ -120,13 +121,13 @@ const RenderItems = ({item, giphy, text, textPosition, textBackground, textStrok
               />
             }
           {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-         {(loader && giphy) &&
+         {/* {(loader && giphy) &&
           <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-          }
+          } */}
         </>
   
       </TouchableOpacity>
     )
   }
 
-export default React.memo(RenderItems)
+export default React.memo(RenderItem)

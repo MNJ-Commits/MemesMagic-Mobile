@@ -29,6 +29,7 @@ import { usePostRateAppStatus } from '../hooks/usePostRateAppStatus';
 
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
     
+    // States
     const [text, setText] = useState<string>('')
     const [textCheck, setTextCheck] = useState<Boolean>(true)
     const [loader, setLoader] = useState<Boolean>(false)
@@ -41,9 +42,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [gifData, setGIFData] = useState<any>({})
     const [fileAction, setFileAction] = useState<string>('')
     const [responseTime, setRresponseTime] = useState<any>('')
-    const [freeGifAccess, setFreeGifAccess] = useState<boolean>(false)
+    const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
+    const [rateStatus, setRateStatus] = useState<any>({})
 
-    // GET Store
+    // GET STORE
     const getter = async () => {
     
         const gif_state = await loadIndividualGifData().catch((error:any)=>{
@@ -78,7 +80,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
           console.log('getter Error: ', error);
           })
         }, []),
-       );
+    );
     
     useEffect(()=>{
         if(gifData?.giphy){
@@ -105,16 +107,52 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
         return()=>{}
     },[gifData])
-   
-    const rateAppStatus: any = usePostRateAppStatus({
+
+    const textSting = gifData?.src2?.split("&w")[1] 
+    let BannerURI: string = ''
+    text ? BannerURI+=`?text=${encodeURIComponent(text)}&w`+textSting : gifData?.src2
+
+
+    // IN-APP REVIEW
+    usePostRateAppStatus({
         onSuccess: async (res: any) => {
+            setRateStatus(res[0])
             // console.log("forceAppStatus: ", res);
         },
         onError: (res: any) => console.log('onError: ',res),
       });
-
-    const isAvailable = InAppReview.isAvailable();
       
+    const isAvailable = InAppReview.isAvailable();
+    const requestReview = ()=> {
+        setTextCheck(false) 
+        Alert.alert("Rate Us", "This is a paid feature. To complete this task for free, please leave a 5 star review",
+            [
+                {
+                    text: 'Maybe Later'
+                },
+                {
+                text: 'Rate Now', onPress: () => {
+                    if(freeGifAccess==="Denied"){
+                        setFreeGifAccess("Granted")
+                        storeFreeGifAccess({access:"Granted"})
+                    }
+                    InAppReview.RequestInAppReview()
+                    .then((hasFlowFinishedSuccessfully) => {
+                    console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
+                    
+                    if (hasFlowFinishedSuccessfully) {
+                        // do something for ios
+                    }
+                    })
+                    .catch((error) => { console.log("RequestInAppReview: ", error) });
+                }
+            
+                }
+            ] )
+    }
+
+    
+    // INDIVIDUAL GIF'S
     const getTemplateById: any = useGetCustomTemplateById({
         onSuccess(res) { 
         // console.log('res: ', res);
@@ -125,7 +163,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('getCustomRenders error: ', error);
         },
     }); 
-
 
     const renderGifById: any = usePostCustomRenders({
         onSuccess(res) { 
@@ -153,23 +190,23 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         },
     }); 
 
-
-    const textSting = gifData?.src2?.split("&w")[1] 
-    let BannerURI: string = ''
-    text ? BannerURI+=`?text=${encodeURIComponent(text)}&w`+textSting : gifData?.src2
-
     // Check Download Permissions to PHOTO'S Gallery
     const DownloadPermissions = ()=> {
         checkLibraryPermissions( ).then((resp:any)=>{
             setDownloading(true);  
             startTime()
-            renderGifById.mutate({ 
-                "HQ": true,
-                "animated_sequence": true,
-                "render_format": "gif",
-                "uids": [ gifData.uid ], 
-                text:[text],
-            })      
+            if (gifData.giphy ){
+                DownloadGiphyGif()
+            }
+            else{
+                renderGifById.mutate({ 
+                    "HQ": true,
+                    "animated_sequence": true,
+                    "render_format": "gif",
+                    "uids": [ gifData.uid ], 
+                    text:[text],
+                })      
+            }
             if(!resp){
                 // console.log('resp: ',resp);
                 requestLibraryPermissions()
@@ -192,87 +229,133 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         { 
             'Content-Type': 'application/json', 
         }
-
+        
     // DOWNLOAD GIF'S
     const RequestDownloadCustomGif  = async (remoteURL: string)=>{
 
         const endTime:any = new Date(); 
         const timeDifference = endTime-responseTime
         console.log("remoteURL Response Time: ", timeDifference / 1000) 
-
-        //Define path and directory to store files to
-        // const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.png`
-        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
         console.log('remoteURL: ',remoteURL);
 
-        //Define options
-        const options: DownloadFileOptions = {
-            // fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-            fromUrl: remoteURL,
-            toFile: filePath,
-            headers: header
-        } 
-        const startTime:any = new Date();
-        let response = await downloadFile(options);
-        return response.promise.then(async (res: any) => {
-            console.log('res: ', res, filePath);    
-             // TO SAVE GIF'S TO IOS PHOTO 
-             const endTime:any = new Date(); 
-                const timeDifference = endTime-startTime
-                console.log("Download Document Response Time: ", timeDifference / 1000)    
+        //Define path and directory to store files to
+        const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
+        // const filePath = RNFS.MainBundlePath + `/${datetime}.gif`
 
-            await CameraRoll.save(remoteURL).then((res:any)=>{
+        // //Define options
+        // const options: DownloadFileOptions = {
+        //     // fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
+        //     fromUrl: remoteURL,
+        //     toFile: filePath,
+        //     headers: header
+        // } 
+        const startTime:any = new Date();
+
+        RNFetchBlob.config({
+            fileCache: true,
+            // path: filePath   //wrting base64
+        }).fetch('GET', remoteURL, header)
+        .then(async (resp:any) => {
+            let returnFilePath = await resp.path();
+            // TO SAVE GIF'S TO IOS LIBRARY   
+            let data: any = await resp.base64();   
+            writeFile(filePath, data, 'base64')    
+            .then((writeFileReposne)=> {
                 const endTime:any = new Date(); 
-                const timeDifference = endTime-startTime
-                console.log("Download Photos Response Time: ", timeDifference / 1000)    
-                setDownloading(false)
-                // console.log('res: ', res);
-                if(freeGifAccess){
-                    setFreeGifAccess(false)
-                    storeFreeGifAccess({access:false})
+                const timeDifference = endTime-responseTime
+                console.log("Download Document Response Time: ", timeDifference / 1000) 
+                if(freeGifAccess==="Granted"){
+                    setFreeGifAccess("Consumed")
+                    storeFreeGifAccess({access: "Consumed"})
                 }
-            }).catch((error:any)=>{
+                // console.log('writeFileReposne: ', writeFileReposne);
+            }).catch((writeFile:any)=>{
                 setDownloading(false)
-                console.log('error: ', error);
-            })
-        }).catch((error:any)=>{
-            setDownloading(false)
-            console.log('error: ', error);
+                console.log('writeFile error: ',writeFile) 
+            })  
+            
+            // TO SAVE GIF'S TO IOS PHOTO 
+            RNFS.exists(filePath).then(async (status: any)=>{
+                await CameraRoll.save(filePath ).then((res:any)=>{
+                    const endTime:any = new Date(); 
+                    const timeDifference = endTime-startTime
+                    console.log("Download Photos Response Time: ", timeDifference / 1000)    
+                    setDownloading(false)
+                    // console.log('res: ', res);
+                    if(freeGifAccess==="Granted"){
+                        setFreeGifAccess("Consumed")
+                        storeFreeGifAccess({access:"Consumed"})
+                    }
+                }).catch((error:any)=>{
+                    setDownloading(false)
+                    console.log('Download Photos error: ', error);
+                })
+             })        
         })
+        
+        // let response = await downloadFile(options);
+        // return response.promise.then(async (res: any) => {
+        //     console.log('res: ', res, filePath);    
+        //      // TO SAVE GIF'S TO IOS PHOTO 
+        //      const endTime:any = new Date(); 
+        //         const timeDifference = endTime-startTime
+        //         console.log("Download Document Response Time: ", timeDifference / 1000)    
+
+        //     await CameraRoll.save(filePath).then((res:any)=>{
+        //         const endTime:any = new Date(); 
+        //         const timeDifference = endTime-startTime
+        //         console.log("Download Photos Response Time: ", timeDifference / 1000)    
+        //         setDownloading(false)
+        //         // console.log('res: ', res);
+        //         if(freeGifAccess==="Granted"){
+        //             setFreeGifAccess("Consumed")
+        //             storeFreeGifAccess({access:"Consumed"})
+        //         }
+        //     }).catch((error:any)=>{
+        //         setDownloading(false)
+        //         console.log('error: ', error);
+        //     })
+        // }).catch((error:any)=>{
+        //     setDownloading(false)
+        //     console.log('error: ', error);
+        // })
+       
     }
 
     const DownloadGiphyGif = async ()=>{
 
+        startTime()
         setDownloading(true)
         //Define path and directory to store files to
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
 
-        await RNFetchBlob
+        await RNFetchBlob.config({ fileCache: true })
             .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
                 header, JSON.stringify({
                     "banner_url": `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
                     "giphy_url":  gifData?.src
                 }))
-                .then(async (response) =>{ 
-                    if(response.info().status==200){
-                        // TO SAVE GIF'S TO IOS LIBRARY                            
-                        writeFile(filePath, response.base64(), 'base64')
-                        .then((writeFileReposne)=> {
-                            if(freeGifAccess){
-                                setFreeGifAccess(false)
-                                storeFreeGifAccess({access: false})
-                            }
-                            console.log('writeFileReposne: ', writeFileReposne);
-                        }).catch((writeFile:any)=>{
-                            setDownloading(false)
-                            console.log('writeFile error: ',writeFile) 
-                        })
-                        console.log('filePath: ', filePath);
-                    
-                        RNFS.exists(filePath).then(async (status: any)=>{
-                           // TO SAVE GIF'S TO IOS PHOTO 
+                .then(async (resp) =>{ 
+                    if(resp.info().status==200){
+                        
+                        // TO SAVE GIF'S TO IOS LIBRARY    
+                        let data = await resp.base64() 
+                         //Define options
+                        const options: DownloadFileOptions = {
+                            fromUrl: `data:image/png;base64,${data}`,
+                            toFile: filePath,
+                            headers: header
+                        } 
+                        let response = downloadFile(options)
+                        return response.promise.then(async (res: any) => {
+                            console.log('res: ', res, filePath);  
+
+                            // TO SAVE GIF'S TO IOS PHOTO 
                             await CameraRoll.save(filePath,).then((res:any)=>{
                                 console.log('res: ', res);
+                                const endTime:any = new Date(); 
+                                const timeDifference = endTime-responseTime
+                                console.log("Download Photos Response Time: ", timeDifference / 1000)         
                                 setDownloading(false)
                             }).catch((error:any)=>{
                                 setDownloading(false)
@@ -280,6 +363,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             })
                         })
                     
+                        
                     }
                 }).catch((writeFile:any)=>{
                     setDownloading(false)
@@ -313,9 +397,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
             }).then((res:any)=>{
                 setSharing(false)
-                if(freeGifAccess){
-                    setFreeGifAccess(false)
-                    storeFreeGifAccess({access:false})
+                if(freeGifAccess==="Granted"){
+                    setFreeGifAccess("Consumed")
+                    storeFreeGifAccess({access:"Consumed"})
                 }
                 console.log('res: ', res);
             }).catch((error:any)=>{
@@ -354,9 +438,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
                 }).then((res:any)=>{
                     console.log('res: ', res);
-                    if(freeGifAccess){
-                        setFreeGifAccess(false)
-                        storeFreeGifAccess({access:false})
+                    if(freeGifAccess==="Granted"){
+                        setFreeGifAccess("Consumed")
+                        storeFreeGifAccess({access:"Consumed"})
                     }
                 }).catch((error:any)=>{
                     setSharing(false)
@@ -377,9 +461,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             const timeDifference = endTime-responseTime
             console.log("Share Response Time: ", timeDifference / 1000)    
             setCopying(!resp) 
-            if(freeGifAccess){
-                setFreeGifAccess(false)
-                storeFreeGifAccess({access:false})
+            if(freeGifAccess==="Granted"){
+                setFreeGifAccess("Consumed")
+                storeFreeGifAccess({access:"Consumed"})
             }
         })
     }
@@ -402,9 +486,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     let remoteURL = `data:image/png;base64,${base64Data}`
                     NativeModules.ClipboardManager.CopyGif(remoteURL)
                     setCopying(false)
-                    if(freeGifAccess){
-                        setFreeGifAccess(false)
-                        storeFreeGifAccess({access:false})
+                    if(freeGifAccess==="Granted"){
+                        setFreeGifAccess("Consumed")
+                        storeFreeGifAccess({access:"Consumed"})
                     }
                 })
                 .catch((writeFile:any)=>{
@@ -413,6 +497,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 })
     }
 
+
+    // VALIDATION'S
     const isValidateInput = () => {
         let string = text.trim()
         if (!string || /^\s*$/.test(string) || /^\.*$/.test(string)){
@@ -431,6 +517,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         return true
     }
 
+
+    // LOCAL STOREAGE
     const StoreIndividualGif = () => {
         if(gifData.giphy)
             {
@@ -443,54 +531,29 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             }
     }
 
-    // console.log('BannerURI: ', BannerURI);
-    // console.log('gifData: ', gifData);
-    // console.log('verifyPayment: ', verifyPayment);
-    // console.log('appleAccessToken: ', appleAccessToken);
-    //  console.log("text.length: ", text.length);
-  
+
     const startTime=()=>{
         const startTime = new Date(); 
-        console.log('start time: ', startTime);
         setRresponseTime(startTime)   
+        console.log('start time: ', startTime);
     }
 
-    const requestReview = ()=> {
-        setTextCheck(false) 
-        Alert.alert("Rate Us", "This is a paid feature.  To complete this task for free, please leave a 5 star review",
-            [
-                {
-                text: 'Maybe Later', onPress: () => {
-                        if(rateAppStatus.data[0].show_popup===1)
-                            DownloadPermissions()
-                    }
-                },
-                {
-                text: 'Rate Now', onPress: () => {
-            
-                    console.log(freeGifAccess, !freeGifAccess);
-                    if(!freeGifAccess){
-                        setFreeGifAccess(true)
-                        storeFreeGifAccess({access:true})
-                    }
-                    InAppReview.RequestInAppReview()
-                    .then((hasFlowFinishedSuccessfully) => {
-                    console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
-                    
-                    if (hasFlowFinishedSuccessfully) {
-                        // do something for ios
-                    }
-                    })
-                    .catch((error) => { console.log("RequestInAppReview: ", error) });
-                }
-            
-                }
-            ] )
-    }
 
-    //   console.log("gifData.src: ",gifData.src);
-    //   console.log("freeGifAccess: ",freeGifAccess);
-      
+
+
+    //  console.log("gifData.src: ",gifData.src);
+    //  console.log("freeGifAccess: ",freeGifAccess);
+    //  console.log(isAvailable , rateAppStatus.data[0].show_popup===1 , !freeGifAccess);
+    //  console.log('BannerURI: ', BannerURI);
+    //  console.log('gifData: ', gifData);
+    //  console.log('verifyPayment: ', verifyPayment);
+    //  console.log('appleAccessToken: ', appleAccessToken);
+    //  console.log("text.length: ", text.length);
+  
+
+    // console.log(isAvailable && rateAppStatus.data[0].show_popup===1 && !freeGifAccess);
+    // console.log("gifData?.giphy: ",gifData?.giphy);
+    
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
             {gifData.src &&  
@@ -562,11 +625,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     </View>
                   
                     {/* Copy/Download/Share */}
-                    <View style={[{flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
+                    <View style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess){
+                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
@@ -581,7 +644,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         }) 
                                     } 
                                     else{
-                                        if(isAvailable && rateAppStatus.data[0].show_popup===1 && !freeGifAccess)
+                                        if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
                                             requestReview() 
                                         else
                                             StoreIndividualGif()
@@ -594,20 +657,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 // if( isValidateInput() ){
-                                //     if (verifyPayment?.subcription || freeGifAccess){
-                                        gifData?.giphy ? DownloadGiphyGif() : 
-                                        // For custom .GIF download
-                                        setFileAction("RequestDownloadCustomGif"); 
-                                        setTextCheck( textSting ? false : true)
-                                        DownloadPermissions()
+                                //     if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                        if(gifData?.giphy) 
+                                            DownloadPermissions() 
+                                        else{
+                                            setFileAction("RequestDownloadCustomGif"); 
+                                            setTextCheck( textSting ? false : true);
+                                            DownloadPermissions()
+                                //         }
                                 //     } 
                                 //     else{
-                                //         if(isAvailable && rateAppStatus.data[0].show_popup===1 && !freeGifAccess)
+                                //         if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
                                 //             requestReview() 
                                 //         else
                                 //             StoreIndividualGif()
                                 //     }
-                                // }
+                                }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
                             <DownloadSvg width={RFValue(40)} height={RFValue(40)} />
@@ -615,7 +680,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if(isValidateInput() ){
-                                    // if (verifyPayment?.subcriptio || freeGifAccess){
+                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   setFileAction("RequestShareCustomGif");   setTextCheck( textSting ? false : true)
@@ -627,13 +692,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "uids": [ gifData.uid ], 
                                             "text":[text],
                                         })      
-                                    // } 
-                                    // else{
-                                    //     if(isAvailable && rateAppStatus.data[0].show_popup===1 && !freeGifAccess)
-                                    //         requestReview() 
-                                    //     else
-                                    //         StoreIndividualGif()
-                                    // }
+                                    } 
+                                    else{
+                                        if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied" )
+                                            requestReview() 
+                                        else
+                                            StoreIndividualGif()
+                                    }
                                 }
                             } }
                             style={{alignSelf:'center', margin:20 }} >

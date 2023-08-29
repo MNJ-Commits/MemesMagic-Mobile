@@ -51,9 +51,12 @@ const CustomScreen = ({navigation, route}:any) => {
       console.log('getCustomRenders error: ', error);
     },
   });  
+
+  const renderInput:any = useRef<any>()
   
   const renderRequestChunk =  ()=>{
-  
+    // console.log("renderRequestChunk: ",renderInput.current);
+
     setAllGIF([])
     setLoader(true)
     Keyboard.dismiss()
@@ -100,11 +103,11 @@ const CustomScreen = ({navigation, route}:any) => {
       getCustomTemplates.refetch()
     }
     else if(text.length==0 && tag.length==0 && page == 1) {   
+      console.log('here');
       setAllGIF([])   
       setUIDs([])
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
-      console.log('here');
     }   
     else if(text.length==0 && tag.length==0 && page > 1) {   
       console.log('Without tag');
@@ -115,6 +118,8 @@ const CustomScreen = ({navigation, route}:any) => {
     }
     else if(text.length!=0 && page > 1 ) {
       setLoader(false) // kept in synch with Banner
+                      // not rendering on tex
+      
     }
 
     return()=>{}
@@ -142,6 +147,7 @@ const CustomScreen = ({navigation, route}:any) => {
   // useEffect(()=>{
   //   setRefreshLoader(false)
   // },[UIDs?.length===allGif?.length])
+// console.log("text.length: ",text.length);
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -156,7 +162,7 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 3000);
 
-console.log(allGif?.length);
+// console.log(allGif?.length);
 // console.log(UIDs?.length);
 // console.log(getCustomRenders?.isLoading);
 // console.log(allGif?.length, UIDs?.length );
@@ -261,9 +267,10 @@ console.log(allGif?.length);
           {/* Grid View */}
           <>
             <AppFlatlist 
+              // data={allGif.concat(allGif).concat(allGif).concat(allGif)}
               data={allGif}
-              // data={[]}
-              API={getCustomTemplates }
+              API={getCustomTemplates}
+              API2={getCustomRenders}
               giphy={false}
               refresh = {refresh}
               isLoader={loader}
@@ -281,7 +288,7 @@ console.log(allGif?.length);
             {
             // loader && 
             UIDs?.length !== allGif?.length  && 
-              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:140  }} >
+              <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}
                   style={{width: 20, height: 20, zIndex:1 }}
@@ -294,8 +301,10 @@ console.log(allGif?.length);
           <View style={{ marginTop:RFValue(5), flexDirection:'row', alignItems:'center',  alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
             <TextInput
               editable={true}
+              ref={renderInput}
               multiline={true}
               placeholderTextColor={'#8d8d8d'}
+              // onChangeText={(e: any) => {renderInput.current= e }}
               onChangeText={(e: any) => { setText(e) }}
               placeholder={'Type your text here'}
               returnKeyType='next'
@@ -310,7 +319,7 @@ console.log(allGif?.length);
               }}            
             />
             <TouchableOpacity 
-              onPress={renderRequestChunk}
+              onPress={()=>renderRequestChunk()}
             >
             <View style={{padding:RFValue(10)}} >
               {loader ?
