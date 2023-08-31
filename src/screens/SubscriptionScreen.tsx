@@ -46,10 +46,10 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
 
-
-  // Ckears Penfding Queue
-  useEffect(() => {
+  // Clears Penfding Queue
+  useLayoutEffect(() => {
     void clearTransactionIOS();
+    console.log("clearTransactionIOS");
     return()=>{}
   }, [])
 
@@ -368,6 +368,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     },
   });
 
+  // console.log("loading: ",  loading);
+  
 
   return (
     <Fragment >
@@ -392,11 +394,11 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
                   <Information width={RFValue(22)} height={RFValue(22)}/>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  disabled={ loading ? true : false}    
-                  onPress={()=>{ setLoading(true); setRestore(true) }}>
-                  <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity 
+                    disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
+                    onPress={()=>{ setLoading(true); setRestore(true) }}>
+                    <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
+                  </TouchableOpacity>
               </View>
             </View>
             <View style={{ alignItems:'center', marginTop:30 }}>

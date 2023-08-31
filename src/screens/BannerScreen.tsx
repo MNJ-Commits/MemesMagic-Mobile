@@ -151,6 +151,7 @@ const BannerScreen = ({navigation}:any) => {
   }, [page]);
 
 
+
   useEffect(()=>{
     
     setAllGIF([]); 

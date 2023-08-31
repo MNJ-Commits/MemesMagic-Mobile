@@ -90,15 +90,20 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }
         else if(gifData.defaultText){
             // For custom render 
-            renderGifById.mutate({ 
-                "HQ": true,
-                "animated_sequence": true,
-                "render_format": "webp",
-                "uids": [ gifData.uid ],
-                text:[gifData?.defaultText]
-            })
-            setWebp(gifData.src)
-            setTextCheck( gifData.defaultText ? false : true)
+            console.log("gifData.src: ",gifData.src);
+            if(gifData.src.includes('render/') ){
+                setTextCheck( gifData.defaultText ? false : true)
+            }
+            else if(!gifData.src.includes('static/template') ){
+                renderGifById.mutate({ 
+                    "HQ": true,
+                    "animated_sequence": true,
+                    "render_format": "webp",
+                    "uids": [ gifData.uid ],
+                    "text":[gifData?.defaultText]
+                })
+            }
+            // setWebp(gifData.src)
             setText(gifData.defaultText)
         }
         else if(route?.params?.uid && !route?.params?.defaultText){
@@ -125,10 +130,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const isAvailable = InAppReview.isAvailable();
     const requestReview = ()=> {
         setTextCheck(false) 
-        Alert.alert("Rate Us", "This is a paid feature. To complete this task for free, please leave a 5 star review",
+        Alert.alert("Rate Us", "This is a locked feature. To unlock it once for free, please leave a 5-star review",
             [
                 {
-                    text: 'Maybe Later'
+                    text: 'Maybe Later', onPress: StoreIndividualGif 
                 },
                 {
                 text: 'Rate Now', onPress: () => {
@@ -204,7 +209,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "animated_sequence": true,
                     "render_format": "gif",
                     "uids": [ gifData.uid ], 
-                    text:[text],
+                    "text":[text],
                 })      
             }
             if(!resp){
@@ -291,35 +296,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     console.log('Download Photos error: ', error);
                 })
              })        
-        })
-        
-        // let response = await downloadFile(options);
-        // return response.promise.then(async (res: any) => {
-        //     console.log('res: ', res, filePath);    
-        //      // TO SAVE GIF'S TO IOS PHOTO 
-        //      const endTime:any = new Date(); 
-        //         const timeDifference = endTime-startTime
-        //         console.log("Download Document Response Time: ", timeDifference / 1000)    
-
-        //     await CameraRoll.save(filePath).then((res:any)=>{
-        //         const endTime:any = new Date(); 
-        //         const timeDifference = endTime-startTime
-        //         console.log("Download Photos Response Time: ", timeDifference / 1000)    
-        //         setDownloading(false)
-        //         // console.log('res: ', res);
-        //         if(freeGifAccess==="Granted"){
-        //             setFreeGifAccess("Consumed")
-        //             storeFreeGifAccess({access:"Consumed"})
-        //         }
-        //     }).catch((error:any)=>{
-        //         setDownloading(false)
-        //         console.log('error: ', error);
-        //     })
-        // }).catch((error:any)=>{
-        //     setDownloading(false)
-        //     console.log('error: ', error);
-        // })
-       
+        })       
     }
 
     const DownloadGiphyGif = async ()=>{
@@ -337,7 +314,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 }))
                 .then(async (resp) =>{ 
                     if(resp.info().status==200){
-                        
                         // TO SAVE GIF'S TO IOS LIBRARY    
                         let data = await resp.base64() 
                          //Define options
@@ -349,6 +325,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         let response = downloadFile(options)
                         return response.promise.then(async (res: any) => {
                             console.log('res: ', res, filePath);  
+                            const endTime:any = new Date(); 
+                            const timeDifference = endTime-responseTime
+                            console.log("Download Photos Response Time: ", timeDifference / 1000)  
 
                             // TO SAVE GIF'S TO IOS PHOTO 
                             await CameraRoll.save(filePath,).then((res:any)=>{
@@ -357,13 +336,15 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 const timeDifference = endTime-responseTime
                                 console.log("Download Photos Response Time: ", timeDifference / 1000)         
                                 setDownloading(false)
+                                if(freeGifAccess==="Granted"){
+                                    setFreeGifAccess("Consumed")
+                                    storeFreeGifAccess({access: "Consumed"})
+                                }
                             }).catch((error:any)=>{
                                 setDownloading(false)
                                 console.log('error: ', error);
                             })
                         })
-                    
-                        
                     }
                 }).catch((writeFile:any)=>{
                     setDownloading(false)
@@ -538,25 +519,12 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('start time: ', startTime);
     }
 
-
-
-
-    //  console.log("gifData.src: ",gifData.src);
-    //  console.log("freeGifAccess: ",freeGifAccess);
-    //  console.log(isAvailable , rateAppStatus.data[0].show_popup===1 , !freeGifAccess);
-    //  console.log('BannerURI: ', BannerURI);
-    //  console.log('gifData: ', gifData);
-    //  console.log('verifyPayment: ', verifyPayment);
-    //  console.log('appleAccessToken: ', appleAccessToken);
-    //  console.log("text.length: ", text.length);
-  
-
-    // console.log(isAvailable && rateAppStatus.data[0].show_popup===1 && !freeGifAccess);
-    // console.log("gifData?.giphy: ",gifData?.giphy);
+    console.log( "freeGifAccess: ", freeGifAccess );
     
+
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
-            {gifData.src &&  
+           
             <KeyboardAvoidingView
                 style={{flex: 1}}
                 behavior={Platform.OS === 'ios' ? 'padding': undefined }
@@ -576,30 +544,20 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     keyboardShouldPersistTaps='handled' 
                  >
                     {/* Gif View*/}
-                    <View>
-                        {/* <Image
-                            // source={{uri: gifData?.giphy ? gifData.src : webp }}
-                            source={{
-                                uri: webp ? webp : gifData.src,  
-                                // priority: FastImage.priority.normal, 
-                                // cache: 'force-cache' 
-                            }}
-                            resizeMode={FastImage.resizeMode.contain}
-                            style={[{width: '100%', aspectRatio: gifData.width/gifData.height,borderRadius:RFValue(30), margin:RFValue(20),  } ]}
-                        />         */}
-                        <FastImage
-                            // source={{uri: gifData?.giphy ? gifData.src : webp }}
-                            source={{
-                                uri: webp ? webp : gifData.src,  
-                                priority: FastImage.priority.high, 
-                                // cache: 'force-cache' 
-                            }}
-                            resizeMode={FastImage.resizeMode.contain}
-                            style={[{width: '100%', aspectRatio: gifData.width/gifData.height,borderRadius:RFValue(30), margin:RFValue(20),  } ]}
-                        /> 
                     
-                        {
-                        gifData.giphy && (text || gifData.defaultText) &&
+                    <View>
+                        <FastImage
+                            source={{
+                                uri: webp ? webp : gifData?.src,  
+                                priority: FastImage.priority.normal, 
+                            }}
+                            resizeMode={FastImage.resizeMode.contain}
+                            style={[{ width:'100%', borderRadius:RFValue(30), margin:RFValue(20) }, 
+                                    (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
+                        /> 
+                         {
+                        gifData?.giphy && 
+                        (text || gifData?.defaultText) &&
                             <FastImage 
                                 source={appleAccessToken ?
                                     {   uri: `http://18.143.157.105:3000/renderer/banner${BannerURI}`,
@@ -612,16 +570,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     }
                                 }
                                 resizeMode={FastImage.resizeMode.contain}
-                                style={{
-                                    width:'100%', 
-                                    aspectRatio: gifData.width/gifData.height,
-                                    position:'absolute',
-                                    borderRadius:RFValue(30), margin:RFValue(20),
-                                }}
+                                style={[{ width:'100%', borderRadius:RFValue(30), margin:RFValue(20) },
+                                       (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
                             />
+                        }  
+                       { (!gifData?.giphy && !webp )&&
+                            <ActivityIndicator size={'small'} style={[ {zIndex: -1, position:'absolute', alignSelf:'center'},  (gifData?.width && gifData?.height) ? { top: RFValue(gifData?.height/3) } : { top: RFValue(100) } ]}/>
                         }
-                        { (!gifData.giphy && !webp )&&
-                            <ActivityIndicator size={'small'} style={{zIndex: -1, position:'absolute', alignSelf:'center', top: RFValue(gifData.height/3) }}/>}
                     </View>
                   
                     {/* Copy/Download/Share */}
@@ -633,7 +588,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
-                                        setCopying(true); setFileAction("CopyCustomGif"); setTextCheck( textSting ? false : true)
+                                        setCopying(true); setFileAction("CopyCustomGif"); 
+                                        // setTextCheck( textSting ? false : true)
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
@@ -656,22 +612,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         </TouchableOpacity>
                         <TouchableOpacity 
                             onPress={ ()=>{
-                                // if( isValidateInput() ){
-                                //     if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                if( isValidateInput() ){
+                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
                                         if(gifData?.giphy) 
                                             DownloadPermissions() 
                                         else{
                                             setFileAction("RequestDownloadCustomGif"); 
-                                            setTextCheck( textSting ? false : true);
+                                            // setTextCheck( textSting ? false : true);
                                             DownloadPermissions()
-                                //         }
-                                //     } 
-                                //     else{
-                                //         if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
-                                //             requestReview() 
-                                //         else
-                                //             StoreIndividualGif()
-                                //     }
+                                        }
+                                    } 
+                                    else{
+                                        if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
+                                            requestReview() 
+                                        else
+                                            StoreIndividualGif()
+                                    }
                                 }
                             }}
                             style={{alignSelf:'center', margin:20 }} >
@@ -683,7 +639,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     if (verifyPayment?.subcription || freeGifAccess==="Granted"){
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
-                                        setSharing(true);   setFileAction("RequestShareCustomGif");   setTextCheck( textSting ? false : true)
+                                        setSharing(true);   setFileAction("RequestShareCustomGif");  
+                                        // setTextCheck( textSting ? false : true)
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
@@ -766,7 +723,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         
                     </View> 
                 </ScrollView>
-            </KeyboardAvoidingView>}
+            </KeyboardAvoidingView>
+            
         </SafeAreaView>
     )
 }

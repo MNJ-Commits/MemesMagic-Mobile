@@ -3,6 +3,8 @@ import { loadAppleAccessTokenFromStorage } from "../store/asyncStorage"
 
 const useGetCustomTemplateByIdRequest = async<T>(params:string)=>{
 
+  console.log("params: ",params);
+  
   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
     console.log('loadAppleAccessTokenFromStorage Error: ', error);
   })

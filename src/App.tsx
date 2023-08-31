@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
+import { NavigationContainer, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import CustomScreen from './screens/CustomScreen';
@@ -48,6 +48,7 @@ const App = ({route}:any) => {
 
 const AppBootStrap = React.memo(function () {
 
+  const navigation = useNavigation<any>();
   const [appRestartCount, setAppRestartCount] = useState<number>(0)
   const [rateStatus, setRateStatus] = useState<any>({})
   const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
@@ -96,7 +97,7 @@ const AppBootStrap = React.memo(function () {
         storeAppRestartCount({ count: resp.count+1 }) 
         setAppRestartCount(resp.count+1)
       } 
-      else {
+      else if (rateStatus.show_popup===0 && freeGifAccess==="Denied"){
         storeAppRestartCount( { count: 1 })
         setAppRestartCount(1)
       }
@@ -126,22 +127,23 @@ const AppBootStrap = React.memo(function () {
 
   const rateAppStatus: any = usePostRateAppStatus({
     onSuccess: async (res: any) => {
-      // console.log("forceAppStatus: ", res[0]);
+      console.log("forceAppStatus: ", res[0]);
       setRateStatus(res[0])
     },
     onError: (res: any) => console.log('onError: ',res),
   });
   
-  const requestReview = ()=> {    
-    console.log(isAvailable, rateStatus.show_popup, freeGifAccess, appRestartCount)
-    console.log(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15))
-    
-    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
-      Alert.alert("Rate Us", "This is a paid feature. To complete this task for free, please leave a 5 star review",
+  const requestReview = ()=> {        
+    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===23|| appRestartCount===25 || appRestartCount===30)){
+      Alert.alert("Rate Us", "This is a locked feature. To unlock it once for free, please leave a 5-star review",
         [
-          { text: 'Maybe Later' },
+          { text: 'Maybe Later', onPress: () => { navigation.navigate('SubscriptionScreen') } },
           {
             text: 'Rate Now', onPress: () => {
+              if(freeGifAccess==="Denied"){
+                setFreeGifAccess("Granted")
+                storeFreeGifAccess({access:"Granted"})
+              }
               InAppReview.RequestInAppReview()
               .then((hasFlowFinishedSuccessfully) => {
               console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
