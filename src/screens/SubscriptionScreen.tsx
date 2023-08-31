@@ -42,6 +42,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [backBlocked, setBackBlocked] = useState<boolean>(false)
   const [restore, setRestore] = useState<boolean>(false)
+  const [action, setAction] = useState<string>("")
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
@@ -271,28 +272,52 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       let purchaseType:any = []
       const renewal_history = validationReponse.latest_receipt_info
       // console.log("renewal_history: ", renewal_history);
-      
+      let not_expired: any
       // Find Subscription
-      const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-      const expiration = subscriptionObject.expires_date_ms
-      let not_expired = expiration && Date.now() < expiration
-      if(subscriptionObject !== undefined)
-        {
-          // console.log("subscriptionObject: ", subscriptionObject);
-          if (not_expired){
-            storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
-            !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+      if(action==="subscribe"){
+        const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        const expiration = subscriptionObject.expires_date_ms
+        not_expired = expiration && Date.now() < expiration
+        if(subscriptionObject !== undefined)
+          {
+            // console.log("subscriptionObject: ", subscriptionObject);
+            if (not_expired){
+              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+            } 
+            else { 
+              // console.log(Date.now() > expiration, Date.now(), expiration);
+              setLoading(false)
+              SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+            }
+          }   
+      }  // Find Purchases
+      else if(action==="puchase"){
+        const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+        if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+      }  // Restore Subscription and Purchases
+      else if(action==="restore"){
+        // Subscription
+        const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        const expiration = subscriptionObject.expires_date_ms
+        not_expired = expiration && Date.now() < expiration
+        if(subscriptionObject !== undefined)
+          {
+            // console.log("subscriptionObject: ", subscriptionObject);
+            if (not_expired){
+              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+            } 
+            else { 
+              // console.log(Date.now() > expiration, Date.now(), expiration);
+              setLoading(false)
+              SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+            }
           } 
-          else { 
-            // console.log(Date.now() > expiration, Date.now(), expiration);
-            setLoading(false)
-            SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-          }
-        }   
-
-      // Find Purchases
-      const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
-      if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+        // Purchases
+        const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+        if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) }   
+      }
       
       // Store Purchase Records
       console.log("purchaseType: ", purchaseType);
@@ -396,7 +421,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                   <TouchableOpacity 
                     disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
-                    onPress={()=>{ setLoading(true); setRestore(true) }}>
+                    onPress={()=>{ setLoading(true); setAction("restore"); setRestore(true) }}>
                     <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                   </TouchableOpacity>
               </View>
@@ -421,7 +446,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
+                  onPress={() => {  if(subscription[0]?.productId){ setAction('subscribe'), handleSubscription()} }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
@@ -438,7 +463,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
               disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ handlePurchase(products[0]?.productId) }} 
+              onPress={() =>{ setAction('purchase'); handlePurchase(products[0]?.productId) }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
