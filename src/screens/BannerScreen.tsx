@@ -144,13 +144,11 @@ const BannerScreen = ({navigation}:any) => {
     }
     else if(text.length!==0 && page > 1) {  
        // setLoader(false) 3rd attmpt      
-      // getBannerTemplates.refetch()  //kept in synch with custom 
+      getBannerTemplates.refetch()  //kept in synch with custom 
                                       // not rendering on text
     }
 
   }, [page]);
-
-
 
   useEffect(()=>{
     

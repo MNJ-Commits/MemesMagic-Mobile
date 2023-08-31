@@ -423,7 +423,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                   disabled={(subscription?.length <1 || loading) ? true : false}  
                   onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
-                
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
                 </TouchableOpacity>

@@ -32,10 +32,17 @@ const CustomScreen = ({navigation, route}:any) => {
       if(res.length === 0){
         setLoader(false)
       } 
-      setAllGIF([...new Set([...allGif, ...res])]);
-      setRefreshLoader(false)
-      const uids = res?.map((items: any) => {  return  items.uid  });      
-      setUIDs([...new Set([...UIDs, ...uids])]);
+      const uids = res?.map((items: any) => {  return  items.uid  });            
+      if(renderInput.current?.value && getCustomRenders.data && page>1)
+        {
+          setUIDs(uids)
+          renderRequestChunk(uids) 
+        }
+      else{
+        setAllGIF([...new Set([...allGif, ...res])]);
+        setUIDs([...new Set([...UIDs, ...uids])])
+        setRefreshLoader(false)
+      }
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -45,34 +52,38 @@ const CustomScreen = ({navigation, route}:any) => {
       // console.log('res: ', res);
       // As we render only already loaded templates so there are no duplicates
       setAllGIF((prevAllGIF: any) =>[...prevAllGIF, ...res]);
-      setRefreshLoader(false)
+      setTimeout(() => {
+        setRefreshLoader(false)
+      }, 5000);
     },
     onError(error) {
       console.log('getCustomRenders error: ', error);
     },
   });  
 
-  const renderInput:any = useRef<any>()
-  
-  const renderRequestChunk =  ()=>{
-    // console.log("renderRequestChunk: ",renderInput.current);
+  const renderInput:any = useRef<any>('')
 
-    setAllGIF([])
+  const renderRequestChunk =  (uids=UIDs)=>{
+
+    let textInput = renderInput?.current?.value
+    console.log("textInput: ", textInput, textInput?.length, textInput && textInput?.length!==0);
+    setRefreshLoader(true)
     setLoader(true)
     Keyboard.dismiss()
-    // getCustomRenders.mutate({ 
-    //   text:[text],
-    //   "uids": UIDs
-    // })
-    for (let i = 0; i <= UIDs.length-1; i += 1) {          
-      setTimeout(() => {
-        getCustomRenders.mutate({ 
-          "render_format": "webp",
-          "text":[text],
-          "uids": [UIDs[i]]
-        })
-      }, i*200);
-    }  
+    if( renderInput?.current?.value && renderInput?.current?.value?.length!==0)
+      { for (let i = 0; i <= uids.length-1; i += 1) {          
+            setTimeout(() => {
+              getCustomRenders.mutate({ 
+                "render_format": "webp",
+                "text":[renderInput.current.value],
+                "uids": [uids[i]]
+              })
+            }, i*200);
+        }  
+      }
+      else{ //alternatively, update setText on inputRef change
+        refresh()
+      }
   }
 
   const refresh = () => {
@@ -81,12 +92,12 @@ const CustomScreen = ({navigation, route}:any) => {
     setLoader(true)
     setLimit(25)
     setAllGIF([]);     
-    if (page > 1 && text.length ==0 ) { setPage(1); } 
+    if (page > 1 && (!renderInput?.current?.value || renderInput?.current?.value?.length===0) ) { setPage(1); } 
     else{
-      if(text.length!=0 ){ renderRequestChunk() }
+      if(renderInput?.current?.value && renderInput?.current?.value.length!==0){ renderRequestChunk() }
       else{ 
         getCustomTemplates.refetch()
-       }
+      }
     }
   };
 
@@ -99,27 +110,26 @@ const CustomScreen = ({navigation, route}:any) => {
       setRefreshLoader(true)   
       getCustomTemplates.refetch()
     }
-    else if(tag.length!=0 && text.length==0 && page > 1) {   
+    else if((!renderInput?.current?.value || renderInput?.current?.value.length===0) && tag.length!=0 && page > 1) {   
       getCustomTemplates.refetch()
     }
-    else if(text.length==0 && tag.length==0 && page == 1) {   
-      console.log('here');
+    else if((!renderInput?.current?.value || renderInput?.current?.value.length===0) && tag.length==0 && page == 1) {   
       setAllGIF([])   
       setUIDs([])
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
     }   
-    else if(text.length==0 && tag.length==0 && page > 1) {   
-      console.log('Without tag');
-      getCustomTemplates.refetch()
+    else if((!renderInput?.current?.value || renderInput?.current?.value.length===0 )&& tag.length==0 && page > 1) {   
+      console.log('Without tag');   
     } 
-    else if(text.length!=0 && page == 1){
+    else if(renderInput?.current?.value.length!==0 && page == 1){
+      setAllGIF([])
       renderRequestChunk()
     }
-    else if(text.length!=0 && page > 1 ) {
+    else if(renderInput?.current?.value.length!==0 && page > 1 ) {
       setLoader(false) // kept in synch with Banner
                       // not rendering on tex
-      
+      getCustomTemplates.refetch() 
     }
 
     return()=>{}
@@ -147,7 +157,6 @@ const CustomScreen = ({navigation, route}:any) => {
   // useEffect(()=>{
   //   setRefreshLoader(false)
   // },[UIDs?.length===allGif?.length])
-// console.log("text.length: ",text.length);
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -167,6 +176,8 @@ const CustomScreen = ({navigation, route}:any) => {
 // console.log(getCustomRenders?.isLoading);
 // console.log(allGif?.length, UIDs?.length );
 
+  // console.log("renderRequestChunk: ",renderInput);
+  // console.log("text: ",text);
 
   return (
     <>
@@ -249,7 +260,6 @@ const CustomScreen = ({navigation, route}:any) => {
                   ["Random", "Angry", "Happy", "Hi", "Mocking", "Nervous", "Nope", "Reveal", "Sad", "Screen", "Signs", "Sports", "Clothes"].map((data:string, index: number)=>{
                   return(
                       <TouchableOpacity
-                        disabled={UIDs?.length !== allGif?.length}
                         onPress={()=>{ 
                           if(data==tag){setTag('')} 
                           else{ setTag(data); setLoader(true);} }} 
@@ -267,7 +277,6 @@ const CustomScreen = ({navigation, route}:any) => {
           {/* Grid View */}
           <>
             <AppFlatlist 
-              // data={allGif.concat(allGif).concat(allGif).concat(allGif)}
               data={allGif}
               API={getCustomTemplates}
               API2={getCustomRenders}
@@ -279,7 +288,7 @@ const CustomScreen = ({navigation, route}:any) => {
               UIDsLength = {UIDs?.length}
               allGifLength = {allGif?.length}
               tag={tag}
-              text={text}
+              // text={text}
               page = {page}
               setPage = {setPage}
               setLimit={setLimit}
@@ -287,7 +296,8 @@ const CustomScreen = ({navigation, route}:any) => {
             />
             {
             // loader && 
-            UIDs?.length !== allGif?.length  && 
+            // UIDs?.length !== allGif?.length  && 
+            refreshLoader &&
               <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}
@@ -304,8 +314,8 @@ const CustomScreen = ({navigation, route}:any) => {
               ref={renderInput}
               multiline={true}
               placeholderTextColor={'#8d8d8d'}
-              // onChangeText={(e: any) => {renderInput.current= e }}
-              onChangeText={(e: any) => { setText(e) }}
+              onChangeText={(e: any) => { renderInput.current.value = e }}
+              // onChangeText={(e: any) => { setText(e) }}
               placeholder={'Type your text here'}
               returnKeyType='next'
               style= {{ 
@@ -319,7 +329,9 @@ const CustomScreen = ({navigation, route}:any) => {
               }}            
             />
             <TouchableOpacity 
-              onPress={()=>renderRequestChunk()}
+              onPress={()=>{
+                setAllGIF([]); 
+                renderRequestChunk()}}
             >
             <View style={{padding:RFValue(10)}} >
               {loader ?

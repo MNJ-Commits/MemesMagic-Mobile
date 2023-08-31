@@ -100,7 +100,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "animated_sequence": true,
                     "render_format": "webp",
                     "uids": [ gifData.uid ],
-                    "text":[gifData?.defaultText]
+                    "text":[gifData?.defaultText ]
                 })
             }
             // setWebp(gifData.src)
@@ -207,7 +207,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 renderGifById.mutate({ 
                     "HQ": true,
                     "animated_sequence": true,
-                    "render_format": "gif",
+                    "render_format": "webp",
                     "uids": [ gifData.uid ], 
                     "text":[text],
                 })      
@@ -663,19 +663,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         </TouchableOpacity>
                     </View>
                     
-                    {/* Activity Indicator */}
-                    <View style={{paddingVertical:20}} >
-                        {
-                            downloading ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
-                            : sharing ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
-                            : copying ?
-                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Copying...</Text>
-                            : null
-                        }
-                    </View>
-
                     {/* Text Ipnut */}
                     <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
                         <TextInput
@@ -704,7 +691,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     {
                                         setLoader(true); 
                                         renderGifById.mutate({ 
-                                        text:[text],
+                                        "text":[text ? text : "Sample Text"],
                                         "HQ": true,
                                         "animated_sequence": true,
                                         "render_format": "webp",
@@ -722,6 +709,21 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         </TouchableOpacity>
                         
                     </View> 
+
+
+                    {/* Activity Indicator */}
+                    <View style={{paddingVertical:20}} >
+                        {
+                            downloading ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Downloading...</Text>
+                            : sharing ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
+                            : copying ?
+                                <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Copying...</Text>
+                            : null
+                        }
+                    </View>
+
                 </ScrollView>
             </KeyboardAvoidingView>
             

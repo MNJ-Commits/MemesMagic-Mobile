@@ -108,7 +108,7 @@ const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, ref
           <RefreshControl
             refreshing={API?.isFetching}
             onRefresh={refresh}
-            enabled={API?.isFetching}
+            enabled={API?.isFetching || API2?.isLoading}
             // tintColor={'transparent'}
             colors={['#FF439E']}
             progressBackgroundColor={'#3386FF'}
