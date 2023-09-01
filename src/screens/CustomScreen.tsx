@@ -40,9 +40,9 @@ const CustomScreen = ({navigation, route}:any) => {
         }
       else{
         setAllGIF([...new Set([...allGif, ...res])]);
-        setUIDs([...new Set([...UIDs, ...uids])])
         setRefreshLoader(false)
       }
+      setUIDs([...new Set([...UIDs, ...uids])])
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -143,20 +143,9 @@ const CustomScreen = ({navigation, route}:any) => {
     setLimit(25)
     setRefreshLoader(true)
     setLoader(true)
-    // setText('')
     getCustomTemplates.refetch()
     return()=>{}
   },[tag])  
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
-
-  // useEffect(()=>{
-  //   setRefreshLoader(false)
-  // },[UIDs?.length===allGif?.length])
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -280,7 +269,6 @@ const CustomScreen = ({navigation, route}:any) => {
               data={allGif}
               API={getCustomTemplates}
               API2={getCustomRenders}
-              giphy={false}
               refresh = {refresh}
               isLoader={loader}
               setLoader={setLoader}
@@ -288,7 +276,6 @@ const CustomScreen = ({navigation, route}:any) => {
               UIDsLength = {UIDs?.length}
               allGifLength = {allGif?.length}
               tag={tag}
-              // text={text}
               page = {page}
               setPage = {setPage}
               setLimit={setLimit}
@@ -296,7 +283,7 @@ const CustomScreen = ({navigation, route}:any) => {
             />
             {
             // loader && 
-            // UIDs?.length !== allGif?.length  && 
+            UIDs?.length !== allGif?.length  && 
             refreshLoader &&
               <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
                 <Image
@@ -315,7 +302,6 @@ const CustomScreen = ({navigation, route}:any) => {
               multiline={true}
               placeholderTextColor={'#8d8d8d'}
               onChangeText={(e: any) => { renderInput.current.value = e }}
-              // onChangeText={(e: any) => { setText(e) }}
               placeholder={'Type your text here'}
               returnKeyType='next'
               style= {{ 

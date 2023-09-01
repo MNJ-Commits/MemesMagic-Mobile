@@ -12,7 +12,7 @@ import { MasonryFlashList  } from "@shopify/flash-list";
 
 
 const LIMIT = 25;
-const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
     // console.log("API: ", API.data.length);
   
     // const columnCount = 2; // Number of columns
@@ -137,12 +137,9 @@ const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, ref
         }}
         ListFooterComponent={ 
           API?.isFetching && allGifLength === 0 ? <Text></Text> :
-          // (giphy && API?.data?.length>=0 && API?.data?.length<LIMIT) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:20, paddingBottom:30 }} >At the bottom</Text>: 
-          // (!API2.isLoading && text!=='') ||  (API?.data?.length>=0 && API?.data?.length<LIMIT) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:20, paddingBottom:30 }} >At the bottom</Text>: 
-          // (!API2.isLoading && !API.isLoading && text==='' ) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:20, paddingBottom:30 }} >Refresh</Text>: 
-        (API?.data?.length <= LIMIT && giphy && page<=3 ) || (!API.isLoading && API?.data?.length===LIMIT && page<=3 && tag) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
-        (API?.data?.length == LIMIT && !tag && !giphy) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
-        <Text></Text>
+          (API?.data?.length <= LIMIT && giphy && page<=3 ) || (!API.isLoading && API?.data?.length===LIMIT && page<=3 && tag) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
+          (API?.data?.length == LIMIT && !tag && !giphy) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
+          <Text></Text>
         }
         extraData={[giphy, text, textPosition, textBackground, textStroke, color, font, isLoader, setLoader, appleAccessToken]}
         renderItem={({ item, extraData}) => 
@@ -162,6 +159,15 @@ const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, ref
             appleAccessToken={appleAccessToken}
           />}
       />
+    )}
+
+export default AppFlatlist
+
+
+
+
+
+
 
   // <BigList
   //   data={data}
@@ -250,7 +256,6 @@ const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, ref
   //     function splitArrayByIndexes(inputArray: any) {
   //       const evenIndexesArray = [];
   //       const oddIndexesArray = [];
-    
   //       for (let i = 0; i < inputArray.length; i++) {
   //         if (i % 2 === 0) {
   //           evenIndexesArray.push(inputArray[i]);
@@ -426,10 +431,6 @@ const AppFlatlist = ({ data, API, API2, giphy, refresh, isLoader, setLoader, ref
   //       )}
   //     }
   // />
-
-    )}
-
-export default AppFlatlist
 
 
 
