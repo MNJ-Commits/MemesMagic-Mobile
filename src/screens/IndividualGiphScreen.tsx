@@ -694,7 +694,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         "text":[text ? text : "Sample Text"],
                                         "HQ": true,
                                         "animated_sequence": true,
-                                        "render_format": "webp",
+                                        "render_format": "gif",
                                         "uids": [ gifData.uid ], 
                                     }) 
                                 }
