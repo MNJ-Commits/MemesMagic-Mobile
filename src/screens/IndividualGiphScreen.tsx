@@ -570,7 +570,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     }
                                 }
                                 resizeMode={FastImage.resizeMode.contain}
-                                style={[{ width:'100%', borderRadius:RFValue(30), margin:RFValue(20) },
+                                style={[{ width:'100%', position:'absolute', borderRadius:RFValue(30), margin:RFValue(20) },
                                        (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
                             />
                         }  

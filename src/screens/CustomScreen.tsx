@@ -33,16 +33,19 @@ const CustomScreen = ({navigation, route}:any) => {
         setLoader(false)
       } 
       const uids = res?.map((items: any) => {  return  items.uid  });            
-      if(renderInput.current?.value && getCustomRenders.data && page>1)
+      setUIDs([...new Set([...UIDs, ...uids])])
+      if(renderInput.current?.value && getCustomRenders.data)
         {
-          setUIDs(uids)
+          // setUIDs(uids)
           renderRequestChunk(uids) 
+          // if(allGif.length===0 && page>1)
+          //   renderRequestChunk(uids) 
         }
       else{
         setAllGIF([...new Set([...allGif, ...res])]);
         setRefreshLoader(false)
       }
-      setUIDs([...new Set([...UIDs, ...uids])])
+
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -92,12 +95,16 @@ const CustomScreen = ({navigation, route}:any) => {
     setLoader(true)
     setLimit(25)
     setAllGIF([]);     
-    if (page > 1 && (!renderInput?.current?.value || renderInput?.current?.value?.length===0) ) { setPage(1); } 
-    else{
-      if(renderInput?.current?.value && renderInput?.current?.value.length!==0){ renderRequestChunk() }
-      else{ 
+    setUIDs([])
+    if (page > 1 && (!renderInput?.current?.value || renderInput?.current?.value?.length===0) ) { setPage(1) } 
+    else if (page > 1 && (renderInput?.current?.value || renderInput?.current?.value?.length!==0) ) { setPage(1) } 
+    else{ //getCustomRenders?.variables?.text[0]
+      // if(renderInput?.current?.value && renderInput?.current?.value?.length!==0){ 
+          
+      // }
+      // else{ 
         getCustomTemplates.refetch()
-      }
+      // }
     }
   };
 
@@ -105,8 +112,7 @@ const CustomScreen = ({navigation, route}:any) => {
 
     setLoader(true)
     if(tag.length!=0 && page == 1 ) {   
-      setUIDs([])
-      setAllGIF([])   
+      // setUIDs([])
       setRefreshLoader(true)   
       getCustomTemplates.refetch()
     }
@@ -114,17 +120,17 @@ const CustomScreen = ({navigation, route}:any) => {
       getCustomTemplates.refetch()
     }
     else if((!renderInput?.current?.value || renderInput?.current?.value.length===0) && tag.length==0 && page == 1) {   
-      setAllGIF([])   
-      setUIDs([])
+      // setUIDs([])
       setRefreshLoader(true)       
       getCustomTemplates.refetch()
     }   
     else if((!renderInput?.current?.value || renderInput?.current?.value.length===0 )&& tag.length==0 && page > 1) {   
       console.log('Without tag');   
+      getCustomTemplates.refetch()
     } 
     else if(renderInput?.current?.value.length!==0 && page == 1){
-      setAllGIF([])
-      renderRequestChunk()
+      // setUIDs([])
+      renderRequestChunk(UIDs.slice(0, 25))
     }
     else if(renderInput?.current?.value.length!==0 && page > 1 ) {
       setLoader(false) // kept in synch with Banner
@@ -139,10 +145,10 @@ const CustomScreen = ({navigation, route}:any) => {
     
     setAllGIF([])
     setUIDs([])
-    setPage(1)
     setLimit(25)
     setRefreshLoader(true)
     setLoader(true)
+    setPage(1)
     getCustomTemplates.refetch()
     return()=>{}
   },[tag])  
@@ -167,6 +173,7 @@ const CustomScreen = ({navigation, route}:any) => {
 
   // console.log("renderRequestChunk: ",renderInput);
   // console.log("text: ",text);
+  // console.log("getCustomRenders: ", getCustomRenders?.variables?.text[0]);
 
   return (
     <>
@@ -251,7 +258,7 @@ const CustomScreen = ({navigation, route}:any) => {
                       <TouchableOpacity
                         onPress={()=>{ 
                           if(data==tag){setTag('')} 
-                          else{ setTag(data); setLoader(true);} }} 
+                          else{ setTag(data); setRefreshLoader(true); setLoader(true);} }} 
                           key={index} 
                           style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center', width:RFValue(80), height:RFValue(35), borderRadius: RFValue(20), marginRight:RFValue(15), borderWidth:1 }, tag==data ? { backgroundColor:'#F9C623', borderColor:'#F9C623'} : { backgroundColor:'#FF439E', borderColor:'#ffffff'} ]} >
                         <Text style={[tag==data ? {color:'#24282C',} : { color:'#ffffff'}, { fontSize:RFValue(11), paddingTop:RFValue(8), paddingBottom:RFValue(5), fontFamily:'Lucita-Regular', }]} >{data}</Text>
@@ -283,8 +290,8 @@ const CustomScreen = ({navigation, route}:any) => {
             />
             {
             // loader && 
-            UIDs?.length !== allGif?.length  && 
-            refreshLoader &&
+            ((UIDs?.length !== allGif?.length) && refreshLoader && loader) 
+            || getCustomRenders.isLoading &&
               <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
                 <Image
                   source={require('../assets/gifs/loader.gif')}

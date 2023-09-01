@@ -106,32 +106,30 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
         estimatedItemSize={150}
         refreshControl={
           <RefreshControl
-            refreshing={API?.isFetching}
+            refreshing={API?.isFetching || API2?.isLoading}
             onRefresh={refresh}
-            enabled={API?.isFetching || API2?.isLoading}
-            // tintColor={'transparent'}
+            // enabled={API?.isFetching || API2?.isLoading}
+            tintColor={'transparent'}
             colors={['#FF439E']}
             progressBackgroundColor={'#3386FF'}
           />
         }
         ListEmptyComponent={
-          API?.isFetching ? (
-            // Loading
-              <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(50),}}> Loading... </Text>
+          API?.isFetching ? ( // Loading
+              <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(70),}}> Loading... </Text>
           ) : API?.data?.length !== 0 ? (
             <Text></Text>
-          ) : (
-            // No gif found
-            <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(20),}}>No content found</Text>
+          ) : ( // No gif found
+            <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(50),}}>No content found</Text>
           )
         }
         onEndReachedThreshold={0.5}
         onEndReached={() => {          
-          API?.data?.length === LIMIT && data.length/25===page && page<=3 ?
+          API?.data?.length === LIMIT && data.length/25===page && (tag || giphy) && page<=3 ?
             setPage(page + 1)
-          : API?.data?.length <= LIMIT && giphy && page<=3 ?
+          : API?.data?.length <= LIMIT && data.length/25===page && giphy && page<=3 ?
             setPage(page + 1)
-          : !tag && !giphy ?
+          : API?.data?.length === LIMIT && data.length/25===page && !tag && !giphy ?
             setPage(page + 1)
           : null
         }}

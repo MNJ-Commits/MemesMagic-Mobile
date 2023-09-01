@@ -134,7 +134,7 @@ const AppBootStrap = React.memo(function () {
   });
   
   const requestReview = ()=> {        
-    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===23|| appRestartCount===25 || appRestartCount===30)){
+    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
       Alert.alert("Rate Us", "This is a locked feature. To unlock it once for free, please leave a 5-star review",
         [
           { text: 'Maybe Later', onPress: () => { navigation.navigate('SubscriptionScreen') } },
