@@ -209,6 +209,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handlePurchase = async (productId: string) => {
 
     console.log("productId: ", productId);
+    setAction('purchase'); 
     setLoading(true)
     setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
@@ -235,6 +236,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const handleSubscription = async () => {
    
+    setAction('subscribe'), 
     setLoading(true)
     setBackBlocked(true)
     const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
@@ -446,7 +448,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => {  if(subscription[0]?.productId){ setAction('subscribe'), handleSubscription()} }}  
+                  onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
@@ -463,7 +465,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
               disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ setAction('purchase'); handlePurchase(products[0]?.productId) }} 
+              onPress={() =>{ handlePurchase(products[0]?.productId) }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
