@@ -16,7 +16,6 @@ const CustomScreen = ({navigation, route}:any) => {
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
-  const [text, setText] = useState<string>('')
   const [tag, setTag] = useState<string>('Random')
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [loader, setLoader] = useState<Boolean>(true)   
@@ -283,6 +282,7 @@ const CustomScreen = ({navigation, route}:any) => {
               UIDsLength = {UIDs?.length}
               allGifLength = {allGif?.length}
               tag={tag}
+              text={renderInput?.current?.value}
               page = {page}
               setPage = {setPage}
               setLimit={setLimit}

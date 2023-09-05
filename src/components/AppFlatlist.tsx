@@ -13,6 +13,7 @@ import { MasonryFlashList  } from "@shopify/flash-list";
 
 const LIMIT = 25;
 const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+  
     // console.log("API: ", API.data.length);
   
     // const columnCount = 2; // Number of columns
@@ -20,8 +21,6 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
     // const marginBetweenItems = 10; // Set your desired margin
 
     // const itemWidth = (totalWidth - (marginBetweenItems * (columnCount - 1))) / columnCount;
-    
-
     const [appleAccessToken, setAppleAccessToken] = useState<string>('')
     const getter = async () => {
       

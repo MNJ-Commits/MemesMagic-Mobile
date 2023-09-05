@@ -83,6 +83,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     );
     
     useEffect(()=>{
+
         if(gifData?.giphy){
             const textSting = gifData?.src2?.split("&w")[0]
             setTextCheck( textSting ? false : true)
@@ -93,8 +94,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             console.log("gifData.src: ",gifData.src);
             if(gifData.src.includes('render/') ){
                 setTextCheck( gifData.defaultText ? false : true)
-            }
-            else if(!gifData.src.includes('static/template') ){
                 renderGifById.mutate({ 
                     "HQ": true,
                     "animated_sequence": true,
@@ -102,6 +101,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "uids": [ gifData.uid ],
                     "text":[gifData?.defaultText ]
                 })
+            }
+            else{
+                setTextCheck( true)
             }
             // setWebp(gifData.src)
             setText(gifData.defaultText)
@@ -207,7 +209,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 renderGifById.mutate({ 
                     "HQ": true,
                     "animated_sequence": true,
-                    "render_format": "webp",
+                    "render_format": "gif",
                     "uids": [ gifData.uid ], 
                     "text":[text],
                 })      
@@ -519,7 +521,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('start time: ', startTime);
     }
 
-    console.log( "freeGifAccess: ", freeGifAccess );
+    // console.log( "freeGifAccess: ", freeGifAccess );
     
 
     return(
@@ -694,7 +696,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                         "text":[text ? text : "Sample Text"],
                                         "HQ": true,
                                         "animated_sequence": true,
-                                        "render_format": "gif",
+                                        "render_format": "webp",
                                         "uids": [ gifData.uid ], 
                                     }) 
                                 }

@@ -127,7 +127,7 @@ const AppBootStrap = React.memo(function () {
 
   const rateAppStatus: any = usePostRateAppStatus({
     onSuccess: async (res: any) => {
-      console.log("forceAppStatus: ", res[0]);
+      // console.log("forceAppStatus: ", res[0]);
       setRateStatus(res[0])
     },
     onError: (res: any) => console.log('onError: ',res),

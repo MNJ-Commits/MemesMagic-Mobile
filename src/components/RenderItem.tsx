@@ -6,9 +6,10 @@ import Video from 'react-native-video';
 import React from "react"
 
   
-const RenderItem = ({item, extraData, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
+const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
   // console.log('item:', item )
+
     const customURI: any =  giphy ? item?.template : 
                             item?.template ? `http://18.143.157.105:3000${item?.template}` : 
                             `http://18.143.157.105:3000${item.render}`
