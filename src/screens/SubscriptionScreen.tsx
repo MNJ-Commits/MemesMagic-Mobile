@@ -185,13 +185,23 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     })
   }
 
-  // Restore Purchases
   useEffect(()=>{
-    if (restore){
+    console.log("action: ",action);
+    
+    if (action==="restore"){
       restorePurchases()
+    }else if (action==="subscribe" && subscription[0]?.productId){
+      handleSubscription(subscription[0]?.productId)
+    }else if (action==="purchase" && products[0]?.productId){
+      handlePurchase(products[0]?.productId)
+    }else{
+      setLoading(false)
     }
+
     return()=>{}
-  },[restore])
+  },[action])
+
+
 
 
   // Apple expires subscription after 6 attempts or 5 minutes in sandbox automatically
@@ -200,7 +210,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     Alert.alert(alertType, msg,
     [
       {
-        text: 'Yes', onPress: () => handleSubscription() 
+        text: 'Yes', onPress: () => setAction("purchase")
       },
       {
         text: 'No'
@@ -211,7 +221,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handlePurchase = async (productId: string) => {
 
     console.log("productId: ", productId);
-    setAction("purchase"); 
     setLoading(true)
     setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
@@ -236,12 +245,12 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       })
   };
 
-  const handleSubscription = async () => {
+  const handleSubscription = async (subscribeId: any) => {
    
     setAction("subscribe"), 
     setLoading(true)
     setBackBlocked(true)
-    const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
+    const productId = subscribeId ? subscribeId : "MonthlySubscription"
     await requestSubscription({ sku: productId, appAccountToken: UUID }) 
     .then(async (subscriptionResponse: any)=>{ 
       // console.log("subscriptionResponse: ", subscriptionResponse);
@@ -456,7 +465,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
+                  onPress={() => { setAction("subscribe"); }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
@@ -473,7 +482,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
               disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ handlePurchase(products[0]?.productId) }} 
+              onPress={() =>{ setAction("purchase"); }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
