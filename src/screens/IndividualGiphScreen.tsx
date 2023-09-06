@@ -57,7 +57,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
             console.log('loadVerifyPaymentFromStorage Error: ', error);
         })
-        // console.log("paymentStatus: ",paymentStatus );
+        console.log("paymentStatus: ",paymentStatus );
         setVerifyPayment(paymentStatus) 
         
         const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
@@ -285,7 +285,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             
         // TO SAVE GIF'S TO IOS PHOTO 
         RNFS.exists(filePath).then(async (status: any)=>{
-            await CameraRoll.saveToCameraRoll(filePath).then((res:any)=>{
+            await CameraRoll.save(filePath).then((res:any)=>{
                 const endTime:any = new Date(); 
                 const timeDifference = endTime-startTime
                 console.log("Download Photos Response Time: ", timeDifference / 1000)    
@@ -452,7 +452,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { 
             const endTime:any = new Date(); 
             const timeDifference = endTime-responseTime
-            console.log("Share Response Time: ", timeDifference / 1000)    
+            console.log("Copy Response Time: ", timeDifference / 1000)    
             setCopying(!resp) 
             if(freeGifAccess==="Granted"){
                 setFreeGifAccess("Consumed")
@@ -596,7 +596,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if (verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted"){
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
@@ -625,7 +625,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if (verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted"){
                                         if(gifData?.giphy) 
                                             DownloadPermissions() 
                                         else{
@@ -648,7 +648,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if(isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if (verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted"){
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   setFileAction("RequestShareCustomGif");  

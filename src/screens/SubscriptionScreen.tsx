@@ -41,7 +41,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [subscription, setSubscription] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [backBlocked, setBackBlocked] = useState<boolean>(false)
-  const [restore, setRestore] = useState<boolean>(false)
   const [action, setAction] = useState<string>("")
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
@@ -70,7 +69,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // console.log("here: ", expired, Date.now(), expiration);
       if (expired) { 
         // setLoading(false)
-        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
+        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false, is_trial_period: paymentStatus?.is_trial_period })
         // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
       }else{
         // setLoading(false)
@@ -185,13 +184,19 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     })
   }
 
-  // Restore Purchases
   useEffect(()=>{
-    if (restore){
+    console.log("action: ",action);
+    
+    if (action==="restore"){
       restorePurchases()
+    }else if (action==="subscribe"){
+      if(subscription[0]?.productId){ handleSubscription()} 
+    }else if (action==="purchase"){
+      handlePurchase(products[0]?.productId)
     }
+
     return()=>{}
-  },[restore])
+  },[action])
 
 
   // Apple expires subscription after 6 attempts or 5 minutes in sandbox automatically
@@ -200,7 +205,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     Alert.alert(alertType, msg,
     [
       {
-        text: 'Yes', onPress: () => handleSubscription() 
+        text: 'Yes', onPress: () => { setAction("subscribe"); }
       },
       {
         text: 'No'
@@ -211,7 +216,6 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handlePurchase = async (productId: string) => {
 
     console.log("productId: ", productId);
-    setAction("purchase"); 
     setLoading(true)
     setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
@@ -237,31 +241,31 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   };
 
   const handleSubscription = async () => {
-   
-    setAction("subscribe"), 
     setLoading(true)
     setBackBlocked(true)
     const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
-    await requestSubscription({ sku: productId, appAccountToken: UUID }) 
-    .then(async (subscriptionResponse: any)=>{ 
-      // console.log("subscriptionResponse: ", subscriptionResponse);
-      await finishTransaction({purchase: subscriptionResponse})
-      .then((AckResult)=>{
-        setBackBlocked(false)
-        console.log('finishTransaction Acknowledged: ', AckResult);  
-        let receipt = subscriptionResponse.transactionReceipt
-        if(receipt)
-          validateReceipt(receipt)
-      }).catch((AckResultError)=>{
-        setLoading(false)
-        setBackBlocked(false)
-        console.log('finishTransaction Error: ', AckResultError);
+    {   
+      await requestSubscription({ sku: productId, appAccountToken: UUID }) 
+      .then(async (subscriptionResponse: any)=>{ 
+        // console.log("subscriptionResponse: ", subscriptionResponse);
+        await finishTransaction({purchase: subscriptionResponse})
+        .then((AckResult)=>{
+          setBackBlocked(false)
+          console.log('finishTransaction Acknowledged: ', AckResult);  
+          let receipt = subscriptionResponse.transactionReceipt
+          if(receipt)
+            validateReceipt(receipt)
+        }).catch((AckResultError)=>{
+          setLoading(false)
+          setBackBlocked(false)
+          console.log('finishTransaction Error: ', AckResultError);
+        })
       })
-    })
-    .catch(async (subscriptionError)=>{
-      setLoading(false)
-      console.log('subscriptionError: ', subscriptionError);
-    })
+      .catch(async (subscriptionError)=>{
+        setLoading(false)
+        console.log('subscriptionError: ', subscriptionError);
+      })
+    } 
   };  
  
   const validateReceipt = async (receipt: string)=>{
@@ -271,9 +275,11 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             
       // Extract Purchase Records
       let purchaseType:any = []
+      let trialPeriod:any  
       const renewal_history = validationReponse.latest_receipt_info
       // console.log("renewal_history: ", renewal_history);
       let not_expired: any
+      console.log("action: ",action);
       // Find Subscription
       if(action==="subscribe"){
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
@@ -283,8 +289,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           {
             console.log("subscriptionObject: ", subscriptionObject);
             if (not_expired){
-              console.log(" action subscribe not expired");
-              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              console.log("action subscribe not expired");
+              storePaymentsReceiptInfo({...subscriptionObject})
+              trialPeriod = subscriptionObject.is_trial_period
               !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
             } 
             else { 
@@ -314,7 +321,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             // console.log("subscriptionObject: ", subscriptionObject);
             if (not_expired){
               console.log(" action resore subscribe not expired");
-              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              storePaymentsReceiptInfo({...subscriptionObject})
               !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
             } 
             else { 
@@ -331,25 +338,24 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // Store Purchase Records
       console.log("purchaseType: ", purchaseType);
       if (purchaseType.length==0){
-        setVerifyPayments({ one_time: false, subcription: false })
+        setVerifyPayments({ one_time: false, subcription: false, is_trial_period: false })
         SubscriptionAlert("Payments Alert", "Your have no active payments. Would you like to subcribe")
       } 
       else if(purchaseType.length == 1){
         if(purchaseType[0] === "NoWatermarks")
-          setVerifyPayments({ one_time: true, subcription: verifyPayment?.subcription })
+          setVerifyPayments({ one_time: true, subcription: verifyPayment?.subcription, is_trial_period: verifyPayment?.trialPeriod })
         else if (purchaseType[0] ===  "MonthlySubscription")
-          setVerifyPayments({ one_time: verifyPayment?.one_time, subcription: true })
+          setVerifyPayments({ subcription: true, one_time: verifyPayment?.one_time, is_trial_period: trialPeriod })
       } 
       else if(purchaseType.length == 2){
-        setVerifyPayments({ one_time: true, subcription: true })
+        setVerifyPayments({ one_time: true, subcription: true, is_trial_period: trialPeriod })
       } 
 
-      if(restore) {
+      if(action==="restore") {
         Alert.alert("Payments Alert", "Payments restored successfully",
           [{
               text: 'Ok',
                onPress: () => { 
-                setRestore(false)
                 if(not_expired) {
                   navigation.canGoBack() ? navigation.pop() :
                   returnScreen ? navigation.push(returnScreen) :
@@ -369,9 +375,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           navigation.push('CustomScreen')
         }, 2000);
       }
-
       setLoading(false)  
-
     })
     .catch((validationError)=>{ 
       setLoading(false)
@@ -431,7 +435,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                   <TouchableOpacity 
                     disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
-                    onPress={()=>{ setLoading(true); setAction("restore"); setRestore(true) }}>
+                    onPress={()=>{ setLoading(true); setAction("restore"); }}>
                     <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                   </TouchableOpacity>
               </View>
@@ -456,7 +460,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
                 <TouchableOpacity 
                   disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => {  if(subscription[0]?.productId){ handleSubscription()} }}  
+                  onPress={() => { setAction("subscribe"); }}  
                     style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
                 >
                   <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
@@ -473,7 +477,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
             <TouchableOpacity 
               disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ handlePurchase(products[0]?.productId) }} 
+              onPress={() =>{ setAction("purchase"); }} 
               style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
             >
               <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
