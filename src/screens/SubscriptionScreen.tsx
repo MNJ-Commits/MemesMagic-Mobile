@@ -42,6 +42,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [backBlocked, setBackBlocked] = useState<boolean>(false)
   const [restore, setRestore] = useState<boolean>(false)
+  const [action, setAction] = useState<string>("")
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
@@ -208,6 +209,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handlePurchase = async (productId: string) => {
 
     console.log("productId: ", productId);
+    setAction('purchase'); 
     setLoading(true)
     setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
@@ -234,6 +236,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const handleSubscription = async () => {
    
+    setAction('subscribe'), 
     setLoading(true)
     setBackBlocked(true)
     const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
@@ -271,28 +274,52 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       let purchaseType:any = []
       const renewal_history = validationReponse.latest_receipt_info
       // console.log("renewal_history: ", renewal_history);
-      
+      let not_expired: any
       // Find Subscription
-      const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-      const expiration = subscriptionObject.expires_date_ms
-      let not_expired = expiration && Date.now() < expiration
-      if(subscriptionObject !== undefined)
-        {
-          // console.log("subscriptionObject: ", subscriptionObject);
-          if (not_expired){
-            storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
-            !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+      if(action==="subscribe"){
+        const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        const expiration = subscriptionObject.expires_date_ms
+        not_expired = expiration && Date.now() < expiration
+        if(subscriptionObject !== undefined)
+          {
+            // console.log("subscriptionObject: ", subscriptionObject);
+            if (not_expired){
+              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+            } 
+            else { 
+              // console.log(Date.now() > expiration, Date.now(), expiration);
+              setLoading(false)
+              SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+            }
+          }   
+      }  // Find Purchases
+      else if(action==="puchase"){
+        const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+        if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+      }  // Restore Subscription and Purchases
+      else if(action==="restore"){
+        // Subscription
+        const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        const expiration = subscriptionObject.expires_date_ms
+        not_expired = expiration && Date.now() < expiration
+        if(subscriptionObject !== undefined)
+          {
+            // console.log("subscriptionObject: ", subscriptionObject);
+            if (not_expired){
+              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+            } 
+            else { 
+              // console.log(Date.now() > expiration, Date.now(), expiration);
+              setLoading(false)
+              SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+            }
           } 
-          else { 
-            // console.log(Date.now() > expiration, Date.now(), expiration);
-            setLoading(false)
-            SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-          }
-        }   
-
-      // Find Purchases
-      const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
-      if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
+        // Purchases
+        const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
+        if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) }   
+      }
       
       // Store Purchase Records
       console.log("purchaseType: ", purchaseType);
@@ -396,7 +423,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                   <TouchableOpacity 
                     disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
-                    onPress={()=>{ setLoading(true); setRestore(true) }}>
+                    onPress={()=>{ setLoading(true); setAction("restore"); setRestore(true) }}>
                     <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                   </TouchableOpacity>
               </View>
