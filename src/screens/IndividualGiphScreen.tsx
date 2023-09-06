@@ -109,6 +109,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             setText(gifData.defaultText)
         }
         else if(route?.params?.uid && !route?.params?.defaultText){
+           
+            console.log("gifData.src: ",gifData.src);
             getTemplateById.mutate({ uid:route?.params?.uid })
         }
 
@@ -211,7 +213,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "animated_sequence": true,
                     "render_format": "gif",
                     "uids": [ gifData.uid ], 
-                    "text":[text],
+                    "text":[text ? text : "Sample Text"],
                 })      
             }
             if(!resp){
@@ -258,13 +260,13 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         // } 
         const startTime:any = new Date();
 
+        // TO SAVE GIF'S TO IOS LIBRARY   
         RNFetchBlob.config({
             fileCache: true,
             // path: filePath   //wrting base64
         }).fetch('GET', remoteURL, header)
         .then(async (resp:any) => {
             let returnFilePath = await resp.path();
-            // TO SAVE GIF'S TO IOS LIBRARY   
             let data: any = await resp.base64();   
             writeFile(filePath, data, 'base64')    
             .then((writeFileReposne)=> {
@@ -281,23 +283,23 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 console.log('writeFile error: ',writeFile) 
             })  
             
-            // TO SAVE GIF'S TO IOS PHOTO 
-            RNFS.exists(filePath).then(async (status: any)=>{
-                await CameraRoll.save(filePath ).then((res:any)=>{
-                    const endTime:any = new Date(); 
-                    const timeDifference = endTime-startTime
-                    console.log("Download Photos Response Time: ", timeDifference / 1000)    
-                    setDownloading(false)
-                    // console.log('res: ', res);
-                    if(freeGifAccess==="Granted"){
-                        setFreeGifAccess("Consumed")
-                        storeFreeGifAccess({access:"Consumed"})
-                    }
-                }).catch((error:any)=>{
-                    setDownloading(false)
-                    console.log('Download Photos error: ', error);
-                })
-             })        
+        // TO SAVE GIF'S TO IOS PHOTO 
+        RNFS.exists(filePath).then(async (status: any)=>{
+            await CameraRoll.saveToCameraRoll(filePath).then((res:any)=>{
+                const endTime:any = new Date(); 
+                const timeDifference = endTime-startTime
+                console.log("Download Photos Response Time: ", timeDifference / 1000)    
+                setDownloading(false)
+                // console.log('res: ', res);
+                if(freeGifAccess==="Granted"){
+                    setFreeGifAccess("Consumed")
+                    storeFreeGifAccess({access:"Consumed"})
+                }
+            }).catch((error:any)=>{
+                setDownloading(false)
+                console.log('Download Photos error: ', error);
+            })
+            })        
         })       
     }
 
@@ -307,6 +309,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         setDownloading(true)
         //Define path and directory to store files to
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
+        
+        console.log(`http://18.143.157.105:3000/renderer/banner${BannerURI}`,);
+        console.log(gifData?.src);
+
 
         await RNFetchBlob.config({ fileCache: true })
             .fetch('POST', 'http://18.143.157.105:3000/giphy/render',
@@ -315,6 +321,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "giphy_url":  gifData?.src
                 }))
                 .then(async (resp) =>{ 
+                    console.log("resp.info().status :", resp.info().status);
+                    
                     if(resp.info().status==200){
                         // TO SAVE GIF'S TO IOS LIBRARY    
                         let data = await resp.base64() 
@@ -347,6 +355,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 console.log('error: ', error);
                             })
                         })
+                    } else{
+                        setDownloading(false)
                     }
                 }).catch((writeFile:any)=>{
                     setDownloading(false)
@@ -554,7 +564,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 priority: FastImage.priority.normal, 
                             }}
                             resizeMode={FastImage.resizeMode.contain}
-                            style={[{ width:'100%', borderRadius:RFValue(30), margin:RFValue(20) }, 
+                            style={[{ width:'100%', borderRadius:RFValue(30), marginHorizontal:RFValue(20) }, 
                                     (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
                         /> 
                          {
@@ -572,7 +582,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     }
                                 }
                                 resizeMode={FastImage.resizeMode.contain}
-                                style={[{ width:'100%', position:'absolute', borderRadius:RFValue(30), margin:RFValue(20) },
+                                style={[{ width:'100%', position:'absolute', borderRadius:RFValue(30), marginHorizontal:RFValue(20) },
                                        (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
                             />
                         }  
@@ -598,7 +608,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "animated_sequence": true,
                                             "render_format": "gif",
                                             "uids": [ gifData.uid ], 
-                                            "text":[text],
+                                            "text":[text ? text : "Sample Text"],
                                         }) 
                                     } 
                                     else{
@@ -649,7 +659,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                             "animated_sequence": true,
                                             "render_format": "gif",
                                             "uids": [ gifData.uid ], 
-                                            "text":[text],
+                                            "text":[text ? text : "Sample Text"],
                                         })      
                                     } 
                                     else{
@@ -669,20 +679,22 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
                         <TextInput
                             editable={true}
+                            multiline={true}
                             placeholderTextColor={'#25282D'}
                             showSoftInputOnFocus={true}
                             onSubmitEditing={() => { }}
                             onChangeText={(e: any) => { setText(e);  setTextCheck(true) }}
                             placeholder={'Your text here'}
                             value={ text }
+                            returnKeyType='next'
                             style= {{ 
-                            fontSize: RFValue(15),
-                            fontFamily:'arial',
-                            width:'75%',
-                            alignSelf:'center',
-                            height: RFValue(40), 
-                            marginLeft: RFValue(20),
-                            color:'#000000',
+                                fontSize: RFValue(15),
+                                fontFamily:'arial',
+                                width:'75%',
+                                alignSelf:'center',
+                                height: RFValue(25), 
+                                marginLeft: RFValue(20),
+                                color:'#000000',
                             }}            
                         />
                         

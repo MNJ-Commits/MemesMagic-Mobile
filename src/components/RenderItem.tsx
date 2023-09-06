@@ -44,7 +44,7 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
             navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text})
           }
         }} 
-        style={{ alignItems:'center', width:'100%', margin:RFValue(5), height: RFValue(150/width*height), borderRadius:RFValue(15) }} 
+        style={{ alignItems:'center', height: RFValue(160/width*height), marginVertical:RFValue(5), }} 
       >  
         < >  
           {/* <Image
@@ -91,9 +91,10 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
             onLoadEnd={()=>setLoader(false)}
             style={{ 
               zIndex: 0, 
-              width:'100%', 
-              height: RFValue(150/width*height),
-              borderRadius:RFValue(15),   
+              width:'90%', 
+              // backgroundColor:"pink",
+              height: RFValue(160/width*height),
+              borderRadius:RFValue(8),   
             }}
           />
           {/* {(loader && !giphy) &&  */}
@@ -114,7 +115,7 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
                 onLoadEnd={()=>setLoader(false)}
                 style={{
                   width:'100%', 
-                  height:RFValue(150/width*height), 
+                  height:RFValue(160/width*height), 
                   position:'absolute',
                   borderRadius:RFValue(10),
                 }}

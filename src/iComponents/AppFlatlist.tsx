@@ -24,7 +24,7 @@ import { useFocusEffect } from '@react-navigation/native';
       }
       
       onRefresh={() => refresh() }
-      contentContainerStyle={{margin:RFValue(10)}}
+      contentContainerStyle={{margin:RFValue(10), backgroundColor:"pink" }}
       showsVerticalScrollIndicator={false}
       renderItem={ ({item}:any) =>
        <RenderItems 

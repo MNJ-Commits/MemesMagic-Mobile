@@ -46,6 +46,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
+  const [verifyPayment, setVerifyPayment] = useState<any>({})
+
 
   // Clears Penfding Queue
   useLayoutEffect(() => {
@@ -59,7 +61,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
       console.log('loadVerifyPaymentFromStorage Error: ', error);
     })
-
+    setVerifyPayment(paymentStatus) 
     await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
       
       // console.log("receipt_info_res: ", receipt_info_res);
@@ -209,7 +211,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const handlePurchase = async (productId: string) => {
 
     console.log("productId: ", productId);
-    setAction('purchase'); 
+    setAction("purchase"); 
     setLoading(true)
     setBackBlocked(true)
     await requestPurchase({ sku: productId, appAccountToken: UUID })
@@ -236,7 +238,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const handleSubscription = async () => {
    
-    setAction('subscribe'), 
+    setAction("subscribe"), 
     setLoading(true)
     setBackBlocked(true)
     const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
@@ -266,10 +268,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     
     await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
     .then( async (validationReponse)=>{ 
-      
-      // Store Receipt
-      getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
-      
+            
       // Extract Purchase Records
       let purchaseType:any = []
       const renewal_history = validationReponse.latest_receipt_info
@@ -282,8 +281,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
         not_expired = expiration && Date.now() < expiration
         if(subscriptionObject !== undefined)
           {
-            // console.log("subscriptionObject: ", subscriptionObject);
+            console.log("subscriptionObject: ", subscriptionObject);
             if (not_expired){
+              console.log(" action subscribe not expired");
               storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
               !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
             } 
@@ -294,11 +294,17 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             }
           }   
       }  // Find Purchases
-      else if(action==="puchase"){
+      else if(action==="purchase"){
+        // Premium Receipt
+        getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
+        
         const purchaseObject = renewal_history?.find((item: { product_id: string; }) => item?.product_id === "NoWatermarks");
         if (purchaseObject !== undefined) { purchaseType.push(purchaseObject.product_id) } 
       }  // Restore Subscription and Purchases
       else if(action==="restore"){
+         // Premium Receipt
+        getAppleAccessToken.mutate({receipt: validationReponse.latest_receipt})
+      
         // Subscription
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
         const expiration = subscriptionObject.expires_date_ms
@@ -307,6 +313,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           {
             // console.log("subscriptionObject: ", subscriptionObject);
             if (not_expired){
+              console.log(" action resore subscribe not expired");
               storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
               !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
             } 
@@ -329,9 +336,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       } 
       else if(purchaseType.length == 1){
         if(purchaseType[0] === "NoWatermarks")
-          setVerifyPayments({ one_time: true, subcription: false })
+          setVerifyPayments({ one_time: true, subcription: verifyPayment?.subcription })
         else if (purchaseType[0] ===  "MonthlySubscription")
-          setVerifyPayments({ one_time: false, subcription: true })
+          setVerifyPayments({ one_time: verifyPayment?.one_time, subcription: true })
       } 
       else if(purchaseType.length == 2){
         setVerifyPayments({ one_time: true, subcription: true })
@@ -396,6 +403,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   });
 
   // console.log("loading: ",  loading);
+  // console.log("action: ",  action);
   
 
   return (
