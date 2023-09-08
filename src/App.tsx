@@ -10,8 +10,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ApplePayScreen from './screens/ApplePayScreen';
 import { ActivityIndicator, Alert, AppState } from 'react-native';
-import { clearTransactionIOS } from 'react-native-iap';
-import { PaymentsReceiptInfo, loadAppRestartCount, loadFreeGifAccess, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppRestartCount, storeFreeGifAccess } from './store/asyncStorage';
+import { clearTransactionIOS, finishTransaction, getAvailablePurchases, getReceiptIOS, validateReceiptIos } from 'react-native-iap';
+import { PaymentsReceiptInfo, loadAppRestartCount, loadFreeGifAccess, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppRestartCount, storeFreeGifAccess, storePaymentsReceiptInfo, storeVerifyPayment } from './store/asyncStorage';
 import InAppReview from 'react-native-in-app-review';
 import { usePostRateAppStatus } from './hooks/usePostRateAppStatus';
 
@@ -49,6 +49,7 @@ const App = ({route}:any) => {
 const AppBootStrap = React.memo(function () {
 
   const navigation = useNavigation<any>();
+  const [verifyPayment, setVerifyPayment] = useState<any>({})
   const [appRestartCount, setAppRestartCount] = useState<number>(0)
   const [rateStatus, setRateStatus] = useState<any>({})
   const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
@@ -61,8 +62,15 @@ const AppBootStrap = React.memo(function () {
     }, []),
   );
 
+  useEffect(()=>{  
+    storeVerifyPayment(verifyPayment)
+    return()=>{}
+  },[verifyPayment])
+
+  
   useEffect(()=>{
     getter()
+    getAvailableSubscription()
   },[])
 
   useEffect(()=>{
@@ -74,22 +82,18 @@ const AppBootStrap = React.memo(function () {
 
   const getter = async () =>{
 
-    const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
-      console.log('loadVerifyPaymentFromStorage Error: ', error);
-    })
+    // await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
 
-    await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
-      // console.log("receipt_info_res: ", receipt_info_res);
-      const expiration = receipt_info_res?.expires_date_ms
-      let expired = expiration && Date.now() > Number(expiration)
-      // console.log("here: ", expired, Date.now(), expiration);
-      if (expired && paymentStatus !== undefined || paymentStatus !== null) { 
-        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
-      }
-    })
-    .catch((error:any)=>{
-      console.log('loadPaymentsReceiptInfo Error: ', error);
-    })
+    //   const expiration = receipt_info_res?.expires_date_ms
+    //   let is_expired = expiration ? Date.now() > Number(expiration) : false
+    //   // console.log("receipt_info_res: ", receipt_info_res);
+    //   // console.log("is_expired: ", is_expired, Date.now(), expiration);
+    //   if (is_expired && paymentStatus !== undefined || paymentStatus !== null) { 
+    //     setVerifyPayment({ one_time: paymentStatus?.one_time, subcription: false, is_trial_period: paymentStatus?.trial_period  })
+    //   }
+    // }).catch((error:any)=>{
+    //   console.log('loadPaymentsReceiptInfo Error: ', error);
+    // })
      
     await loadAppRestartCount().then((resp)=>{
       console.log("resp: ", resp);
@@ -101,8 +105,7 @@ const AppBootStrap = React.memo(function () {
         storeAppRestartCount( { count: 1 })
         setAppRestartCount(1)
       }
-    })
-    .catch((error:any)=>{
+    }).catch((error:any)=>{
       console.log('loadAppRestartCount Error: ', error);
     })
  
@@ -115,15 +118,11 @@ const AppBootStrap = React.memo(function () {
         storeFreeGifAccess({access:"Denied"})
         setFreeGifAccess("Denied")
       }    
-    })
-    .catch((error:any)=>{
+    }).catch((error:any)=>{
         console.log('loadFreeGifAccess Error: ', error);
     })
  
   }
-
-  console.log("freeGifAccess: ",freeGifAccess, appRestartCount);
-  
 
   const rateAppStatus: any = usePostRateAppStatus({
     onSuccess: async (res: any) => {
@@ -159,6 +158,44 @@ const AppBootStrap = React.memo(function () {
     }
   }
 
+  const getAvailableSubscription = async ()=>{
+    
+    console.log("getAvailableSubscription"); 
+    // forceRefresh only makes sense when testing an app not downloaded from the Appstore.
+    // And only afer a direct user action.
+    const latestAvailableReceipt = await getReceiptIOS({forceRefresh: true});
+    if(latestAvailableReceipt){
+      await validateReceiptIos({ receiptBody: {"receipt-data": latestAvailableReceipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
+      .then( async (validationReponse)=>{ 
+        const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{ console.log('loadVerifyPaymentFromStorage Error: ', error) })
+        const renewal_history = validationReponse.latest_receipt_info
+        // console.log("paymentStatus: ", paymentStatus);     
+        // console.log("renewal_history: ", renewal_history);
+        let trial_period:any  
+        let not_expired: any
+        // Find Subscription
+        const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        trial_period = subscriptionObject.is_trial_period
+        const expiration_time = subscriptionObject.expires_date_ms
+        not_expired = expiration_time ? Date.now() < expiration_time : false
+        console.log("subscriptionObject: ", subscriptionObject);
+        storePaymentsReceiptInfo({...subscriptionObject})
+        setVerifyPayment({ 
+                          subcription: not_expired,
+                          one_time: paymentStatus?.one_time, 
+                          is_trial_period: trial_period 
+                        })
+      })
+      .catch((validationError)=>{ 
+        console.log('validationError: ', validationError)
+      })   
+    }
+  }
+
+
+
+  console.log("freeGifAccess: ",freeGifAccess, appRestartCount);
+
   return(
         <Stack.Navigator
           screenOptions={{
@@ -179,10 +216,6 @@ export default App
 
 
 
-
-function setVerifyPayments(arg0: { one_time: any; subcription: boolean; }) {
-  throw new Error('Function not implemented.');
-}
 //       CustomScreen:{
 //   screens:{
 //     IndividualGiphScreen:"IndividualGiphScreen"

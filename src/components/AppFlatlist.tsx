@@ -102,6 +102,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
         showsVerticalScrollIndicator={false}
         keyboardDismissMode={"on-drag"}
         removeClippedSubviews={true}
+        estimatedItemSize={150}
         refreshControl={
           <RefreshControl
             refreshing={API?.isFetching || API2?.isLoading}
