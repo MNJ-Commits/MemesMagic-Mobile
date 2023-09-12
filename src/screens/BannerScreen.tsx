@@ -318,7 +318,7 @@ const BannerScreen = ({navigation}:any) => {
         {/* Apply Text */}
         <View 
           style={{ 
-          marginTop:RFValue(5), flexDirection:'row', alignItems:'center',alignSelf:'center',width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
+          marginTop:RFValue(5), flexDirection:'row', alignItems:'center',alignSelf:'center',width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(42)  }} >
           <TextInput
             editable={true}
             multiline={true}
@@ -330,8 +330,7 @@ const BannerScreen = ({navigation}:any) => {
               width:'82%',
               fontSize: RFValue(15),
               fontFamily:'arial',
-              height: RFValue(40), 
-              paddingTop: RFValue(12),
+              paddingBottom:RFValue(2),
               marginLeft: RFValue(20),
               color:'#000000',  
             }}          

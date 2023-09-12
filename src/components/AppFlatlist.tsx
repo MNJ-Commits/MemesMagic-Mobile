@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Dimensions, FlatList, Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
@@ -102,6 +102,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
         showsVerticalScrollIndicator={false}
         keyboardDismissMode={"on-drag"}
         removeClippedSubviews={true}
+        estimatedItemSize={150}
         refreshControl={
           <RefreshControl
             refreshing={API?.isFetching || API2?.isLoading}
@@ -113,7 +114,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
           />
         }
         ListEmptyComponent={
-          API?.isFetching ? ( // Loading
+          (API?.isFetching  || API2?.isLoading) ? ( // Loading
               <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(70),}}> Loading... </Text>
           ) : API?.data?.length !== 0 ? (
             <Text></Text>
@@ -121,7 +122,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
             <Text style={{color: '#ffffff', fontFamily:'Lucita-Regular', fontSize: RFValue(12), paddingBottom: RFValue(5), alignSelf:'center', marginTop: RFValue(50),}}>No content found</Text>
           )
         }
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.1}
         onEndReached={() => {          
           API?.data?.length === LIMIT && data.length/25===page && (tag || giphy) && page<=3 ?
             setPage(page + 1)
@@ -132,9 +133,9 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
           : null
         }}
         ListFooterComponent={ 
-          API?.isFetching && allGifLength === 0 ? <Text></Text> :
-          (API?.data?.length <= LIMIT && giphy && page<=3 ) || (!API.isLoading && API?.data?.length===LIMIT && page<=3 && tag) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
-          (API?.data?.length == LIMIT && !tag && !giphy) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
+         API?.isFetching && allGifLength === 0 ? <Text></Text> :
+          (API?.data?.length <= LIMIT && giphy && page<=3 ) || (!API.isLoading && API?.data?.length===LIMIT && !API2?.isLoading && page<=3 && tag) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
+          (API?.data?.length == LIMIT && !API2?.isLoading && !tag && !giphy) ? <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:14, alignSelf:'center', paddingTop:10, paddingBottom:30 }} >Load More</Text>:
           <Text></Text>
         }
         extraData={[giphy, text, textPosition, textBackground, textStroke, color, font, isLoader, setLoader, appleAccessToken]}

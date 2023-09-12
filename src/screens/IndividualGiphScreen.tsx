@@ -44,7 +44,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [responseTime, setRresponseTime] = useState<any>('')
     const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
     const [rateStatus, setRateStatus] = useState<any>({})
-
+    const multitext_gifs = ["135","167","168","169","171","172","173","174","177","179","180","181","183","184","185","186","197","198","200","203","204","206"]
+    const multi_text = multitext_gifs.includes(gifData.uid)
     // GET STORE
     const getter = async () => {
     
@@ -586,8 +587,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                        (gifData?.width && gifData?.height) ? {aspectRatio: gifData?.width/gifData?.height} : {aspectRatio:2} ]}
                             />
                         }  
-                       { (!gifData?.giphy && !webp )&&
-                            <ActivityIndicator size={'small'} style={[ {zIndex: -1, position:'absolute', alignSelf:'center'},  (gifData?.width && gifData?.height) ? { top: RFValue(gifData?.height/3) } : { top: RFValue(100) } ]}/>
+                       { (!gifData?.giphy || !webp ) &&
+                            <ActivityIndicator size={'small'} style={[ {zIndex: -1, position:'absolute', alignSelf:'center'},  (gifData?.width && gifData?.height) ? { top: RFValue(gifData?.height/4) } : { top: RFValue(100) } ]}/>
                         }
                     </View>
                   
@@ -676,15 +677,16 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     </View>
                     
                     {/* Text Ipnut */}
-                    <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(40)  }} >
+                    <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center',  width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', minHeight:RFValue(40)  }} >
                         <TextInput
                             editable={true}
                             multiline={true}
-                            placeholderTextColor={'#25282D'}
+                            numberOfLines={multi_text ? 2 : 1}
+                            placeholder={multi_text ? 'Text 1 \nText 2' : 'Your text here'}
+                            placeholderTextColor={'#8d8d8d'}
                             showSoftInputOnFocus={true}
                             onSubmitEditing={() => { }}
                             onChangeText={(e: any) => { setText(e);  setTextCheck(true) }}
-                            placeholder={'Your text here'}
                             value={ text }
                             returnKeyType='next'
                             style= {{ 
@@ -692,7 +694,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 fontFamily:'arial',
                                 width:'75%',
                                 alignSelf:'center',
-                                height: RFValue(25), 
+                                textAlignVertical:'top',
+                                minHeight: RFValue(25), 
                                 marginLeft: RFValue(20),
                                 color:'#000000',
                             }}            
