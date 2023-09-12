@@ -47,7 +47,7 @@ export const storeAppleAccessToken = async (data: { access_token: string }) => {
       console.log( 'storeAppleAccessToken error: ',error);
     }
   };
-export const storeVerifyPayment = async (data: { one_time?: boolean; subcription?: boolean }) => {
+export const storeVerifyPayment = async (data: { one_time?: boolean; subcription?: boolean; is_trial_period?: boolean }) => {
     try {
       await AsyncStorage.setItem(paymentKey, JSON.stringify(data));
     } catch (error) {

@@ -55,11 +55,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         // console.log("gif_state: ",gif_state );
         setGIFData(gif_state) 
 
-        const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+        const verifyPayment = await loadVerifyPaymentFromStorage().catch((error:any)=>{
             console.log('loadVerifyPaymentFromStorage Error: ', error);
         })
-        // console.log("paymentStatus: ",paymentStatus );
-        setVerifyPayment(paymentStatus) 
+        console.log("verifyPayment: ",verifyPayment );
+        setVerifyPayment(verifyPayment) 
         
         const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
             console.log('loadAppleAccessTokenFromStorage Error: ', error);
@@ -92,7 +92,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }
         else if(gifData.defaultText){
             // For custom render 
-            console.log("gifData.src: ",gifData.src);
+            // console.log("gifData.src: ",gifData.src);
             if(gifData.src.includes('render/') ){
                 setTextCheck( gifData.defaultText ? false : true)
                 renderGifById.mutate({ 
@@ -149,7 +149,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     InAppReview.RequestInAppReview()
                     .then((hasFlowFinishedSuccessfully) => {
                     console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
-                    
                     if (hasFlowFinishedSuccessfully) {
                         // do something for ios
                     }
@@ -286,7 +285,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             
         // TO SAVE GIF'S TO IOS PHOTO 
         RNFS.exists(filePath).then(async (status: any)=>{
-            await CameraRoll.saveToCameraRoll(filePath).then((res:any)=>{
+            await CameraRoll.save(filePath).then((res:any)=>{
                 const endTime:any = new Date(); 
                 const timeDifference = endTime-startTime
                 console.log("Download Photos Response Time: ", timeDifference / 1000)    
@@ -366,7 +365,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 console.log('filePath: ', filePath);    
     }
 
- 
     // SHARE GIF'S
     const RequestShareCustomGif = (remoteURL: string) => {
     
@@ -453,7 +451,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { 
             const endTime:any = new Date(); 
             const timeDifference = endTime-responseTime
-            console.log("Share Response Time: ", timeDifference / 1000)    
+            console.log("Copy Response Time: ", timeDifference / 1000)    
             setCopying(!resp) 
             if(freeGifAccess==="Granted"){
                 setFreeGifAccess("Consumed")
@@ -532,8 +530,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('start time: ', startTime);
     }
 
-    // console.log( "freeGifAccess: ", freeGifAccess );
-    
+    // console.log( "freeGifAccess: ", freeGifAccess );    
 
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
@@ -597,12 +594,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")===true){
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
                                         setCopying(true); setFileAction("CopyCustomGif"); 
-                                        // setTextCheck( textSting ? false : true)
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
@@ -626,12 +622,11 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")===true){
                                         if(gifData?.giphy) 
                                             DownloadPermissions() 
                                         else{
                                             setFileAction("RequestDownloadCustomGif"); 
-                                            // setTextCheck( textSting ? false : true);
                                             DownloadPermissions()
                                         }
                                     } 
@@ -649,11 +644,10 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if(isValidateInput() ){
-                                    if (verifyPayment?.subcription || freeGifAccess==="Granted"){
+                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess=="Granted")===true){
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   setFileAction("RequestShareCustomGif");  
-                                        // setTextCheck( textSting ? false : true)
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,

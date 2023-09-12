@@ -1,7 +1,7 @@
 // Libraries
 import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Image, } from 'react-native';
-import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection, getPendingPurchasesIOS, purchaseErrorListener, clearTransactionIOS} from 'react-native-iap';
+import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection, getPendingPurchasesIOS, purchaseErrorListener, clearTransactionIOS, getReceiptIOS} from 'react-native-iap';
 import { getUniqueId } from 'react-native-device-info';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { PaymentsReceiptInfo, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppleAccessToken, storePaymentsReceiptInfo, storeVerifyPayment } from '../store/asyncStorage';
@@ -41,12 +41,11 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [subscription, setSubscription] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [backBlocked, setBackBlocked] = useState<boolean>(false)
-  const [restore, setRestore] = useState<boolean>(false)
   const [action, setAction] = useState<string>("")
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
-  const [verifyPayment, setVerifyPayment] = useState<any>({})
+  const [paymentStatus, setPaymenStatus] = useState<any>({})
 
 
   // Clears Penfding Queue
@@ -58,27 +57,25 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const getter = async () =>{
 
-    const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+    await loadVerifyPaymentFromStorage().then((paymentStatus)=>{ setPaymenStatus(paymentStatus) })
+    .catch((error:any)=>{
       console.log('loadVerifyPaymentFromStorage Error: ', error);
     })
-    setVerifyPayment(paymentStatus) 
-    await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
-      
-      // console.log("receipt_info_res: ", receipt_info_res);
-      const expiration = receipt_info_res?.expires_date_ms
-      let expired = expiration && Date.now() > Number(expiration)
-      // console.log("here: ", expired, Date.now(), expiration);
-      if (expired) { 
-        // setLoading(false)
-        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false })
-        // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
-      }else{
-        // setLoading(false)
-      }
-    })
-    .catch((error:any)=>{
-      console.log('loadPaymentsReceiptInfo Error: ', error);
-    })
+
+    // Local Receipt Cheack
+    // await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
+    //   // console.log("receipt_info_res: ", receipt_info_res);
+    //   const expiration = receipt_info_res?.expires_date_ms
+    //   let expired = expiration && Date.now() > Number(expiration)
+    //   // console.log("here: ", expired, Date.now(), expiration);
+    //   if (expired) { 
+    //     setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false, is_trial_period: paymentStatus?.is_trial_period })
+    //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
+    //   }
+    // })
+    // .catch((error:any)=>{
+    //   console.log('loadPaymentsReceiptInfo Error: ', error);
+    // })
 
   }
 
@@ -86,14 +83,14 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     
     // Get Pending Purchases
     let pendingPurchases = await getPendingPurchasesIOS()
-
+    console.log("pendingPurchases length: ", pendingPurchases.length);
     setTimeout(async () => {
       pendingPurchases = await getPendingPurchasesIOS()
         if(pendingPurchases.length!==0){
           console.log("Pending");
           PendingTransaction()
         }else{
-          console.log("finished");
+          console.log("pendingPurchases cleared");
           setLoading(false)
         }
     },2000);
@@ -110,17 +107,10 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     initConnection()
     .then(async ()=>{ 
       console.log('connected') 
-
       // Get Products from Store
       getInventory()  
-
       // Check Pending Purchases
-      let pendingPurchases = await getPendingPurchasesIOS()
-      console.log("length: ", pendingPurchases.length);
-      if(pendingPurchases.length!==0)
-        PendingTransaction()
-      else
-        setLoading(false)
+      PendingTransaction()
     })
     .catch((error: any)=>{ 
       setLoading(false)
@@ -161,47 +151,65 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   }
 
   const restorePurchases = async ()=>{
+    
+    setLoading(true);
     console.log("Restore Purchase History"); 
-    getAvailablePurchases()
-    .then(async (availablePurchasesRes: any)=>{
-      console.log('availablePurchasesRes: ', availablePurchasesRes.length); 
-      if(availablePurchasesRes.length>0){
-        const sortedAvailablePurchases = availablePurchasesRes.sort( (a, b) => b.transactionDate - a.transactionDate );
-        const latestAvailableReceipt = sortedAvailablePurchases[0].transactionReceipt;
-        // console.log("sortedAvailablePurchases[0]: ", sortedAvailablePurchases[0]);
-        await finishTransaction({purchase: sortedAvailablePurchases[0]})
-          .then((AckResult)=>{
-            console.log('finishTransaction Acknowledged: ', AckResult);  
-            if(latestAvailableReceipt)
-              validateReceipt(latestAvailableReceipt)
-          }).catch((AckResultError)=>{
-            setLoading(false)
-            console.log('finishTransaction Error: ', AckResultError);
-          })
-      }
-    }).catch((error: any)=>{
+    // forceRefresh only makes sense when testing an app not downloaded from the Appstore.
+    // And only afer a direct user action.
+    await getReceiptIOS({forceRefresh: true}).then(async (latestAvailableReceipt: any)=>{
+      if(latestAvailableReceipt)
+        validateReceipt(latestAvailableReceipt)
+    })
+    .catch((error: any)=>{
       setLoading(false)
       console.log("getAvailablePurchases error: ", JSON.stringify(error))
     })
+
+    // getAvailablePurchases()
+    // .then(async (availablePurchasesRes: any)=>{
+    //   console.log('availablePurchasesRes: ', availablePurchasesRes.length); 
+    //   if(availablePurchasesRes.length>0){
+    //     const sortedAvailablePurchases = availablePurchasesRes.sort( (a:any, b:any) => b.transactionDate - a.transactionDate );
+    //     const latestAvailableReceipt = sortedAvailablePurchases[0].transactionReceipt;
+    //     // console.log("sortedAvailablePurchases[0]: ", sortedAvailablePurchases[0]);
+    //     await finishTransaction({purchase: sortedAvailablePurchases[0]})
+    //       .then((AckResult)=>{
+    //         console.log('finishTransaction Acknowledged: ', AckResult);  
+    //         if(latestAvailableReceipt)
+    //           validateReceipt(latestAvailableReceipt)
+    //       }).catch((AckResultError)=>{
+    //         setLoading(false)
+    //         console.log('finishTransaction Error: ', AckResultError);
+    //       })
+    //   }
+    // }).catch((error: any)=>{
+    //     setAction("")
+    //     setLoading(false)
+    //     Alert.alert("Request Error","Restore failed due to some error. Do you want to retry?",
+    //       [{
+    //           text: 'Yes',
+    //           onPress: restorePurchases
+    //       },{
+    //         text: 'No',
+    //       }]
+    //     )
+    //     console.log("getAvailablePurchases error: ", JSON.stringify(error))
+    //   })
   }
 
   useEffect(()=>{
     console.log("action: ",action);
-    
+      
     if (action==="restore"){
       restorePurchases()
-    }else if (action==="subscribe" && subscription[0]?.productId){
-      handleSubscription(subscription[0]?.productId)
-    }else if (action==="purchase" && products[0]?.productId){
+    }else if (action==="subscribe"){
+      if(subscription[0]?.productId){ handleSubscription()} 
+    }else if (action==="purchase"){
       handlePurchase(products[0]?.productId)
-    }else{
-      setLoading(false)
     }
 
     return()=>{}
   },[action])
-
-
 
 
   // Apple expires subscription after 6 attempts or 5 minutes in sandbox automatically
@@ -210,7 +218,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     Alert.alert(alertType, msg,
     [
       {
-        text: 'Yes', onPress: () => setAction("purchase")
+        text: 'Yes', onPress: () => { setAction("subscribe"); }
       },
       {
         text: 'No'
@@ -241,67 +249,72 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       })
       .catch((purchaseError)=>{
         setLoading(false)
+        setAction("")
         console.log('purchaseError: ', purchaseError);
       })
   };
 
-  const handleSubscription = async (subscribeId: any) => {
-   
-    setAction("subscribe"), 
+  const handleSubscription = async () => {
+    console.log("handleSubscription");
+    
     setLoading(true)
     setBackBlocked(true)
-    const productId = subscribeId ? subscribeId : "MonthlySubscription"
-    await requestSubscription({ sku: productId, appAccountToken: UUID }) 
-    .then(async (subscriptionResponse: any)=>{ 
-      // console.log("subscriptionResponse: ", subscriptionResponse);
-      await finishTransaction({purchase: subscriptionResponse})
-      .then((AckResult)=>{
-        setBackBlocked(false)
-        console.log('finishTransaction Acknowledged: ', AckResult);  
-        let receipt = subscriptionResponse.transactionReceipt
-        if(receipt)
-          validateReceipt(receipt)
-      }).catch((AckResultError)=>{
-        setLoading(false)
-        setBackBlocked(false)
-        console.log('finishTransaction Error: ', AckResultError);
+    const productId = subscription[0]?.productId ? subscription[0]?.productId : "MonthlySubscription"
+    {   
+      await requestSubscription({ sku: productId, appAccountToken: UUID }) 
+      .then(async (subscriptionResponse: any)=>{ 
+        // console.log("subscriptionResponse: ", subscriptionResponse);
+        await finishTransaction({purchase: subscriptionResponse})
+        .then((AckResult)=>{
+          setBackBlocked(false)
+          console.log('finishTransaction Acknowledged: ', AckResult);  
+          let receipt = subscriptionResponse.transactionReceipt
+          if(receipt)
+            validateReceipt(receipt)
+        }).catch((AckResultError)=>{
+          setLoading(false)
+          setBackBlocked(false)
+          console.log('finishTransaction Error: ', AckResultError);
+        })
       })
-    })
-    .catch(async (subscriptionError)=>{
-      setLoading(false)
-      console.log('subscriptionError: ', subscriptionError);
-    })
+      .catch(async (subscriptionError)=>{
+        setLoading(false)
+        setAction("")
+        console.log('subscriptionError: ', subscriptionError);
+      })
+    } 
   };  
  
   const validateReceipt = async (receipt: string)=>{
     
     await validateReceiptIos({ receiptBody: {"receipt-data": receipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
     .then( async (validationReponse)=>{ 
-            
+      const renewal_history = validationReponse.latest_receipt_info
+      const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+      console.log("subscriptionObject: ", subscriptionObject);
+
       // Extract Purchase Records
       let purchaseType:any = []
-      const renewal_history = validationReponse.latest_receipt_info
-      // console.log("renewal_history: ", renewal_history);
+      let trialPeriod:any  
       let not_expired: any
+      console.log("action: ",action);
       // Find Subscription
       if(action==="subscribe"){
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
+        trialPeriod = subscriptionObject.is_trial_period
         const expiration = subscriptionObject.expires_date_ms
-        not_expired = expiration && Date.now() < expiration
-        if(subscriptionObject !== undefined)
+        not_expired = expiration ? Date.now() < expiration : false
+        if( not_expired || trialPeriod )
           {
             console.log("subscriptionObject: ", subscriptionObject);
-            if (not_expired){
-              console.log(" action subscribe not expired");
-              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
-              !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
-            } 
-            else { 
-              // console.log(Date.now() > expiration, Date.now(), expiration);
-              setLoading(false)
-              SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
-            }
-          }   
+            storePaymentsReceiptInfo({...subscriptionObject})
+            !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
+          } 
+          else { 
+            // console.log(Date.now() > expiration, Date.now(), expiration);
+            setLoading(false)
+            SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")
+          }
       }  // Find Purchases
       else if(action==="purchase"){
         // Premium Receipt
@@ -323,7 +336,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
             // console.log("subscriptionObject: ", subscriptionObject);
             if (not_expired){
               console.log(" action resore subscribe not expired");
-              storePaymentsReceiptInfo({...subscriptionObject, subscribed: true})
+              storePaymentsReceiptInfo({...subscriptionObject})
               !purchaseType.includes(subscriptionObject.product_id) ? purchaseType.push(subscriptionObject.product_id) : null
             } 
             else { 
@@ -340,25 +353,24 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       // Store Purchase Records
       console.log("purchaseType: ", purchaseType);
       if (purchaseType.length==0){
-        setVerifyPayments({ one_time: false, subcription: false })
+        setVerifyPayments({ one_time: false, subcription: false, is_trial_period: false })
         SubscriptionAlert("Payments Alert", "Your have no active payments. Would you like to subcribe")
       } 
       else if(purchaseType.length == 1){
         if(purchaseType[0] === "NoWatermarks")
-          setVerifyPayments({ one_time: true, subcription: verifyPayment?.subcription })
+          setVerifyPayments({ one_time: true, subcription: paymentStatus?.subcription, is_trial_period: paymentStatus?.trialPeriod })
         else if (purchaseType[0] ===  "MonthlySubscription")
-          setVerifyPayments({ one_time: verifyPayment?.one_time, subcription: true })
+          setVerifyPayments({ subcription: not_expired, one_time: paymentStatus?.one_time, is_trial_period: trialPeriod })
       } 
       else if(purchaseType.length == 2){
-        setVerifyPayments({ one_time: true, subcription: true })
+        setVerifyPayments({ one_time: true, subcription: not_expired, is_trial_period: trialPeriod })
       } 
 
-      if(restore) {
+      if(action==="restore") {
         Alert.alert("Payments Alert", "Payments restored successfully",
           [{
               text: 'Ok',
                onPress: () => { 
-                setRestore(false)
                 if(not_expired) {
                   navigation.canGoBack() ? navigation.pop() :
                   returnScreen ? navigation.push(returnScreen) :
@@ -378,9 +390,8 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           navigation.push('CustomScreen')
         }, 2000);
       }
-
       setLoading(false)  
-
+      setAction("")
     })
     .catch((validationError)=>{ 
       setLoading(false)
@@ -440,7 +451,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
                 </TouchableOpacity>
                   <TouchableOpacity 
                     disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
-                    onPress={()=>{ setLoading(true); setAction("restore"); setRestore(true) }}>
+                    onPress={()=>{ setAction("restore"); }}>
                     <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
                   </TouchableOpacity>
               </View>
