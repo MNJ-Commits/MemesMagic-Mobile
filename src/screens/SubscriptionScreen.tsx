@@ -45,7 +45,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
   const [UUID, setUUID] = useState<string>('')
   const [isVerifyPayments, setVerifyPayments] = useState<any>({})
   const [isVisibleModal, setVisibleModal] = useState(false);
-  const [verifyPayment, setVerifyPayment] = useState<any>({})
+  const [paymentStatus, setPaymenStatus] = useState<any>({})
 
 
   // Clears Penfding Queue
@@ -57,27 +57,25 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   const getter = async () =>{
 
-    const paymentStatus = await loadVerifyPaymentFromStorage().catch((error:any)=>{
+    await loadVerifyPaymentFromStorage().then((paymentStatus)=>{ setPaymenStatus(paymentStatus) })
+    .catch((error:any)=>{
       console.log('loadVerifyPaymentFromStorage Error: ', error);
     })
-    setVerifyPayment(paymentStatus) 
-    await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
-      
-      // console.log("receipt_info_res: ", receipt_info_res);
-      const expiration = receipt_info_res?.expires_date_ms
-      let expired = expiration && Date.now() > Number(expiration)
-      // console.log("here: ", expired, Date.now(), expiration);
-      if (expired) { 
-        // setLoading(false)
-        setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false, is_trial_period: paymentStatus?.is_trial_period })
-        // SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
-      }else{
-        // setLoading(false)
-      }
-    })
-    .catch((error:any)=>{
-      console.log('loadPaymentsReceiptInfo Error: ', error);
-    })
+
+    // Local Receipt Cheack
+    // await loadPaymentsReceiptInfo().then((receipt_info_res:PaymentsReceiptInfo)=>{
+    //   // console.log("receipt_info_res: ", receipt_info_res);
+    //   const expiration = receipt_info_res?.expires_date_ms
+    //   let expired = expiration && Date.now() > Number(expiration)
+    //   // console.log("here: ", expired, Date.now(), expiration);
+    //   if (expired) { 
+    //     setVerifyPayments({ one_time: paymentStatus.one_time, subcription: false, is_trial_period: paymentStatus?.is_trial_period })
+    //     SubscriptionAlert("Subscription Expired", "Your monthly subscription has expired. Would you like to re-subcribe")  
+    //   }
+    // })
+    // .catch((error:any)=>{
+    //   console.log('loadPaymentsReceiptInfo Error: ', error);
+    // })
 
   }
 
@@ -85,14 +83,14 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     
     // Get Pending Purchases
     let pendingPurchases = await getPendingPurchasesIOS()
-
+    console.log("pendingPurchases length: ", pendingPurchases.length);
     setTimeout(async () => {
       pendingPurchases = await getPendingPurchasesIOS()
         if(pendingPurchases.length!==0){
           console.log("Pending");
           PendingTransaction()
         }else{
-          console.log("finished");
+          console.log("pendingPurchases cleared");
           setLoading(false)
         }
     },2000);
@@ -109,17 +107,10 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     initConnection()
     .then(async ()=>{ 
       console.log('connected') 
-
       // Get Products from Store
       getInventory()  
-
       // Check Pending Purchases
-      let pendingPurchases = await getPendingPurchasesIOS()
-      console.log("length: ", pendingPurchases.length);
-      if(pendingPurchases.length!==0)
-        PendingTransaction()
-      else
-        setLoading(false)
+      PendingTransaction()
     })
     .catch((error: any)=>{ 
       setLoading(false)
@@ -367,9 +358,9 @@ const SubscriptionScreen = ({navigation, route}:any) => {
       } 
       else if(purchaseType.length == 1){
         if(purchaseType[0] === "NoWatermarks")
-          setVerifyPayments({ one_time: true, subcription: verifyPayment?.subcription, is_trial_period: verifyPayment?.trialPeriod })
+          setVerifyPayments({ one_time: true, subcription: paymentStatus?.subcription, is_trial_period: paymentStatus?.trialPeriod })
         else if (purchaseType[0] ===  "MonthlySubscription")
-          setVerifyPayments({ subcription: not_expired, one_time: verifyPayment?.one_time, is_trial_period: trialPeriod })
+          setVerifyPayments({ subcription: not_expired, one_time: paymentStatus?.one_time, is_trial_period: trialPeriod })
       } 
       else if(purchaseType.length == 2){
         setVerifyPayments({ one_time: true, subcription: not_expired, is_trial_period: trialPeriod })
