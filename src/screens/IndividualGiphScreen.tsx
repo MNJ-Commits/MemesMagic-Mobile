@@ -25,15 +25,16 @@ import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
 import FastImage from 'react-native-fast-image';
 import { usePostRateAppStatus } from '../hooks/usePostRateAppStatus';
 
- 
+// import RNGif from 'react-native-video-to-gif'; 
 
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
     
     // States
     const [text, setText] = useState<string>('')
-    const [textCheck, setTextCheck] = useState<Boolean>(true)
+    const [textCheck, setTextCheck] = useState<Boolean>(false)
     const [loader, setLoader] = useState<Boolean>(false)
     const [downloading, setDownloading] = useState<Boolean>(false)
+    const [loading, setLoading] = useState<Boolean>(false)
     const [sharing, setSharing] = useState<Boolean>(false)
     const [copying, setCopying] = useState<Boolean>(false)
     const [webp, setWebp] = useState<string>('')
@@ -92,6 +93,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }
         else if(gifData.defaultText){
             // For custom render 
+            // console.log("gifData.defaultText ",gifData.defaultText);
             // console.log("gifData.src: ",gifData.src);
             if(gifData.src.includes('render/') ){
                 setTextCheck( gifData.defaultText ? false : true)
@@ -141,18 +143,20 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 },
                 {
                 text: 'Rate Now', onPress: () => {
+                    setLoading(true)
                     if(freeGifAccess==="Denied"){
                         setFreeGifAccess("Granted")
                         storeFreeGifAccess({access:"Granted"})
                     }
                     InAppReview.RequestInAppReview()
                     .then((hasFlowFinishedSuccessfully) => {
-                    console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
-                    if (hasFlowFinishedSuccessfully) {
-                        // do something for ios
-                    }
+                        console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
+                        if (hasFlowFinishedSuccessfully) {
+                            // do something for ios
+                            setLoading(false)
+                        }
                     })
-                    .catch((error) => { console.log("RequestInAppReview: ", error) });
+                    .catch((error) => { setLoading(false); console.log("RequestInAppReview: ", error) });
                 }
             
                 }
@@ -520,7 +524,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
             }
         else{
-                storeIndividualGifData({src: webp, width:gifData.width, height:gifData.height, uid: gifData.uid, defaultText:text});
+                storeIndividualGifData({src: webp ? webp: gifData.src, width:gifData.width, height:gifData.height, uid: gifData.uid, defaultText:text});
                 navigation.push('SubscriptionScreen', {returnScreen : 'IndividualGiphScreen'} )
             }
     }
@@ -532,7 +536,18 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('start time: ', startTime);
     }
 
-    // console.log( "freeGifAccess: ", freeGifAccess );    
+    // console.log( "freeGifAccess: ", freeGifAccess);    
+    // console.log( "textCheck: ", textCheck);    
+    
+    const acces_allowed = (verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")
+    // console.log( "acces_allowed: ", verifyPayment?.subcription, verifyPayment?.is_trial_period, freeGifAccess, freeGifAccess==="Granted", acces_allowed );    
+
+    
+
+    // // methods (Just iOs for now)
+    // RNGif.convert('pathToLocalVideo').then(('gifPath') => {
+    // console.log('Video is converted to gif at: ', 'gifPath');
+    // })
 
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
@@ -554,6 +569,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     // onScrollBeginDrag={()=>Keyboard.dismiss()}
                     contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20), paddingBottom:50 }}
                     keyboardShouldPersistTaps='handled' 
+                    keyboardDismissMode='on-drag'
                  >
                     {/* Gif View*/}                
                     <View>
@@ -594,27 +610,29 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     <View style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
                             onPress={ ()=>{
+                                console.log("isValidateInput: ",isValidateInput());
                                 if( isValidateInput() ){
-                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")===true){
-                                    gifData?.giphy ?
-                                        CopyGiphyGif() : 
-                                        // For custom .GIF download
-                                        setCopying(true); 
-                                        setFileAction("CopyCustomGif"); 
-                                        startTime()
-                                        renderGifById.mutate({ 
-                                            "HQ": true,
-                                            "animated_sequence": true,
-                                            "render_format": "gif",
-                                            "uids": [ gifData.uid ], 
-                                            "text":[text ? text : "Sample Text"],
-                                        }) 
-                                    } 
-                                    else{
-                                        if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
-                                            requestReview() 
-                                        else
-                                            StoreIndividualGif()
+                                    if (acces_allowed){
+                                        console.log("Copy allowed: ", acces_allowed)
+                                        gifData?.giphy ?
+                                            CopyGiphyGif() : 
+                                            // For custom .GIF download
+                                            setCopying(true); 
+                                            setFileAction("CopyCustomGif"); 
+                                            startTime()
+                                            renderGifById.mutate({ 
+                                                "HQ": true,
+                                                "animated_sequence": true,
+                                                "render_format": "gif",
+                                                "uids": [ gifData.uid ], 
+                                                "text":[text ? text : "Sample Text"],
+                                            }) 
+                                    }
+                                else{
+                                    if(isAvailable && rateStatus.show_popup===1 && freeGifAccess==="Denied")
+                                        requestReview() 
+                                    else
+                                        StoreIndividualGif()
                                     }
                                 }
                             }}
@@ -624,7 +642,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if( isValidateInput() ){
-                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")===true){
+                                    if (acces_allowed){
+                                        console.log("Download allowed: ", acces_allowed)
                                         if(gifData?.giphy) 
                                             DownloadPermissions() 
                                         else{
@@ -646,7 +665,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         <TouchableOpacity 
                             onPress={ ()=>{
                                 if(isValidateInput() ){
-                                    if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess=="Granted")===true){
+                                    if (acces_allowed){
+                                        console.log("Share allowed: ", acces_allowed)
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
                                         setSharing(true);   
@@ -732,6 +752,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Sharing...</Text>
                             : copying ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Copying...</Text>
+                            : loading ?
+                            <ActivityIndicator size={'small'} />
                             : null
                         }
                     </View>

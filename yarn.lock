@@ -8214,6 +8214,11 @@ react-native-svg@^12.1.1, react-native-svg@>=12.0.0:
     css-select "^5.1.0"
     css-tree "^1.1.3"
 
+react-native-video-to-gif@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/react-native-video-to-gif/-/react-native-video-to-gif-0.0.3.tgz"
+  integrity sha512-GzHXU7krpnt3GPnD610iUUeT6OfcwRn36QxrzjQvJMCeD8BJoamLUDgvbQiAwKHIlI/gx/fHrwKLxoPcHAJgig==
+
 react-native-video@^6.0.0-alpha.6:
   version "6.0.0-alpha.6"
   resolved "https://registry.npmjs.org/react-native-video/-/react-native-video-6.0.0-alpha.6.tgz"

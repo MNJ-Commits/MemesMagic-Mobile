@@ -173,18 +173,21 @@ const AppBootStrap = React.memo(function () {
         const renewal_history = validationReponse.latest_receipt_info
         // console.log("paymentStatus: ", paymentStatus);     
         // console.log("renewal_history: ", renewal_history);
-        let trial_period:any  
-        let expired: any
+        let trial_period: Boolean  
+        let is_expired: boolean
         // Find Subscription
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-        trial_period = subscriptionObject.is_trial_period
+        trial_period = JSON.parse(subscriptionObject.is_trial_period)
         const expiration_time = subscriptionObject.expires_date_ms
-        expired = expiration_time ? Date.now() > expiration_time : false
-        console.log("subscriptionObject: ", subscriptionObject);
-        if(expired){
+        is_expired = expiration_time ? Date.now() > expiration_time : false
+        // console.log("subscriptionObject: ", subscriptionObject);
+        // console.log("is_expired: ", expiration_time, Date.now(), is_expired);        
+        // console.log("trialPeriod: ", trial_period, typeof trial_period);
+        
+        if(is_expired){
           storePaymentsReceiptInfo({...subscriptionObject})
           setVerifyPayment({ 
-                            subcription: expired,
+                            subcription: !is_expired,
                             one_time: paymentStatus?.one_time, 
                             is_trial_period: trial_period 
                           })

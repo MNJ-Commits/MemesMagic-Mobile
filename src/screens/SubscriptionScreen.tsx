@@ -295,15 +295,17 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
       // Extract Purchase Records
       let purchaseType:any = []
-      let trialPeriod:any  
-      let not_expired: any
+      let trialPeriod: boolean  
+      let not_expired: boolean
       console.log("action: ",action);
       // Find Subscription
       if(action==="subscribe"){
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-        trialPeriod = subscriptionObject.is_trial_period
+        trialPeriod = JSON.parse(subscriptionObject.is_trial_period)
         const expiration = subscriptionObject.expires_date_ms
         not_expired = expiration ? Date.now() < expiration : false
+        // console.log("trialPeriod: ",trialPeriod, typeof trialPeriod);
+        
         if( not_expired || trialPeriod )
           {
             console.log("subscriptionObject: ", subscriptionObject);

@@ -44,6 +44,7 @@
     "react-native-svg": "^12.1.1",
     "react-native-svg-transformer": "^1.0.0",
     "react-native-video": "^6.0.0-alpha.6",
+    "react-native-video-to-gif": "^0.0.3",
     "react-native-webp-format": "^1.2.0",
     "react-redux": "^8.0.5",
     "recyclerlistview": "^4.2.0",

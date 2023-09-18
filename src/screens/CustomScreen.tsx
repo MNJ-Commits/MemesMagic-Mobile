@@ -88,20 +88,24 @@ const CustomScreen = ({navigation, route}:any) => {
     // const chunkSize = 2;
     if( renderInput?.current?.value && renderInput?.current?.value?.length!==0)
       {
-        getCustomRenders.mutate({ 
-                  "render_format": "webp",
-                  "text":[renderInput.current.value],
-                  "uids": uids
-                })
-        // for (let i = 0; i <= uids.length-1; i += chunkSize) {          
-        //     setTimeout(() => {
-        //       getCustomRenders.mutate({ 
-        //         "render_format": "webp",
-        //         "text":[renderInput.current.value],
-        //         "uids": uids.slice(i, i + chunkSize)
-        //       })
-        //     }, i*200);
-        // }  
+        if(uids.length<25){
+          getCustomRenders.mutate({ 
+                    "render_format": "webp",
+                    "text":[renderInput.current.value],
+                    "uids": uids
+                  })
+        }
+        else{
+          for (let i = 0; i <= uids.length-1; i += 25) {          
+            setTimeout(() => {
+              getCustomRenders.mutate({ 
+                "render_format": "webp",
+                "text":[renderInput.current.value],
+                "uids": uids.slice(i, i + 25)
+              })
+            }, i*200);
+          } 
+        } 
       }
       else{ //alternatively, update setText on inputRef change
         refresh()
