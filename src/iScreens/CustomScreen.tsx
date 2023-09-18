@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, Linking, Alert, useWindowDimensions, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator, RefreshControl, Image, Keyboard, Linking, Alert, useWindowDimensions, NativeModules, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -113,7 +113,17 @@ useEffect(() => {
  }, []);
 
 //  console.log('isKeyboardVisible: ', isKeyboardVisible);
- 
+const onOpenURL = ()=>{
+  NativeModules.MessagesManager.openURL("https://memeswork.com")
+  .then( (resp:any) => {
+    console.log("resp: ", resp);
+   })
+  .catch( (error:any) => {
+    console.log("error: ", error);
+   })
+}
+
+
   return (
     <SafeAreaView 
       onLayout={(event) => {
@@ -145,7 +155,7 @@ useEffect(() => {
             <TouchableOpacity>
               <Download2 width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=>{
+            <TouchableOpacity onPress={()=>{ // onOpenURL()
               // navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
               }} >
               <Pro width={RFValue(25*ratio)} height={RFValue(25*ratio)}/>

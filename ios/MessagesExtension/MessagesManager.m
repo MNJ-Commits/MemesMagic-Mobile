@@ -34,10 +34,10 @@ RCT_EXTERN_METHOD(updatePresentationStyle:
                   rejecter: (RCTPromiseRejectBlock)reject)
 
 
-//RCT_EXTERN_METHOD(openURL:
-//                  (NSString *)urlString
-//                  resolver: (RCTPromiseResolveBlock)resolve
-//                  rejecter: (RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(openURL:
+                  (NSString *)urlString
+                  resolver: (RCTPromiseResolveBlock)resolve
+                  rejecter: (RCTPromiseRejectBlock)reject)
 @end
 
 

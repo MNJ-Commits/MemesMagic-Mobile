@@ -32,7 +32,7 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
 
       return(
       <TouchableOpacity 
-        key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+        // key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
         onPress={()=>{
           if(giphy)
             {
@@ -44,89 +44,58 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
             navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text})
           }
         }} 
-        style={{ alignItems:'center', height: RFValue(160/width*height), marginVertical:RFValue(5), }} 
+        style={{ alignItems:'center', 
+          aspectRatio: width/height,
+          // height: RFValue(160/width*height), 
+          // marginVertical:RFValue(5),
+        }} 
       >  
-        < >  
-          {/* <Image
-            // source={{uri: gifData?.giphy ? gifData.src : webp }}
-            source={{
-              uri: customURI,
-              cache: 'force-cache' 
-            }}
-            resizeMode={FastImage.resizeMode.contain}
-            style={{ 
-              zIndex: 0, 
-              width:'100%', 
-              height: RFValue(150/width*height),
-              borderRadius:RFValue(10),   
-            }}
-         />  */}
-
-          {/* <Video 
-            key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
-            // source={require('../assets/video/big_buck_bunny_720p_1mb.mp4')}  // Can be a URL or a local file.
-            source={{uri: customURI}}
-            repeat={true}
-            controls={false}
-            resizeMode="contain"
-            playInBackground={true}
-            disableFocus={true}
-            removeClippedSubviews={true}
-            onLoadEnd={()=>setLoader(false)}
-            style={{ 
-              zIndex: 0, 
-              width:'100%', 
-              height: RFValue(150/width*height),
-              borderRadius:RFValue(10),   
-            }}
-          />  */}
-          <FastImage
-            key={item.index}
-            source={{ 
-              uri: customURI, 
-              priority: FastImage.priority.normal,
-              // cache:'immutable'
-            }}
-            resizeMode={FastImage.resizeMode.contain}
-            onLoadEnd={()=>setLoader(false)}
-            style={{ 
-              zIndex: 0, 
-              width:'90%', 
-              // backgroundColor:"pink",
-              height: RFValue(160/width*height),
-              borderRadius:RFValue(8),   
-            }}
-          />
-          {/* {(loader && !giphy) &&  */}
-          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-        
-          {
-            giphy &&  
-              <Image 
-                key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
-                source={appleAccessToken ? 
-                        { 
-                          uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
-                          headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
-                        }
-                      : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : null }}
-                resizeMode={'contain'}
-                onLoadStart={()=>setLoader(true)}
-                onLoadEnd={()=>setLoader(false)}
-                style={{
-                  width:'100%', 
-                  height:RFValue(160/width*height), 
-                  position:'absolute',
-                  borderRadius:RFValue(10),
-                }}
-              />
-            }
-          {/* <ActivityIndicator size={'small'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} /> */}
-         {(loader && giphy) &&
-          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-          }
-        </>
-  
+        { !giphy ? 
+          <>
+            <FastImage
+              // key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+              source={{ 
+                uri: customURI, 
+                priority: FastImage.priority.normal,
+              }}
+              resizeMode={FastImage.resizeMode.contain}
+              onLoadEnd={()=>setLoader(false)}
+              style={{ 
+                zIndex: 0, 
+                width:'90%', 
+                aspectRatio: width/height,
+                // backgroundColor:'#FF439E',
+                // height: RFValue(160/width*height),
+                borderRadius:RFValue(8),   
+              }}
+            />
+            <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+          </>
+        :
+          <>
+            <Image 
+              key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+              source={appleAccessToken ? 
+                      { 
+                        uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
+                        headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
+                      }
+                    : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : null }}
+              resizeMode={'contain'}
+              onLoadStart={()=>setLoader(true)}
+              onLoadEnd={()=>setLoader(false)}
+              style={{
+                width:'100%', 
+                height:RFValue(160/width*height), 
+                position:'absolute',
+                borderRadius:RFValue(10),
+              }}
+            />
+              
+            { loader  &&
+              <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
+          </>
+        }
       </TouchableOpacity>
     )
   }

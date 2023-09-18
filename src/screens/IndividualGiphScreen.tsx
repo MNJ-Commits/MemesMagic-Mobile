@@ -110,9 +110,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             setText(gifData.defaultText)
         }
         else if(route?.params?.uid && !route?.params?.defaultText){
-           
-            console.log("gifData.src: ",gifData.src);
-            getTemplateById.mutate({ uid:route?.params?.uid })
+            // console.log("gifData.src: ",gifData.src);
+            // getTemplateById.mutate({ uid:route?.params?.uid })
         }
 
         return()=>{}
@@ -250,14 +249,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         //Define path and directory to store files to
         const filePath = RNFS.DocumentDirectoryPath + `/${datetime}.gif`
         // const filePath = RNFS.MainBundlePath + `/${datetime}.gif`
-
-        // //Define options
-        // const options: DownloadFileOptions = {
-        //     // fromUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png',
-        //     fromUrl: remoteURL,
-        //     toFile: filePath,
-        //     headers: header
-        // } 
         const startTime:any = new Date();
 
         // TO SAVE GIF'S TO IOS LIBRARY   
@@ -266,18 +257,17 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             // path: filePath   //wrting base64
         }).fetch('GET', remoteURL, header)
         .then(async (resp:any) => {
-            let returnFilePath = await resp.path();
+            // let returnFilePath = await resp.path();
             let data: any = await resp.base64();   
             writeFile(filePath, data, 'base64')    
-            .then((writeFileReposne)=> {
+            .then(()=> {
                 const endTime:any = new Date(); 
-                const timeDifference = endTime-responseTime
+                const timeDifference = endTime-startTime
                 console.log("Download Document Response Time: ", timeDifference / 1000) 
                 if(freeGifAccess==="Granted"){
                     setFreeGifAccess("Consumed")
                     storeFreeGifAccess({access: "Consumed"})
                 }
-                // console.log('writeFileReposne: ', writeFileReposne);
             }).catch((writeFile:any)=>{
                 setDownloading(false)
                 console.log('writeFile error: ',writeFile) 
@@ -377,6 +367,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         }).fetch('GET', remoteURL, header).then(async (resp:any) => {
             // setSharing(false)
             filePath = await resp.path();
+            console.log("filePath: ",filePath);
             let data: any = await resp.base64();            
             return data
         }).then((base64Data:any) => {
@@ -386,7 +377,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             // Share
             Share.open({
                 type: 'image/gif',
-                url: `data:image/png;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
+                url: `data:image/gif;base64,${base64Data}`     // (Platform.OS === 'android' ? 'file://' + filePath)
             }).then((res:any)=>{
                 setSharing(false)
                 if(freeGifAccess==="Granted"){
@@ -440,7 +431,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 });
             }).catch((error:any)=>{ 
                 setSharing(false)
-                // console.log('fetch error: ', error) 
+                console.log('fetch error: ', error) 
             });
     }
 
@@ -448,16 +439,27 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     // COPY GIF'S
     const CopyCustomGif = (remoteURL: string) => {
         console.log("uid: ", gifData.uid, remoteURL);
+
+        const endTime:any = new Date(); 
+        const timeDifference = endTime-responseTime
+        console.log("remoteURL Response Time: ", timeDifference / 1000) 
+                                
         NativeModules.ClipboardManager.CopyGif(remoteURL).then( (resp:any) => { 
             const endTime:any = new Date(); 
             const timeDifference = endTime-responseTime
             console.log("Copy Response Time: ", timeDifference / 1000)    
+            // Remove from device's storage
             setCopying(!resp) 
             if(freeGifAccess==="Granted"){
                 setFreeGifAccess("Consumed")
                 storeFreeGifAccess({access:"Consumed"})
             }
         })
+        .catch((error:any)=>{
+            setCopying(false)
+            console.log("copying files error: ",error);
+        })
+
     }
 
     const CopyGiphyGif = async ()=>{
@@ -483,9 +485,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                         storeFreeGifAccess({access:"Consumed"})
                     }
                 })
-                .catch((writeFile:any)=>{
+                .catch((error:any)=>{
                     setCopying(false)
-                    console.log('writeFile error: ',writeFile) 
+                    console.log('CopyGiphyGif error: ',error) 
                 })
     }
 
@@ -553,8 +555,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     contentContainerStyle={{ alignItems:'center', marginHorizontal:RFValue(20), paddingBottom:50 }}
                     keyboardShouldPersistTaps='handled' 
                  >
-                    {/* Gif View*/}
-                    
+                    {/* Gif View*/}                
                     <View>
                         <FastImage
                             source={{
@@ -598,7 +599,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     gifData?.giphy ?
                                         CopyGiphyGif() : 
                                         // For custom .GIF download
-                                        setCopying(true); setFileAction("CopyCustomGif"); 
+                                        setCopying(true); 
+                                        setFileAction("CopyCustomGif"); 
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
@@ -647,7 +649,8 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                     if ((verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess=="Granted")===true){
                                         gifData?.giphy ? ShareGiphyGif() 
                                         : // For custom .GIF download
-                                        setSharing(true);   setFileAction("RequestShareCustomGif");  
+                                        setSharing(true);   
+                                        setFileAction("RequestShareCustomGif");  
                                         startTime()
                                         renderGifById.mutate({ 
                                             "HQ": true,
@@ -694,7 +697,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 color:'#000000',
                             }}            
                         />
-                        
                         <TouchableOpacity 
                             onPress={()=> { 
                                 Keyboard.dismiss()
@@ -718,7 +720,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                                 }
                             </View>
                         </TouchableOpacity>
-                        
                     </View> 
 
 

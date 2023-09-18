@@ -34,6 +34,17 @@ class MessagesViewController: MSMessagesAppViewController {
     self.removeAllChildViewControllers()
   }
   
+  override func willTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
+    // Called before the extension transitions to a new presentation style.
+    // Use this method to prepare for the change in presentation style.
+  }
+  
+  override func didTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
+    // Called after the extension transitions to a new presentation style.
+    // Use this method to finalize any behaviors associated with the change in presentation style.
+    self.delegate?.didTransition(to: presentationStyle)
+  }
+  
   override func willBecomeActive(with conversation: MSConversation) {
     // Called when the extension is about to move from the inactive to active state.
     // This will happen when the extension is about to present UI.
@@ -50,18 +61,6 @@ class MessagesViewController: MSMessagesAppViewController {
     // in case it is terminated later.
   }
 
-  override func willTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
-    // Called before the extension transitions to a new presentation style.
-    // Use this method to prepare for the change in presentation style.
-  }
-  
-  
-  override func didTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
-    // Called after the extension transitions to a new presentation style.
-    // Use this method to finalize any behaviors associated with the change in presentation style.
-    self.delegate?.didTransition(to: presentationStyle)
-  }
-  
   override func didSelect(_ message: MSMessage, conversation: MSConversation) {
     self.delegate?.didSelect(message: message, conversation: conversation)
   }

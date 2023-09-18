@@ -163,7 +163,9 @@ const AppBootStrap = React.memo(function () {
     console.log("getAvailableSubscription"); 
     // forceRefresh only makes sense when testing an app not downloaded from the Appstore.
     // And only afer a direct user action.
-    const latestAvailableReceipt = await getReceiptIOS({forceRefresh: true});
+    const latestAvailableReceipt = await getReceiptIOS({forceRefresh: true}).catch((error)=>{
+      console.log("getReceiptIOS error: ", error);
+    })
     if(latestAvailableReceipt){
       await validateReceiptIos({ receiptBody: {"receipt-data": latestAvailableReceipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
       .then( async (validationReponse)=>{ 
@@ -172,27 +174,27 @@ const AppBootStrap = React.memo(function () {
         // console.log("paymentStatus: ", paymentStatus);     
         // console.log("renewal_history: ", renewal_history);
         let trial_period:any  
-        let not_expired: any
+        let expired: any
         // Find Subscription
         const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
         trial_period = subscriptionObject.is_trial_period
         const expiration_time = subscriptionObject.expires_date_ms
-        not_expired = expiration_time ? Date.now() < expiration_time : false
+        expired = expiration_time ? Date.now() > expiration_time : false
         console.log("subscriptionObject: ", subscriptionObject);
-        storePaymentsReceiptInfo({...subscriptionObject})
-        setVerifyPayment({ 
-                          subcription: not_expired,
-                          one_time: paymentStatus?.one_time, 
-                          is_trial_period: trial_period 
-                        })
+        if(expired){
+          storePaymentsReceiptInfo({...subscriptionObject})
+          setVerifyPayment({ 
+                            subcription: expired,
+                            one_time: paymentStatus?.one_time, 
+                            is_trial_period: trial_period 
+                          })
+        }
       })
       .catch((validationError)=>{ 
         console.log('validationError: ', validationError)
       })   
     }
   }
-
-
 
   console.log("freeGifAccess: ",freeGifAccess, appRestartCount);
 

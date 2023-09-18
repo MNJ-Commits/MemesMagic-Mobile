@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, Image, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, Image, Linking, Alert, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -190,6 +190,27 @@ const CustomScreen = ({navigation, route}:any) => {
     setShowScreen(true) 
   }, 3000);
 
+  // Get the deep link used to open the app
+  const getUrlAsync = async () => {
+    await Linking.getInitialURL().then((url) => {
+      console.log('getInitialURL: ',url);
+      // Alert.alert("InitialURL: "+JSON.stringify(url));
+      if(url==="https://memeswork.com")
+        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+    })
+  
+    Linking.addEventListener('url',(url)=>{ 
+      // Alert.alert("addEventListener: "+JSON.stringify(url));
+      console.log('Event Listener: ',url);
+      if(url?.url==="https://memeswork.com")
+        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+    });
+  }
+
+  useEffect(() => {
+    // getUrlAsync();
+  }, [])
+
 // console.log(allGif?.length);
 // console.log(UIDs?.length);
 // console.log(getCustomRenders?.isLoading);
@@ -201,7 +222,8 @@ const CustomScreen = ({navigation, route}:any) => {
 
   return (
     <>
-      {showScreen ? 
+      {
+      showScreen ? 
        <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
         <KeyboardAvoidingView
           style={{flex: 1}}
@@ -210,12 +232,12 @@ const CustomScreen = ({navigation, route}:any) => {
         >
           {/* Header */}
           <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center',  backgroundColor:'#000000', padding:RFValue(15) }}>
-            <View style={{flexDirection:'row', width:'48%', justifyContent:'space-around'}} >
-              <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
-                <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular'}} >CUSTOM</Text>
+            <View style={{flexDirection:'row', width:'48%', justifyContent:'flex-start',}} >
+              <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10), marginRight:RFValue(20) }} >
+                <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:RFValue(8), alignSelf:'center', marginTop:RFValue(2)}} >CUSTOM</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
-                <Text style={{color:'white', fontSize:RFValue(8), marginTop:RFValue(2), fontFamily:'Lucita-Regular' }} >BANNER</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('BannerScreen')}  style={{backgroundColor:'#A8A9AB', borderRadius: RFValue(20), paddingVertical:RFValue(5), paddingHorizontal:RFValue(10) }} >
+                <Text style={{fontFamily:'Lucita-Regular', color:'white', fontSize:RFValue(8), alignSelf:'center', marginTop:RFValue(2) }} >BANNER</Text>
               </TouchableOpacity>
             </View>
 
@@ -353,8 +375,9 @@ const CustomScreen = ({navigation, route}:any) => {
                 setRefreshLoader(true)
                 renderRequestChunk()
               }}
+              style={{ width:'25%' }}
             >
-            <View style={{padding:RFValue(10)}} >
+            <View style={{padding:RFValue(10), alignSelf:'flex-start' }} >
               {loader ?
                 <ActivityIndicator size={'small'} color={'#8d8d8d'} />
                 :

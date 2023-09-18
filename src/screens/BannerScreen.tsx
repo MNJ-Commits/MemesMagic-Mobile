@@ -181,8 +181,8 @@ const BannerScreen = ({navigation}:any) => {
       >
         {/* Header */}
         <View style={{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#000000',padding:RFValue(15) }}>
-          <View style={{flexDirection:'row', alignItems:'center', width:'48%', justifyContent:'space-around'}} >
-            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10)  }} >
+          <View style={{flexDirection:'row', alignItems:'center', width:'48%', justifyContent:'flex-start'}} >
+            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10), marginRight:RFValue(20)   }} >
               <Text style={{color:'white', fontSize:RFValue(8), fontFamily:'Lucita-Regular' }} >CUSTOM</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10)  }} >
