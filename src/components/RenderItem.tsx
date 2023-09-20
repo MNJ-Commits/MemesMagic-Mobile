@@ -9,6 +9,7 @@ import React from "react"
 const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke, color, font, navigation, loader, setLoader, UIDsLength, allGifsLength, appleAccessToken}:any)=>{
 
   // console.log('item:', item )
+  // console.log('giphy:', giphy )
 
     const customURI: any =  giphy ? item?.template : 
                             item?.template ? `http://18.143.157.105:3000${item?.template}` : 
@@ -25,10 +26,11 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
       textPosition ? BannerURI += `&location=${textPosition}` : ''
       font ? BannerURI += `&font=${font}` : ''
       color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
-      // console.log('BannerURI: ', BannerURI);
+      // console.log('BannerURI: ',  `http://18.143.157.105:3000/renderer/banner${BannerURI}`);
       // console.log('customURI: ', customURI);
       
       const customURI_parts = customURI.split("/")
+      const key = giphy ? customURI_parts[customURI_parts.length - 2] : id
 
       return(
       <TouchableOpacity 
@@ -47,13 +49,13 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
         style={{ alignItems:'center', 
           aspectRatio: width/height,
           // height: RFValue(160/width*height), 
-          // marginVertical:RFValue(5),
+          marginVertical: giphy ? RFValue(5) : 0,
         }} 
       >  
         { !giphy ? 
           <>
             <FastImage
-              // key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+              key={key}
               source={{ 
                 uri: customURI, 
                 priority: FastImage.priority.normal,
@@ -73,20 +75,22 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
           </>
         :
           <>
-            <Image 
-              key={giphy ? customURI_parts[customURI_parts.length - 2] : id }
+            <FastImage 
+              key={key}
               source={appleAccessToken ? 
                       { 
-                        uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
+                        uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : customURI,
                         headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
                       }
-                    : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : null }}
+                    : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : customURI }}
               resizeMode={'contain'}
               onLoadStart={()=>setLoader(true)}
               onLoadEnd={()=>setLoader(false)}
               style={{
                 width:'100%', 
-                height:RFValue(160/width*height), 
+                // backgroundColor:'pink',
+                // height:RFValue(160/width*height), 
+                aspectRatio: width/height,
                 position:'absolute',
                 borderRadius:RFValue(10),
               }}

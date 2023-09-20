@@ -1,11 +1,12 @@
 // Libraries
 import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Image, } from 'react-native';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Image, Pressable, StyleSheet, } from 'react-native';
 import {getProducts, getSubscriptions, getPurchaseHistory, purchaseUpdatedListener, requestPurchase, requestSubscription, useIAP, validateReceiptIos, finishTransaction, getAvailablePurchases, initConnection, endConnection, getPendingPurchasesIOS, purchaseErrorListener, clearTransactionIOS, getReceiptIOS} from 'react-native-iap';
 import { getUniqueId } from 'react-native-device-info';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { PaymentsReceiptInfo, loadPaymentsReceiptInfo, loadVerifyPaymentFromStorage, storeAppleAccessToken, storePaymentsReceiptInfo, storeVerifyPayment } from '../store/asyncStorage';
 import * as RNFS from 'react-native-fs';
+import Modal from "react-native-modal";
 
 // SVG's
 import AppLogo from "../assets/svgs/app-logo.svg";
@@ -291,8 +292,7 @@ const SubscriptionScreen = ({navigation, route}:any) => {
     .then( async (validationReponse)=>{ 
       const renewal_history = validationReponse.latest_receipt_info
       const subscriptionObject = renewal_history?.find((item: { product_id: string; }) => item.product_id === "MonthlySubscription")
-      console.log("subscriptionObject: ", subscriptionObject);
-
+      // console.log("subscriptionObject: ", subscriptionObject);
       // Extract Purchase Records
       let purchaseType:any = []
       let trialPeriod: boolean  
@@ -430,82 +430,82 @@ const SubscriptionScreen = ({navigation, route}:any) => {
 
   return (
     <Fragment >
-      <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
-      <SafeAreaView style= {{flex:1, backgroundColor:'#3386FF' }} >
-        <View style={{ flex:1, backgroundColor:'#FF439E',}} >
-          <ScrollView contentContainerStyle={{ marginTop:10 }} >
-            
-            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
-              <TouchableOpacity
-                disabled={backBlocked}
-                onPress={()=>{
-                  navigation.canGoBack() ? navigation.pop() :
-                  returnScreen ? navigation.push(returnScreen) :
-                  navigation.push('CustomScreen')
-                }} 
-              >
-                <BackButton width={RFValue(25)} height={RFValue(25)}/>
-              </TouchableOpacity>
-              
-              <View style={{flexDirection:'row', alignItems:'center', }}  >
-                <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
-                  <Information width={RFValue(22)} height={RFValue(22)}/>
-                </TouchableOpacity>
-                  <TouchableOpacity 
-                    disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
-                    onPress={()=>{ setAction("restore"); }}>
-                    <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
-                  </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{ alignItems:'center', marginTop:30 }}>
-              <AppLogo width={RFValue(250)} height={RFValue(130)} />
-              <View style={{ marginTop:40 }} >
-                { Services.map((data:any, index:number)=>{
-                    return(
-                    <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(5)  }}  >
-                      {data.SVG}
-                      <Text style={{color:'white', fontFamily:'Lucita-Regular', fontSize:RFValue(18), fontWeight:'900', paddingVertical:10 }} >{data.Label}</Text>
-                    </TouchableOpacity>
-                    )
-                  })
-                }
-              </View>
-
-              {/* Subscribe */}
-              <View style={{alignItems:"center"}} >
-                <Subcribe width={RFValue(250)} height={RFValue(35)} style={{marginTop:RFValue(20)}}/>
-                <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
-                <TouchableOpacity 
-                  disabled={(subscription?.length <1 || loading) ? true : false}  
-                  onPress={() => { setAction("subscribe"); }}  
-                    style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
-                >
-                  <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
-                </TouchableOpacity>
-                <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscription[0]?.localizedPrice} monthly</Text>
-              </View>
-            </View> 
-            {(loading || products?.length==0 || subscription?.length==0) && 
-              <ActivityIndicator size={'large'} color={'grey'} style={{position:'relative', top: RFValue(10), alignSelf:'center'}} />
-            } 
-          </ScrollView>  
-
-          {/* Purchase */}
-          <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
-            <TouchableOpacity 
-              disabled={(products?.length <1 || loading) ? true : false}    
-              onPress={() =>{ setAction("purchase"); }} 
-              style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
+    <SafeAreaView style= {{flex:0, backgroundColor:'#FF439E' }} />
+    <SafeAreaView style= {{flex:1, backgroundColor:'#3386FF' }} >
+      <View style={{ flex:1, backgroundColor:'#FF439E',}} >
+        <ScrollView contentContainerStyle={{ marginTop:10 }} >
+          
+          <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',  paddingHorizontal:20 }} >
+            <TouchableOpacity
+              // disabled={backBlocked}
+              onPress={()=>{
+                navigation.canGoBack() ? navigation.pop() :
+                returnScreen ? navigation.push(returnScreen) :
+                navigation.push('CustomScreen')
+              }} 
             >
-              <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
-              <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>
+              <BackButton width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
-            <Text style={{color:'#ffffff', fontSize:RFValue(10), fontFamily:'Lucita-Regular', alignSelf:'center', paddingTop: RFValue(5) }} >one time purchase</Text>
+            
+            <View style={{flexDirection:'row', alignItems:'center', }}  >
+              <TouchableOpacity onPress={()=>{ setVisibleModal(!isVisibleModal) }} >
+                <Information width={RFValue(22)} height={RFValue(22)}/>
+              </TouchableOpacity>
+                <TouchableOpacity 
+                  // disabled={ loading || products?.length==0 || subscription?.length==0 ? true : false}    
+                  onPress={()=>{ setAction("restore"); }}>
+                  <Text style={{color:'#ffffff', fontSize:RFValue(14), fontWeight:'400', marginLeft:RFValue(10), fontFamily:'Lucita-Regular', }} >Restore</Text>
+                </TouchableOpacity>
+            </View>
           </View>
-        </View>
+          <View style={{ alignItems:'center', marginTop:30 }}>
+            <AppLogo width={RFValue(250)} height={RFValue(130)} />
+            <View style={{ marginTop:40 }} >
+              { Services.map((data:any, index:number)=>{
+                  return(
+                  <TouchableOpacity key={index} style={{flexDirection:'row', alignItems:'center', marginVertical:RFValue(5)  }}  >
+                    {data.SVG}
+                    <Text style={{color:'white', fontFamily:'Lucita-Regular', fontSize:RFValue(18), fontWeight:'900', paddingVertical:10 }} >{data.Label}</Text>
+                  </TouchableOpacity>
+                  )
+                })
+              }
+            </View>
 
-      {/* Subscription Information Modal */}
+            {/* Subscribe */}
+            <View style={{alignItems:"center"}} >
+              <Subcribe width={RFValue(250)} height={RFValue(35)} style={{marginTop:RFValue(20)}}/>
+              <ArrowDown width={RFValue(30)} height={RFValue(30)} style={{alignSelf:'center', marginTop:-2}} />
+              <TouchableOpacity 
+                // disabled={(subscription?.length <1 || loading) ? true : false}  
+                onPress={() => { setAction("subscribe"); }}  
+                  style={{ borderWidth:4, borderColor:'#ffffff', backgroundColor:'#622FAE', padding:RFValue(15), borderRadius:RFValue(15), marginTop:RFValue(10) }} 
+              >
+                <Text style={{color:'#ffffff', fontSize:RFValue(16), fontFamily:'Lucita-Regular' }} >Try Free & Subscribe</Text>
+              </TouchableOpacity>
+              <Text style={{color:'white', fontSize:RFValue(10), paddingTop:RFValue(5), fontFamily:'Lucita-Regular', alignSelf:'center' }} >3 day free trial. Then {subscription[0]?.localizedPrice} monthly</Text>
+            </View>
+          </View> 
+          {/* {(loading || products?.length==0 || subscription?.length==0) && 
+            <ActivityIndicator size={'large'} color={'grey'} style={{position:'relative', top: RFValue(10), alignSelf:'center'}} />
+          }  */}
+        </ScrollView>  
+
+        {/* Purchase */}
+        <View style={{ alignItems:'center', backgroundColor:'#3386FF' }} >
+          <TouchableOpacity 
+            // disabled={(products?.length <1 || loading) ? true : false}    
+            onPress={() =>{ setAction("purchase"); }} 
+            style={{flexDirection:'row', alignItems:'center', backgroundColor:'#ffffff', padding:RFValue(12), borderRadius:RFValue(15), marginTop:RFValue(20) }} 
+          >
+            <Text style={{color:'#622FAE', fontSize:RFValue(12),  fontFamily:'Lucita-Regular', }} >No Watermarks   </Text>
+            <Text style={{color:'#622FAE', fontSize:RFValue(12), fontFamily:'Lucita-Regular', }} >{products[0]?.localizedPrice}</Text>
+          </TouchableOpacity>
+          <Text style={{color:'#ffffff', fontSize:RFValue(10), fontFamily:'Lucita-Regular', alignSelf:'center', paddingTop: RFValue(5) }} >one time purchase</Text>
+        </View>
+      </View>
+
+      {/* Information Modal */}
       <AppModal isVisible={isVisibleModal} setModalVisible = {setVisibleModal}  >
         <AppModal.Container >
           <AppLogo width={RFValue(150)} height={RFValue(60)} style={{alignSelf:'center', marginVertical:20}} />
@@ -531,12 +531,54 @@ const SubscriptionScreen = ({navigation, route}:any) => {
           </AppModal.Footer>
         </AppModal.Container>
       </AppModal>
-      </SafeAreaView>
-    </Fragment>    
+    
+      {/* Payment Status Modal */}
+      <Modal
+        animationIn="tada"
+        animationOut="tada"
+        backdropOpacity={0.6}
+        // isVisible={true}
+        isVisible={(loading || products?.length==0 || subscription?.length==0)}
+        >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+              <ActivityIndicator size={'large'}  color={'#FF439E'} />
+          </View>
+        </View>
+      </Modal>
+ 
+    </SafeAreaView>
+
+  </Fragment>  
+
+ 
   );
 };
 
  
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: '#3386FF',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+});
+
 
 export default SubscriptionScreen;
 

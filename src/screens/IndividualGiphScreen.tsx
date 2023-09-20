@@ -24,8 +24,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useGetCustomTemplateById } from '../hooks/useGetCustomTemplateById';
 import FastImage from 'react-native-fast-image';
 import { usePostRateAppStatus } from '../hooks/usePostRateAppStatus';
-
-// import RNGif from 'react-native-video-to-gif'; 
+ 
 
 const IndividualGiphScreen = ({navigation, route}:any)=> {    
     
@@ -47,8 +46,50 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
     const [rateStatus, setRateStatus] = useState<any>({})
     const multitext_gifs = ["135","167","168","169","171","172","173","174","177","179","180","181","183","184","185","186","197","198","200","203","204","206"]
     const multi_text = multitext_gifs.includes(gifData.uid)
+    
+    
+    // INDIVIDUAL GIF'S
+    const getTemplateById: any = useGetCustomTemplateById({
+        onSuccess(res) { 
+        // console.log('res: ', res);
+        setTextCheck(false)
+        setWebp(`http://18.143.157.105:3000${res.template}`) 
+        },
+        onError(error) {
+        console.log('getCustomRenders error: ', error);
+        },
+    }); 
+
+    var renderGifById: any = usePostCustomRenders({
+        onSuccess(res) { 
+            // console.log("res: ", res[0].render);     
+            setTextCheck(false)
+            if(res[0].render.includes('.webp')){
+                setWebp(`http://18.143.157.105:3000${res[0].render}`) 
+                console.log("webp");
+            }
+            else {
+                console.log("gif");
+                if(fileAction==="RequestShareCustomGif")
+                    RequestShareCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+                else if(fileAction==="RequestDownloadCustomGif")
+                    RequestDownloadCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+                else if(fileAction==="CopyCustomGif")
+                    CopyCustomGif(`http://18.143.157.105:3000${res[0].render}`)
+
+            }
+            setLoader(false)
+        },
+        onError(error) {
+            setLoader(false)
+            console.log("renderGifById", error);
+        },
+    }); 
+
+    // console.log("renderGifById: ", renderGifById.data);
+     
     // GET STORE
-    const getter = async () => {
+     const getter = async () => {
     
         const gif_state = await loadIndividualGifData().catch((error:any)=>{
             console.log('loadIndividualGifData Error: ', error);
@@ -95,7 +136,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             // For custom render 
             // console.log("gifData.defaultText ",gifData.defaultText);
             // console.log("gifData.src: ",gifData.src);
-            if(gifData.src.includes('render/') ){
+            if(gifData.src.includes('render/') && !renderGifById.data ){
                 setTextCheck( gifData.defaultText ? false : true)
                 renderGifById.mutate({ 
                     "HQ": true,
@@ -104,6 +145,9 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     "uids": [ gifData.uid ],
                     "text":[gifData?.defaultText ]
                 })
+            }
+            else if(gifData.src.includes('render/') && renderGifById.data ){
+                setTextCheck(false)
             }
             else{
                 setTextCheck( true)
@@ -135,6 +179,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
       
     const isAvailable = InAppReview.isAvailable();
     const requestReview = ()=> {
+        setLoading(true)
         setTextCheck(false) 
         Alert.alert("Rate Us", "This is a locked feature. To unlock it once for free, please leave a 5-star review",
             [
@@ -143,7 +188,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                 },
                 {
                 text: 'Rate Now', onPress: () => {
-                    setLoading(true)
                     if(freeGifAccess==="Denied"){
                         setFreeGifAccess("Granted")
                         storeFreeGifAccess({access:"Granted"})
@@ -163,44 +207,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
             ] )
     }
 
-    
-    // INDIVIDUAL GIF'S
-    const getTemplateById: any = useGetCustomTemplateById({
-        onSuccess(res) { 
-        // console.log('res: ', res);
-        setTextCheck(false)
-        setWebp(`http://18.143.157.105:3000${res.template}`) 
-        },
-        onError(error) {
-        console.log('getCustomRenders error: ', error);
-        },
-    }); 
-
-    const renderGifById: any = usePostCustomRenders({
-        onSuccess(res) { 
-            // console.log("res: ", res[0].render);     
-            setTextCheck(false)
-            if(res[0].render.includes('.webp')){
-                setWebp(`http://18.143.157.105:3000${res[0].render}`) 
-                console.log("webp");
-            }
-            else {
-                console.log("gif");
-                if(fileAction==="RequestShareCustomGif")
-                    RequestShareCustomGif(`http://18.143.157.105:3000${res[0].render}`)
-                else if(fileAction==="RequestDownloadCustomGif")
-                    RequestDownloadCustomGif(`http://18.143.157.105:3000${res[0].render}`)
-                else if(fileAction==="CopyCustomGif")
-                    CopyCustomGif(`http://18.143.157.105:3000${res[0].render}`)
-
-            }
-            setLoader(false)
-        },
-        onError(error) {
-            setLoader(false)
-            console.log("renderGifById", error);
-        },
-    }); 
 
     // Check Download Permissions to PHOTO'S Gallery
     const DownloadPermissions = ()=> {
@@ -518,6 +524,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
 
     // LOCAL STOREAGE
     const StoreIndividualGif = () => {
+        setLoading(false)
         if(gifData.giphy)
             {
                 storeIndividualGifData({src: gifData.src,  width:gifData.width, height:gifData.height, giphy: gifData.giphy, src2: BannerURI});
@@ -536,18 +543,14 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
         console.log('start time: ', startTime);
     }
 
-    // console.log( "freeGifAccess: ", freeGifAccess);    
+    // console.log("loading: ",loading);
+    
+    // console.log( "freeGifAccess: ", loading, freeGifAccess);    
     // console.log( "textCheck: ", textCheck);    
     
     const acces_allowed = (verifyPayment?.subcription || verifyPayment?.is_trial_period || freeGifAccess==="Granted")
     // console.log( "acces_allowed: ", verifyPayment?.subcription, verifyPayment?.is_trial_period, freeGifAccess, freeGifAccess==="Granted", acces_allowed );    
 
-    
-
-    // // methods (Just iOs for now)
-    // RNGif.convert('pathToLocalVideo').then(('gifPath') => {
-    // console.log('Video is converted to gif at: ', 'gifPath');
-    // })
 
     return(
         <SafeAreaView style={{flex:1, backgroundColor:'#25282D' }}>
@@ -610,7 +613,6 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                     <View style={[{ flexDirection:'row', alignItems:'center', justifyContent:'center' }]} >
                         <TouchableOpacity 
                             onPress={ ()=>{
-                                console.log("isValidateInput: ",isValidateInput());
                                 if( isValidateInput() ){
                                     if (acces_allowed){
                                         console.log("Copy allowed: ", acces_allowed)
@@ -753,7 +755,7 @@ const IndividualGiphScreen = ({navigation, route}:any)=> {
                             : copying ?
                                 <Text style={{alignSelf:'center', fontFamily:'arial', fontWeight:'bold', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Copying...</Text>
                             : loading ?
-                            <ActivityIndicator size={'small'} />
+                                <ActivityIndicator size={'small'} />
                             : null
                         }
                     </View>

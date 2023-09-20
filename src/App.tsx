@@ -62,10 +62,10 @@ const AppBootStrap = React.memo(function () {
     }, []),
   );
 
-  useEffect(()=>{  
-    storeVerifyPayment(verifyPayment)
-    return()=>{}
-  },[verifyPayment])
+  // useEffect(()=>{  
+  //   storeVerifyPayment(verifyPayment)
+  //   return()=>{}
+  // },[verifyPayment])
 
   
   useEffect(()=>{
@@ -97,24 +97,32 @@ const AppBootStrap = React.memo(function () {
      
     await loadAppRestartCount().then((resp)=>{
       console.log("resp: ", resp);
-      if (resp !==undefined && resp !==null && AppState.currentState==='active'){
+      if (resp !==undefined && resp !==null && rateStatus.show_popup===0 && AppState.currentState==='active'){
         storeAppRestartCount({ count: resp.count+1 }) 
         setAppRestartCount(resp.count+1)
       } 
-      else if (rateStatus.show_popup===0 && freeGifAccess==="Denied"){
+      else if (rateStatus.show_popup===0 && AppState.currentState==='active'){
         storeAppRestartCount( { count: 1 })
         setAppRestartCount(1)
+      }
+      else if (rateStatus.show_popup!==0 && AppState.currentState==='active' && resp.count>1 ){
+        storeAppRestartCount({ count: 1 })
       }
     }).catch((error:any)=>{
       console.log('loadAppRestartCount Error: ', error);
     })
  
+    // console.log( 'active',  AppState.currentState);
+    
     await loadFreeGifAccess().then((resp:any)=>{
-      // console.log('loadFreeGifAccess res: ', res);
-      if (resp !==undefined && resp !==null && AppState.currentState==='active'){
+      // console.log('loadFreeGifAccess resp: ', resp);
+      // if (resp !==undefined && resp !==null && AppState.currentState==='active'){
+      if (resp !==undefined && resp !==null){
           setFreeGifAccess(resp.access) 
         }
       else{
+        console.log("I deny");
+        
         storeFreeGifAccess({access:"Denied"})
         setFreeGifAccess("Denied")
       }    

@@ -98,7 +98,7 @@ export const loadAppleAccessTokenFromStorage = async () => {
 export const loadVerifyPaymentFromStorage = async () => {
     try {
       const savedPaymentInfo: any = await AsyncStorage.getItem(paymentKey);
-      const paymentInfo = JSON.parse(savedPaymentInfo);
+      const paymentInfo = JSON.parse(savedPaymentInfo);      
       return paymentInfo
     } catch (error) {
       console.log('loadVerifyPaymentFromStorage error: ',error);
