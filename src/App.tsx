@@ -50,14 +50,14 @@ const AppBootStrap = React.memo(function () {
 
   const navigation = useNavigation<any>();
   const [verifyPayment, setVerifyPayment] = useState<any>({})
-  const [appRestartCount, setAppRestartCount] = useState<number>(0)
+  const [appRestartCount, setAppRestartCount] = useState<number>(1)
   const [rateStatus, setRateStatus] = useState<any>({})
   const [freeGifAccess, setFreeGifAccess] = useState<string>("Denied")
   const isAvailable = InAppReview.isAvailable();
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("clearTransactionIOS");
+      // console.log("clearTransactionIOS");
       void clearTransactionIOS();
     }, []),
   );
@@ -69,16 +69,21 @@ const AppBootStrap = React.memo(function () {
 
   
   useEffect(()=>{
-    getter()
+    // getter()
     getAvailableSubscription()
   },[])
 
   useEffect(()=>{
-    setTimeout(() => {
-      if(rateAppStatus?.data)
-        requestReview()
-    }, 5000);
+    if(rateAppStatus?.data)
+      getter()
   },[rateStatus])
+
+    useEffect(()=>{
+      setTimeout(() => {
+        if(rateAppStatus?.data)
+          requestReview()
+      }, 5000);
+    },[appRestartCount])
 
   const getter = async () =>{
 
@@ -96,17 +101,17 @@ const AppBootStrap = React.memo(function () {
     // })
      
     await loadAppRestartCount().then((resp)=>{
-      console.log("resp: ", resp);
-      if (resp !==undefined && resp !==null && rateStatus.show_popup===0 && AppState.currentState==='active'){
+      // console.log("resp: ", resp, rateStatus.show_popup);
+      if ((resp===undefined || resp===null) && rateStatus.show_popup===0){
+        storeAppRestartCount( { count: 1 })
+      }
+      else if ((resp !==undefined || resp !==null) && rateStatus.show_popup===0){
         storeAppRestartCount({ count: resp.count+1 }) 
         setAppRestartCount(resp.count+1)
       } 
-      else if (rateStatus.show_popup===0 && AppState.currentState==='active'){
-        storeAppRestartCount( { count: 1 })
-        setAppRestartCount(1)
-      }
-      else if (rateStatus.show_popup!==0 && AppState.currentState==='active' && resp.count>1 ){
-        storeAppRestartCount({ count: 1 })
+      else if (rateStatus.show_popup===1 && resp.count>1 ){
+        storeAppRestartCount({ count: 0 })
+        setAppRestartCount(0)
       }
     }).catch((error:any)=>{
       console.log('loadAppRestartCount Error: ', error);
@@ -116,16 +121,21 @@ const AppBootStrap = React.memo(function () {
     
     await loadFreeGifAccess().then((resp:any)=>{
       // console.log('loadFreeGifAccess resp: ', resp);
-      // if (resp !==undefined && resp !==null && AppState.currentState==='active'){
-      if (resp !==undefined && resp !==null){
-          setFreeGifAccess(resp.access) 
-        }
-      else{
-        console.log("I deny");
+      if (resp===undefined || resp===null){
+        storeFreeGifAccess({access:"Denied", uid:0})
+      }
+      // // if (resp !==undefined && resp !==null && AppState.currentState==='active'){
+      // if (resp !==undefined && resp !==null){
+      //     setFreeGifAccess(resp.access) 
+      //   }
+      // else{
+      //   console.log("I deny");
         
-        storeFreeGifAccess({access:"Denied"})
-        setFreeGifAccess("Denied")
-      }    
+      //   storeFreeGifAccess({access:"Denied"})
+      //   setFreeGifAccess("Denied")
+      // }   
+      
+      
     }).catch((error:any)=>{
         console.log('loadFreeGifAccess Error: ', error);
     })
@@ -140,20 +150,21 @@ const AppBootStrap = React.memo(function () {
     onError: (res: any) => console.log('onError: ',res),
   });
   
-  const requestReview = ()=> {        
-    if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
+  const requestReview = ()=> {            
+    // if(isAvailable && rateStatus.show_popup===0 && freeGifAccess==="Denied" && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
+    if(isAvailable && rateStatus.show_popup===0 && (appRestartCount===3|| appRestartCount===7 || appRestartCount===15)){
       Alert.alert("Rate Us", "This is a locked feature. To unlock it once for free, please leave a 5-star review",
         [
           { text: 'Maybe Later', onPress: () => { navigation.navigate('SubscriptionScreen') } },
           {
             text: 'Rate Now', onPress: () => {
-              if(freeGifAccess==="Denied"){
-                setFreeGifAccess("Granted")
-                storeFreeGifAccess({access:"Granted"})
-              }
+              // if(freeGifAccess==="Denied"){
+              //   setFreeGifAccess("Granted")
+              //   storeFreeGifAccess({access:"Granted"})
+              // }
               InAppReview.RequestInAppReview()
               .then((hasFlowFinishedSuccessfully) => {
-              console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
+                console.log('InAppReview in ios has launched successfully', hasFlowFinishedSuccessfully);
               
                 if (hasFlowFinishedSuccessfully) {
                     // do something for ios
@@ -172,7 +183,7 @@ const AppBootStrap = React.memo(function () {
     // forceRefresh only makes sense when testing an app not downloaded from the Appstore.
     // And only afer a direct user action.
     const latestAvailableReceipt = await getReceiptIOS({forceRefresh: true}).catch((error)=>{
-      console.log("getReceiptIOS error: ", error);
+      // console.log("getReceiptIOS error: ", error);
     })
     if(latestAvailableReceipt){
       await validateReceiptIos({ receiptBody: {"receipt-data": latestAvailableReceipt, password: '8397e848fdbf458c9d81f1b742105789'}, isTest: true })
@@ -207,7 +218,8 @@ const AppBootStrap = React.memo(function () {
     }
   }
 
-  console.log("freeGifAccess: ",freeGifAccess, appRestartCount);
+  console.log("appRestartCount: ",appRestartCount, rateStatus.show_popup);
+  // console.log("freeGifAccess: ", appRestartCount);
 
   return(
         <Stack.Navigator
