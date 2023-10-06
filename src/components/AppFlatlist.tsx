@@ -12,7 +12,7 @@ import { MasonryFlashList  } from "@shopify/flash-list";
 
 
 const LIMIT = 25;
-const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font }:any) =>{ 
+const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoader, refreshLoader, UIDsLength, allGifLength, page, setPage, tag, navigation, text, textPosition, textBackground, textStroke, color, font, appleAccessToken }:any) =>{ 
   
     // console.log("API: ", API.data.length);
   
@@ -21,26 +21,32 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
     // const marginBetweenItems = 10; // Set your desired margin
 
     // const itemWidth = (totalWidth - (marginBetweenItems * (columnCount - 1))) / columnCount;
-    const [appleAccessToken, setAppleAccessToken] = useState<string>('')
-    const getter = async () => {
-      
-      const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-          console.log('loadAppleAccessTokenFromStorage Error: ', error);
-      })
-      setAppleAccessToken(access_token) 
-    }
   
-    useFocusEffect(
-      React.useCallback(() => {
-        getter().catch((error:any)=>{
-        console.log('getter Error: ', error);
-        })
-      }, []),
-    );
 
-    useEffect(()=>{
+    
+    // AppleAccessToken
+    
+    // // const [appleAccessToken, setAppleAccessToken] = useState<string>('')
+    // // const getter = async () => {
       
-    },[tag])
+    // //   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+    // //       console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    // //   })
+    // //   setAppleAccessToken(access_token) 
+    // // }
+  
+    // // useFocusEffect(
+    // //   React.useCallback(() => {
+    // //     getter().catch((error:any)=>{
+    // //     console.log('getter Error: ', error);
+    // //     })
+    // //   }, []),
+    // // );
+
+    // // useEffect(()=>{
+      
+    // // },[tag])
+
 
     // const handleScroll = (event: any) => {      
     //   // console.log("API?.data?.length, ", event.nativeEvent.locationY, API?.data?.length);
@@ -99,6 +105,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
       <MasonryFlashList
         data={data}
         numColumns={2}
+        contentContainerStyle={{paddingTop:20}}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode={"on-drag"}
         removeClippedSubviews={true}
@@ -126,7 +133,7 @@ const AppFlatlist = ({ data, API, API2, giphy=false, refresh, isLoader, setLoade
         onEndReached={() => {          
           API?.data?.length === LIMIT && data.length/25===page && (tag || giphy) && page<=3 ?
             setPage(page + 1)
-          : API?.data?.length <= LIMIT && data.length/25===page && giphy && page<=3 ?
+          : API?.data?.length <= LIMIT   && giphy && page<=3 ?
             setPage(page + 1)
           : API?.data?.length === LIMIT && data.length/25===page && !tag && !giphy ?
             setPage(page + 1)

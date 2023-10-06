@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, Image, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
@@ -23,9 +23,14 @@ import { Fonts } from '../utils/Fonts';
 import { Colors } from '../utils/colors';
 import { useGetBannerSearch } from '../hooks/useGetBannerSearch';
 import { useFocusEffect } from '@react-navigation/native';
+import { loadAppleAccessTokenFromStorage, loadVerifyPaymentFromStorage, storeAppleAccessToken } from '../store/asyncStorage';
+import Modal from 'react-native-modal';
+import { styles } from './SubscriptionScreen';
+import AppPaymentStatusModal from '../components/PaymentStatusModal';
+import { Log } from 'ffmpeg-kit-react-native';
 
 
-const BannerScreen = ({navigation}:any) => {
+const BannerScreen = ({navigation, route}:any) => {
  
   const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
   const [sText, setSText] = useState<Boolean>(false)
@@ -43,6 +48,10 @@ const BannerScreen = ({navigation}:any) => {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
 
+  const [accessToken, setAccessToken] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(false)
+
+  
   const getBannerTemplates: any = useGetBannerTemplates(page, limit, {
     enabled:false,
     onSuccess: (res: any) => {
@@ -162,12 +171,74 @@ const BannerScreen = ({navigation}:any) => {
  
   },[query])
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refresh()
-  //   }, []),
-  // );
+ 
+    
+  // Refresh after One-Time Payment is made
+  const loadPurchaseStatus = async ()=>{
 
+    const appleAccessToken: any = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+      console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    })
+    
+    await loadVerifyPaymentFromStorage()
+    .then((verifyPayment)=>{
+      // Store
+      if( (appleAccessToken?.access_token===undefined) && verifyPayment?.one_time ){
+        setLoading(true)
+        const intervalId = setInterval(async () => {
+          // Local
+          if(accessToken.length===0){
+            await loadAppleAccessTokenFromStorage()
+            .then((appleAccessToken)=>{ 
+              if (appleAccessToken?.access_token) { 
+                setAccessToken(appleAccessToken?.access_token) 
+                setLoading(false)
+                refresh(); 
+                // To stop the interval, use clearInterval with the interval ID
+                clearInterval(intervalId); 
+              } 
+              console.log("This code runs every 1 second.");
+            })
+            .catch((error:any)=>{
+              console.log('loadAppleAccessTokenFromStorage Error: ', error);
+            })
+          }
+          else{
+            // To stop the interval, use clearInterval with the interval ID
+            clearInterval(intervalId);
+          }
+        }, 1000);        
+      }
+      else if(appleAccessToken?.galleryRefresh){
+        storeAppleAccessToken({ access_token: appleAccessToken?.access_token, galleryRefresh: false, individualRefresh: false })
+        setAccessToken(appleAccessToken?.access_token)
+        refresh(); 
+      }
+      else if(appleAccessToken){
+        console.log("yees");
+        
+        setAccessToken(appleAccessToken?.access_token)
+      }
+    }) 
+    .catch((error:any)=>{
+      console.log('loadVerifyPaymentFromStorage Error: ', error);
+    })
+  }
+
+  useFocusEffect(
+    useCallback(()=>{
+      loadPurchaseStatus()
+      // async ()=>{
+      //   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+      //     console.log('loadAppleAccessTokenFromStorage Error: ', error);
+      //   })
+      //   if(route?.params?.refetch){
+      //     setAccessToken(access_token)
+      //     refresh()
+      //   }
+      // }
+    },[])
+  )
   
   const searchInput: any = useRef()  
   
@@ -197,7 +268,7 @@ const BannerScreen = ({navigation}:any) => {
             <TouchableOpacity>
               <Download2 width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity> */}
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{ returnScreen:'BannerScreen', reRender: refresh })}} >
+            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{ returnScreen:'BannerScreen' })}} >
               <Pro width={RFValue(25)} height={RFValue(25)}/>
             </TouchableOpacity>
           </View>
@@ -294,6 +365,7 @@ const BannerScreen = ({navigation}:any) => {
             setLoader = {setLoader}
             refreshLoader={refreshLoader}
             allGifLength = {allGif?.length}
+            appleAccessToken={accessToken}
             text={text}
             page = {page}
             setPage = {setPage}
@@ -409,6 +481,9 @@ const BannerScreen = ({navigation}:any) => {
           </AppModal.Footer>
         </AppModal.Container>
       </AppModal>
+
+       {/* Payment Status Modal */}
+      <AppPaymentStatusModal loading={loading} />
 
     </SafeAreaView>
   );

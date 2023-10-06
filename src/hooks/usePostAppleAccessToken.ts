@@ -3,7 +3,7 @@ import {useMutation, UseMutationOptions} from '@tanstack/react-query';
 
 const usePostAppleAccessTokenRequest = async (params: any)=>{
         
-    // console.log('apple AccessToken params: ',params);
+    console.log('apple AccessToken request params: ',params);
     try {
         const response = await fetch('http://18.143.157.105:3000/auth/sso/apple-payment', 
             {

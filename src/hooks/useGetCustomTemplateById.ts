@@ -5,11 +5,11 @@ const useGetCustomTemplateByIdRequest = async<T>(params:string)=>{
 
   console.log("params: ",params);
   
-  const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+  const appleAccessToken = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
     console.log('loadAppleAccessTokenFromStorage Error: ', error);
   })
 
-  const headers:any  = access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` }
+  const headers:any  = appleAccessToken?.access_token ? { 'Content-Type': 'application/json', "X-ACCESS-TOKEN": `${access_token}` }
                        : {  'Content-Type': 'application/json' }
   try {
     const response = await fetch( `http://18.143.157.105:3000/assets/templates/${params.uid}`, 

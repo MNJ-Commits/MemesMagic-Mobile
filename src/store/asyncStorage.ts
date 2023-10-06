@@ -40,7 +40,7 @@ export const storePaymentsReceiptInfo = async (data: PaymentsReceiptInfo) => {
       console.log( 'storeTransactionsReceipt error: ',error);
     }
   };
-export const storeAppleAccessToken = async (data: { access_token: string }) => {
+export const storeAppleAccessToken = async (data: { access_token: string, galleryRefresh: boolean, individualRefresh: boolean }) => {
     try {
       await AsyncStorage.setItem(accessKey, JSON.stringify(data));
     } catch (error) {

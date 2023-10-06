@@ -57,7 +57,7 @@ const AppBootStrap = React.memo(function () {
 
   useFocusEffect(
     React.useCallback(() => {
-      // console.log("clearTransactionIOS");
+      console.log("clearTransactionIOS");
       void clearTransactionIOS();
     }, []),
   );

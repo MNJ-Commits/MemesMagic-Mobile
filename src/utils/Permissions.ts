@@ -1,4 +1,5 @@
 import { checkMultiple, PERMISSIONS, requestMultiple } from "react-native-permissions";
+import { resolveModuleName } from "typescript";
 
 export const checkLibraryPermissions = async ()=>{
   return new Promise<any>(async (resolve, reject) => {
@@ -30,7 +31,7 @@ export const checkLibraryPermissions = async ()=>{
 
 export const requestLibraryPermissions = ()=>{
 
-  return new Promise(async ()=>{
+  return new Promise<any>(async (resolve, reject) =>{
     await requestMultiple([
       // iOS default modal asks for permissions with our messagefor photos
       PERMISSIONS.IOS.PHOTO_LIBRARY, 
@@ -38,7 +39,8 @@ export const requestLibraryPermissions = ()=>{
       // // MemeMagic App Modal asks for permissions for photos but doesn't allowed
       // PERMISSIONS.IOS.MEDIA_LIBRARY,
     ])
-    .then((requestMultipleReponse:any) => {        
+    .then((requestMultipleReponse:any) => {       
+      resolve(true) 
       // console.log('requestMultipleReponse: ', requestMultipleReponse);        
     })
     .catch((requestMultipleError)=>{

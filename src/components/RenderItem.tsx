@@ -19,6 +19,7 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
     const id: number = item.uid  
       
     let BannerURI: string = ''
+    if(giphy){
       text ? BannerURI += `?text=${encodeURIComponent(text)}` : ''
       BannerURI += `&w=${RFValue(400)}&h=${RFValue(400/width*height)}`
       textBackground ? BannerURI += `&textBackground=${textBackground}` : ''
@@ -26,8 +27,10 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
       textPosition ? BannerURI += `&location=${textPosition}` : ''
       font ? BannerURI += `&font=${font}` : ''
       color ? BannerURI += `&color=${encodeURIComponent(color)}` : ''        
-      // console.log('BannerURI: ',  `http://18.143.157.105:3000/renderer/banner${BannerURI}`);
-      // console.log('customURI: ', customURI);
+     } 
+    // console.log('BannerURI: ',  `http://18.143.157.105:3000/renderer/banner${BannerURI}`);
+    // console.log('customURI: ', customURI);
+    // console.log('appleAccessToken: ', typeof appleAccessToken);
       
       const customURI_parts = customURI.split("/")
       const key = giphy ? customURI_parts[customURI_parts.length - 2] : id
@@ -39,11 +42,11 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
           if(giphy)
             {
               storeIndividualGifData({src:customURI, width:width, height:height, giphy: giphy, src2: BannerURI });
-              navigation.navigate( 'IndividualGiphScreen')
+              navigation.navigate( 'IndividualGiphScreen', {returnScreen : 'BannerScreen'})
             }
           else{
             storeIndividualGifData({src:customURI, width:width, height:height, uid: id, defaultText:text });
-            navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text})
+            navigation.navigate( 'IndividualGiphScreen', {uid: id, defaultText:text, returnScreen : 'CustomScreen'})
           }
         }} 
         style={{ alignItems:'center', 
@@ -52,37 +55,37 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
           marginVertical: giphy ? RFValue(5) : 0,
         }} 
       >  
-        { !giphy ? 
-          <>
-            <FastImage
-              key={key}
-              source={{ 
-                uri: customURI, 
-                priority: FastImage.priority.normal,
-              }}
-              resizeMode={FastImage.resizeMode.contain}
-              onLoadEnd={()=>setLoader(false)}
-              style={{ 
-                zIndex: 0, 
-                width:'90%', 
-                aspectRatio: width/height,
-                // backgroundColor:'#FF439E',
-                // height: RFValue(160/width*height),
-                borderRadius:RFValue(8),   
-              }}
-            />
-            <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
-          </>
-        :
+        
+        <>
+          <FastImage
+            key={key}
+            source={{ 
+              uri: customURI, 
+              priority: FastImage.priority.normal,
+            }}
+            resizeMode={FastImage.resizeMode.contain}
+            onLoadEnd={()=>setLoader(false)}
+            style={{ 
+              zIndex: 0, 
+              width:'90%', 
+              aspectRatio: width/height,
+              // backgroundColor:'#FF439E',
+              // height: RFValue(160/width*height),
+              borderRadius:RFValue(8),   
+            }}
+          />
+          <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: -1, position:'absolute', top: RFValue((150/width*height)/2) }} />
+        </>
+        { giphy &&
           <>
             <FastImage 
               key={key}
               source={appleAccessToken ? 
                       { 
-                        uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : customURI,
+                        uri: giphy && text.length!==0 ? `http://18.143.157.105:3000/renderer/banner${BannerURI}`  : null,
                         headers: { "X-ACCESS-TOKEN": `${appleAccessToken}`}   
                       }
-                    : { uri: text ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : customURI }}
+                    : { uri: giphy && text.length!==0 ? `http://18.143.157.105:3000/renderer/banner${BannerURI}` : null }}
               resizeMode={'contain'}
               onLoadStart={()=>setLoader(true)}
               onLoadEnd={()=>setLoader(false)}
@@ -96,8 +99,8 @@ const RenderItem = ({item, giphy, text, textPosition, textBackground, textStroke
               }}
             />
               
-            { loader  &&
-              <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />}
+            {/* { loader  &&
+              <ActivityIndicator size={'large'}  color={'#FF439E'} style={{zIndex: 1, position:'absolute', top: RFValue((150/width*height)/2) }} />} */}
           </>
         }
       </TouchableOpacity>

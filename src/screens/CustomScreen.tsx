@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, Image, Linking, Alert, } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, Text, View, SafeAreaView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, Keyboard, Animated, NativeModules, ActivityIndicator, Image, Linking, Alert, StyleSheet, } from 'react-native';
 import Suggestions from "../assets/svgs/suggestions.svg";
 import Download2 from "../assets/svgs/download2.svg";
 import Pro from "../assets/svgs/pro.svg";
@@ -10,9 +10,14 @@ import { useGetCustomTemplates } from '../hooks/useGetCustomTemplates';
 import { usePostCustomRenders } from '../hooks/usePostCustomRenders';
 import { useFocusEffect } from '@react-navigation/native';
 import AppFlatlist  from '../components/AppFlatlist'
+import { loadAppleAccessTokenFromStorage, loadVerifyPaymentFromStorage, storeAppleAccessToken } from '../store/asyncStorage';
+import AppPaymentStatusModal from '../components/PaymentStatusModal';
 
 
 const CustomScreen = ({navigation, route}:any) => {
+
+
+  
  
   const [allGif, setAllGIF] = useState<any>([])
   const [UIDs, setUIDs] = useState<any>([])
@@ -24,11 +29,13 @@ const CustomScreen = ({navigation, route}:any) => {
   const [showScreen, setShowScreen] = useState<Boolean>(false)
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
+  const [accessToken, setAccessToken] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(false)
 
   const renderInput:any = useRef<any>('')
   const prevTag:any = useRef<any>('Random')
 
-  const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, {
+  const getCustomTemplates: any = useGetCustomTemplates(tag, page, limit, accessToken, {
     // enabled:false,
     onSuccess: async (res: any) => {
       // console.log('res: ', res);     
@@ -53,7 +60,6 @@ const CustomScreen = ({navigation, route}:any) => {
          setAllGIF([...new Set([...allGif, ...res])]);
          setRefreshLoader(false)
       }
-
     },
     onError: (res: any) => console.log('onError: ',res),
   });
@@ -73,7 +79,7 @@ const CustomScreen = ({navigation, route}:any) => {
       }
       setTimeout(() => {
         setRefreshLoader(false)
-      }, 5000);
+      }, 3000);
     },
     onError(error) {
       console.log('getCustomRenders error: ', error);
@@ -88,11 +94,12 @@ const CustomScreen = ({navigation, route}:any) => {
     // const chunkSize = 2;
     if( renderInput?.current?.value && renderInput?.current?.value?.length!==0)
       {
-        if(uids.length<25){
+        if(uids.length<=25){
           getCustomRenders.mutate({ 
                     "render_format": "webp",
                     "text":[renderInput.current.value],
-                    "uids": uids
+                    "uids": uids,
+                    "access_token": accessToken
                   })
         }
         else{
@@ -101,7 +108,8 @@ const CustomScreen = ({navigation, route}:any) => {
               getCustomRenders.mutate({ 
                 "render_format": "webp",
                 "text":[renderInput.current.value],
-                "uids": uids.slice(i, i + 25)
+                "uids": uids.slice(i, i + 25),
+                "access_token": accessToken
               })
             }, i*200);
           } 
@@ -200,16 +208,91 @@ const CustomScreen = ({navigation, route}:any) => {
       console.log('getInitialURL: ',url);
       // Alert.alert("InitialURL: "+JSON.stringify(url));
       if(url==="https://memeswork.com")
-        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
     })
   
     Linking.addEventListener('url',(url)=>{ 
       // Alert.alert("addEventListener: "+JSON.stringify(url));
       console.log('Event Listener: ',url);
       if(url?.url==="https://memeswork.com")
-        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+        navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
     });
   }
+
+  
+  // Refresh after One-Time Payment is made
+  const loadPurchaseStatus = async ()=>{
+
+    const appleAccessToken = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+      console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    })
+    
+    await loadVerifyPaymentFromStorage()
+    .then((verifyPayment)=>{
+      console.log(appleAccessToken?.access_token===null, verifyPayment?.one_time, appleAccessToken?.access_token===null && verifyPayment?.one_time);
+      console.log("noope: ",appleAccessToken?.access_token, verifyPayment?.one_time);
+      
+      // Store
+      if( appleAccessToken?.access_token===undefined && verifyPayment?.one_time ){
+        setLoading(true)
+        const intervalId = setInterval(async () => {
+          // Local
+          if(accessToken.length===0){
+            await loadAppleAccessTokenFromStorage()
+            .then((appleAccessToken)=>{ 
+              if (appleAccessToken?.access_token) { 
+                setAccessToken(appleAccessToken?.access_token) 
+                setLoading(false)
+                refresh(); 
+                // To stop the interval, use clearInterval with the interval ID
+                clearInterval(intervalId); 
+              } 
+              console.log("This code runs every 1 second.");
+            })
+            .catch((error:any)=>{
+              console.log('loadAppleAccessTokenFromStorage Error: ', error);
+            })
+          }
+          else{
+            // To stop the interval, use clearInterval with the interval ID
+            clearInterval(intervalId);
+          }
+        }, 1000);        
+      }
+      else if(appleAccessToken?.galleryRefresh){
+        storeAppleAccessToken({ access_token: appleAccessToken?.access_token, galleryRefresh: false, individualRefresh: false })
+        setAccessToken(appleAccessToken?.access_token)
+        refresh(); 
+      }
+      else{
+        setAccessToken(appleAccessToken?.access_token)
+      }
+    }) 
+    .catch((error:any)=>{
+      console.log('loadVerifyPaymentFromStorage Error: ', error);
+    })
+  }
+
+  useFocusEffect(
+    useCallback(()=>{
+      loadPurchaseStatus()
+      console.log("route: ", route?.params?.refetch);
+
+      // async ()=>{
+      //   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+      //     console.log('loadAppleAccessTokenFromStorage Error: ', error);
+      //   })
+      //   setAccessToken(access_token)
+      //   if(route?.params?.refetch){
+      //     setTimeout(() => {
+      //       refresh()
+      //     }, 1000);
+      //   }
+      // }
+
+
+    },[])
+  )
 
   useEffect(() => {
     // getUrlAsync();
@@ -254,7 +337,7 @@ const CustomScreen = ({navigation, route}:any) => {
               </TouchableOpacity> */}
               <TouchableOpacity 
                 onPress={()=>{
-                  navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen', reRender: refresh })
+                  navigation.navigate('SubscriptionScreen',{returnScreen:'CustomScreen'})
                 }} >
                 <Pro width={RFValue(25)} height={RFValue(25)}/>
               </TouchableOpacity>
@@ -391,6 +474,10 @@ const CustomScreen = ({navigation, route}:any) => {
             </TouchableOpacity>
           </View> 
         </KeyboardAvoidingView>
+
+        {/* Payment Status Modal */}
+        <AppPaymentStatusModal loading={loading} />
+ 
        </SafeAreaView>
      :
       <Animated.View
@@ -411,6 +498,7 @@ const CustomScreen = ({navigation, route}:any) => {
     </>
   );
 };
+
 
 export default CustomScreen;
 

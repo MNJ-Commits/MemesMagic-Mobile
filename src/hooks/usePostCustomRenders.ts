@@ -2,14 +2,16 @@ import {useMutation, UseMutationOptions} from '@tanstack/react-query';
 import { loadAppleAccessTokenFromStorage } from '../store/asyncStorage';
 
 
-const usePostCustomRendersRequest = async (params: any)=>{
+const usePostCustomRendersRequest = async (data: any)=>{
         
 
-    const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-        console.log('loadAppleAccessTokenFromStorage Error: ', error);
-    })
+    // const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
+    //     console.log('loadAppleAccessTokenFromStorage Error: ', error);
+    // })
 
+    const {access_token , ...params} = data
     // console.log('params: ',params);
+    // console.log('access_token: ',access_token);
 
     try {
         const response = await fetch('http://18.143.157.105:3000/renderer/render', 
