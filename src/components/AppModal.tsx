@@ -1,10 +1,10 @@
-import React from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
-import RNModal from "react-native-modal";
+import React from 'react';
+import {StyleSheet, View, Text, Button} from 'react-native';
+import RNModal from 'react-native-modal';
 
 type AppModalProps = {
   isVisible: boolean;
-  setModalVisible : React.Dispatch<React.SetStateAction<boolean>>;
+  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
   [x: string]: any;
 };
@@ -14,7 +14,6 @@ export const AppModal = ({
   children,
   ...props
 }: AppModalProps) => {
-
   return (
     <RNModal
       isVisible={isVisible}
@@ -29,55 +28,52 @@ export const AppModal = ({
   );
 };
 
-const ModalContainer = ({ children }: { children: React.ReactNode }) => (
+const ModalContainer = ({children}: {children: React.ReactNode}) => (
   <View style={styles.container}>{children}</View>
 );
 
-const ModalHeader = ({ title }: { title: string }) => (
+const ModalHeader = ({title}: {title: string}) => (
   <View style={styles.header}>
     <Text style={styles.text}>{title}</Text>
   </View>
 );
 
-const ModalBody = ({ children }: { children?: React.ReactNode }) => (
+const ModalBody = ({children}: {children?: React.ReactNode}) => (
   <View style={styles.body}>{children}</View>
 );
 
-const ModalFooter = ({ children }: { children?: React.ReactNode }) => (
+const ModalFooter = ({children}: {children?: React.ReactNode}) => (
   <View style={styles.footer}>{children}</View>
 );
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor:'#25282D',
+    backgroundColor: '#25282D',
     borderRadius: 25,
-    // borderWidth: 1,
-    // borderColor: "#000",
-    // borderStyle: "solid",
   },
   header: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop:10
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
   },
   text: {
     paddingTop: 10,
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 24,
-    color:'#ffffff',
-    fontFamily:'Lucita-Regular',
+    color: '#ffffff',
+    fontFamily: 'Lucita-Regular',
   },
   body: {
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 15,
     minHeight: 100,
     marginTop: 20,
   },
   footer: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 10,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
 });
 

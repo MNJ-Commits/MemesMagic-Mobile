@@ -1,24 +1,18 @@
 import {useMutation, UseMutationOptions} from '@tanstack/react-query';
 
+const usePostAppleAccessTokenRequest = async (params: any) => {
+  const response = await fetch(
+    'http://18.143.157.105:3000/auth/sso/apple-payment',
+    {
+      method: 'POST',
+      body: JSON.stringify({...params}),
+      headers: {Accept: 'application/json', 'Content-Type': 'application/json'},
+    },
+  );
+  const data = await response?.json();
 
-const usePostAppleAccessTokenRequest = async (params: any)=>{
-        
-    console.log('apple AccessToken request params: ',params);
-    try {
-        const response = await fetch('http://18.143.157.105:3000/auth/sso/apple-payment', 
-            {
-                method: 'POST',
-                body: JSON.stringify({...params }),
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
-            })    
-        const data = await response?.json()        
-        
-        return data?.data
-    }
-    catch (err:any) {
-        throw new Error(err.response?.data?.message);
-    }
-}
+  return data?.data;
+};
 
 export function usePostAppleAccessToken(
   options?: UseMutationOptions<any, Error, string, any>,

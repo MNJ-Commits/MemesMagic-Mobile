@@ -1,496 +1,720 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, View, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, FlatList, Keyboard, Image, } from 'react-native';
-import Suggestions from "../assets/svgs/suggestions.svg";
-import Download2 from "../assets/svgs/download2.svg";
-import Pro from "../assets/svgs/pro.svg";
-import Search from "../assets/svgs/search.svg";
-import TextIcon from "../assets/svgs/text.svg";
-import BgColors from "../assets/svgs/bg-colors.svg";
-import STextEnable from "../assets/svgs/s-text-enable.svg";
-import STextDisable from "../assets/svgs/s-text-disable.svg";
-import YellowBoxB from "../assets/svgs/green-box-b.svg";
-import YellowBoxBB from "../assets/svgs/green-box-bb.svg";
-import YellowBoxT from "../assets/svgs/green-box-t.svg";
-import YellowBoxTB from "../assets/svgs/green-box-tb.svg";
-import RightTick from "../assets/svgs/right-tick.svg";
-import { RFValue } from 'react-native-responsive-fontsize';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+  Keyboard,
+  Image,
+} from 'react-native';
+import Pro from '../assets/svgs/pro.svg';
+import Search from '../assets/svgs/search.svg';
+import TextIcon from '../assets/svgs/text.svg';
+import YellowBoxB from '../assets/svgs/green-box-b.svg';
+import YellowBoxBB from '../assets/svgs/green-box-bb.svg';
+import YellowBoxT from '../assets/svgs/green-box-t.svg';
+import YellowBoxTB from '../assets/svgs/green-box-tb.svg';
+import RightTick from '../assets/svgs/right-tick.svg';
+import {RFValue} from 'react-native-responsive-fontsize';
 import AppFlatlist from '../components/AppFlatlist';
-import { useGetBannerTemplates } from '../hooks/useGetBannerTemplates';
-import { useGetFonts } from '../hooks/useGetFonts';
-import { AppModal } from '../components/AppModal';
-
-import { Fonts } from '../utils/Fonts';
-import { Colors } from '../utils/colors';
-import { useGetBannerSearch } from '../hooks/useGetBannerSearch';
-import { useFocusEffect } from '@react-navigation/native';
-import { loadAppleAccessTokenFromStorage, loadVerifyPaymentFromStorage, storeAppleAccessToken } from '../store/asyncStorage';
-import Modal from 'react-native-modal';
-import { styles } from './SubscriptionScreen';
+import {useGetBannerTemplates} from '../hooks/useGetBannerTemplates';
+import {useGetFonts} from '../hooks/useGetFonts';
+import {AppModal} from '../components/AppModal';
+import {Colors} from '../utils/colors';
+import {useGetBannerSearch} from '../hooks/useGetBannerSearch';
+import {useFocusEffect} from '@react-navigation/native';
+import {
+  loadAppleAccessTokenFromStorage,
+  loadVerifyPaymentFromStorage,
+  storeAppleAccessToken,
+} from '../store/asyncStorage';
 import AppPaymentStatusModal from '../components/PaymentStatusModal';
-import { Log } from 'ffmpeg-kit-react-native';
 
-
-const BannerScreen = ({navigation, route}:any) => {
- 
-  const [visibleSearch, setVisibleSearch] = useState<boolean>(false)
-  const [sText, setSText] = useState<Boolean>(false)
-  const [fontFile, setFontFile] = useState<string>("Lucita-Regular.otf")  
-  const [fontcolor, setFontcolor] = useState<string>("#000000")  
-  const [textPosition, setTextPosition] = useState('YellowBoxBB')
-  const [fontsArray, setFontsArray] = useState<string[]>([])  
-  const [text, setText] = useState<string>("")
-  const [query, setQuery] = useState<string>("")
-  const [loader, setLoader] = useState<Boolean>(false)
-  const [refreshLoader, setRefreshLoader] = useState<Boolean>(false)
+const BannerScreen = ({navigation, route}: any) => {
+  const [visibleSearch, setVisibleSearch] = useState<boolean>(false);
+  const [sText, setSText] = useState<Boolean>(false);
+  const [fontFile, setFontFile] = useState<string>('Lucita-Regular.otf');
+  const [fontcolor, setFontcolor] = useState<string>('#000000');
+  const [textPosition, setTextPosition] = useState('YellowBoxBB');
+  const [fontsArray, setFontsArray] = useState<string[]>([]);
+  const [text, setText] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
+  const [loader, setLoader] = useState<Boolean>(false);
+  const [refreshLoader, setRefreshLoader] = useState<Boolean>(false);
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
-  const [allGif, setAllGIF] = useState<any>([])  
+  const [allGif, setAllGIF] = useState<any>([]);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
 
-  const [accessToken, setAccessToken] = useState<string>("")
-  const [loading, setLoading] = useState<boolean>(false)
+  const [accessToken, setAccessToken] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-  
   const getBannerTemplates: any = useGetBannerTemplates(page, limit, {
-    enabled:false,
+    enabled: false,
     onSuccess: (res: any) => {
-      console.log("res: ",res.length);
-      setRefreshLoader(false)
+      console.log('res: ', res.length);
+      setRefreshLoader(false);
       setAllGIF([...new Set([...allGif, ...res])]);
     },
-    onError: (res: any) => console.log('getBannerTemplates onError: ',res),
+    onError: (res: any) => console.log('getBannerTemplates onError: ', res),
   });
 
-  const getBannerSearch: any = useGetBannerSearch(query, page, limit,{
-    enabled:false,
-    onSuccess: (res: any) => { 
-      setRefreshLoader(false)
+  const getBannerSearch: any = useGetBannerSearch(query, page, limit, {
+    enabled: false,
+    onSuccess: (res: any) => {
+      setRefreshLoader(false);
       // setLoader(false) 1st attmpt
-      setAllGIF([...new Set([...allGif, ...res])]); 
+      setAllGIF([...new Set([...allGif, ...res])]);
     },
-    onError: (res: any) => console.log('getBannerSearch onError: ',res),
+    onError: (res: any) => console.log('getBannerSearch onError: ', res),
   });
 
   const getFonts: any = useGetFonts({
     onSuccess: (res: any) => {
-      // let fontList: {fontname:string; name:string, fontFamily:string}[] = []
-      // for (var i=0; i<res.length; i++){
-      //   if( staticFonts.includes(res[i].fontname) ) 
-      //     fontList.push({'fontname': res[i].fontname, 'name': res[i].name, 'fontFamily':'' })
-      // }
-      // setFontNameList(fontList)
+      let fontList: {fontname: string; name: string; fontFamily: string}[] = [];
+      for (var i = 0; i < res.length; i++) {
+        if (staticFonts.includes(res[i].fontname))
+          fontList.push({
+            fontname: res[i].fontname,
+            name: res[i].name,
+            fontFamily: '',
+          });
+      }
+      setFontNameList(fontList);
       setFontsArray(res);
     },
-    onError: (res: any) => console.log('onError: ',res),
+    onError: (res: any) => console.log('onError: ', res),
   });
 
   const staticFontsPair = [
-    {fontname:"Arial",              fontFamily:"Arial",             fontFile:"arial.ttf"}, 
-    // {fontname:"Arial Black",         fontFamily:"Arial Black",           fontFile:"arialb.ttf"}, 
-    {fontname:"Times New Roman",    fontFamily:"times",             fontFile:"times.ttf"}, 
-    {fontname:"Bahnschrift",        fontFamily:"Bahnschrift",       fontFile:"bahnschrift.ttf"}, 
-    {fontname:"Lucita-Regular",        fontFamily:"Lucita-Regular",       fontFile: "Lucita-Regular.otf"}, 
-    // {fontname:"Calibri",            fontFamily:"Calibri Regular",   fontFile:"calibri.ttf"}, 
-    {fontname:"Calibr bold",        fontFamily:"Calibri Bold",      fontFile:"calibrib.ttf"}, 
-    {fontname:"Calibri bold italic", fontFamily:"Calibri Bold Italic", fontFile:"calibribi.ttf"}, 
-    {fontname:"Calibri light",      fontFamily:"Calibri Light",     fontFile:"calibril.ttf"}, 
-    {fontname:"Calibri italic",     fontFamily:"Calibri Italic",    fontFile:"calibrii.ttf"}, 
-    {fontname:"Calibri light italic", fontFamily:"Calibri Light Italic", fontFile:"calibrili.ttf"}, 
-    {fontname:"Capture it", fontFamily:"Capture it", fontFile: `${encodeURIComponent("Capture it.ttf")}`}, 
-    {fontname:"Cibola", fontFamily:"cibola", fontFile:"cibola.ttf"}, 
-    {fontname:"Lazer84", fontFamily:"Lazer84", fontFile:"Lazer84.ttf"}, 
-    {fontname:"Netigen", fontFamily:"Netigen", fontFile:"Netigen.ttf"}, 
-    {fontname:"Cooper Std", fontFamily:"Cooper Std", fontFile:`${encodeURIComponent("Cooper Std.otf")}`}, 
-    {fontname:"Helvetica", fontFamily:"Helvetica", fontFile:"Helvetica.ttc"}, 
-    {fontname:"KaushanScript", fontFamily:"KaushanScript-Regular", fontFile:"KaushanScript-Regular.otf"}, 
-    {fontname:"Rounds Black", fontFamily:"Rounds Black", fontFile: `${encodeURIComponent("Rounds Black.otf")}`}, 
-    // {fontname:"SF Pro Text", fontFamily:"SF-Pro-Text-Regular", fontFile:"SF-Pro-Text-Regular.otf"}, 
-  ]
+    {fontname: 'Arial', fontFamily: 'Arial', fontFile: 'arial.ttf'},
+    {
+      fontname: 'Arial Black',
+      fontFamily: 'Arial Black',
+      fontFile: 'arialb.ttf',
+    },
+    {fontname: 'Times New Roman', fontFamily: 'times', fontFile: 'times.ttf'},
+    {
+      fontname: 'Bahnschrift',
+      fontFamily: 'Bahnschrift',
+      fontFile: 'bahnschrift.ttf',
+    },
+    {
+      fontname: 'Lucita-Regular',
+      fontFamily: 'Lucita-Regular',
+      fontFile: 'Lucita-Regular.otf',
+    },
+    {
+      fontname: 'Calibri',
+      fontFamily: 'Calibri Regular',
+      fontFile: 'calibri.ttf',
+    },
+    {
+      fontname: 'Calibr bold',
+      fontFamily: 'Calibri Bold',
+      fontFile: 'calibrib.ttf',
+    },
+    {
+      fontname: 'Calibri bold italic',
+      fontFamily: 'Calibri Bold Italic',
+      fontFile: 'calibribi.ttf',
+    },
+    {
+      fontname: 'Calibri light',
+      fontFamily: 'Calibri Light',
+      fontFile: 'calibril.ttf',
+    },
+    {
+      fontname: 'Calibri italic',
+      fontFamily: 'Calibri Italic',
+      fontFile: 'calibrii.ttf',
+    },
+    {
+      fontname: 'Calibri light italic',
+      fontFamily: 'Calibri Light Italic',
+      fontFile: 'calibrili.ttf',
+    },
+    {
+      fontname: 'Capture it',
+      fontFamily: 'Capture it',
+      fontFile: `${encodeURIComponent('Capture it.ttf')}`,
+    },
+    {fontname: 'Cibola', fontFamily: 'cibola', fontFile: 'cibola.ttf'},
+    {fontname: 'Lazer84', fontFamily: 'Lazer84', fontFile: 'Lazer84.ttf'},
+    {fontname: 'Netigen', fontFamily: 'Netigen', fontFile: 'Netigen.ttf'},
+    {
+      fontname: 'Cooper Std',
+      fontFamily: 'Cooper Std',
+      fontFile: `${encodeURIComponent('Cooper Std.otf')}`,
+    },
+    {fontname: 'Helvetica', fontFamily: 'Helvetica', fontFile: 'Helvetica.ttc'},
+    {
+      fontname: 'KaushanScript',
+      fontFamily: 'KaushanScript-Regular',
+      fontFile: 'KaushanScript-Regular.otf',
+    },
+    {
+      fontname: 'Rounds Black',
+      fontFamily: 'Rounds Black',
+      fontFile: `${encodeURIComponent('Rounds Black.otf')}`,
+    },
+    {
+      fontname: 'SF Pro Text',
+      fontFamily: 'SF-Pro-Text-Regular',
+      fontFile: 'SF-Pro-Text-Regular.otf',
+    },
+  ];
 
   const refresh = () => {
-    console.log('Giphy refresh');
-    
-    setAllGIF([]); 
-    setRefreshLoader(true)   
-    setLoader(true)
-    if (page > 1 && text.length===0) {
+    setAllGIF([]);
+    setRefreshLoader(true);
+    setLoader(true);
+    if (page > 1 && text.length === 0) {
       setPage(1);
-    } 
-    else{
-      if(query.length!=0 )
-        getBannerSearch.refetch()
-      else
-        getBannerTemplates.refetch()
-    };
-  }
+    } else {
+      if (query.length != 0) getBannerSearch.refetch();
+      else getBannerTemplates.refetch();
+    }
+  };
 
   useEffect(() => {
-     
-    setLoader(true)       
-    if(query.length!=0 && page == 1){
-      console.log("refresh render");
-      setAllGIF([])
-      setRefreshLoader(true)  
-      getBannerSearch.refetch()
+    setLoader(true);
+    if (query.length != 0 && page == 1) {
+      console.log('refresh render');
+      setAllGIF([]);
+      setRefreshLoader(true);
+      getBannerSearch.refetch();
+    } else if (query.length != 0 && page > 1) {
+      // setLoader(false) 2nd attmpt
+      getBannerSearch.refetch();
+    } else if (text.length == 0 && page == 1) {
+      setAllGIF([]);
+      setRefreshLoader(true);
+      getBannerTemplates.refetch(); // refresh refetch()
+    } else if (text.length == 0 && page > 1) {
+      getBannerTemplates.refetch();
+    } else if (text.length !== 0 && page == 1) {
+      setAllGIF([]);
+      getBannerTemplates.refetch();
+    } else if (text.length !== 0 && page > 1) {
+      getBannerTemplates.refetch(); //kept in synch with custom
+      // not rendering on text
     }
-    else if(query.length!=0 && page > 1)
-    {
-       // setLoader(false) 2nd attmpt    
-      getBannerSearch.refetch()  
-    }
-    else if(text.length==0 && page == 1 ){   
-      setAllGIF([])   
-      setRefreshLoader(true)   
-      getBannerTemplates.refetch() // refresh refetch()
-    }
-    else if(text.length==0 && page > 1) {   
-      getBannerTemplates.refetch()
-    }
-    else if(text.length!==0 && page == 1) {  
-      setAllGIF([])   
-      getBannerTemplates.refetch()
-    }
-    else if(text.length!==0 && page > 1) {  
-       // setLoader(false) 3rd attmpt      
-      getBannerTemplates.refetch()  //kept in synch with custom 
-                                      // not rendering on text
-    }
-
   }, [page]);
 
-  useEffect(()=>{
-    
-    setAllGIF([]); 
-    setRefreshLoader(true) 
-    setPage(1)
-    if(query.length!=0 )
-      getBannerSearch.refetch()
-    else
-      getBannerTemplates.refetch()
- 
-  },[query])
+  useEffect(() => {
+    setAllGIF([]);
+    setRefreshLoader(true);
+    setPage(1);
+    if (query.length != 0) getBannerSearch.refetch();
+    else getBannerTemplates.refetch();
+  }, [query]);
 
- 
-    
   // Refresh after One-Time Payment is made
-  const loadPurchaseStatus = async ()=>{
+  const loadPurchaseStatus = async () => {
+    const appleAccessToken: any = await loadAppleAccessTokenFromStorage().catch(
+      (error: any) => {
+        console.log('loadAppleAccessTokenFromStorage Error: ', error);
+      },
+    );
 
-    const appleAccessToken: any = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-      console.log('loadAppleAccessTokenFromStorage Error: ', error);
-    })
-    
     await loadVerifyPaymentFromStorage()
-    .then((verifyPayment)=>{
-      // Store
-      if( (appleAccessToken?.access_token===undefined) && verifyPayment?.one_time ){
-        setLoading(true)
-        const intervalId = setInterval(async () => {
-          // Local
-          if(accessToken.length===0){
-            await loadAppleAccessTokenFromStorage()
-            .then((appleAccessToken)=>{ 
-              if (appleAccessToken?.access_token) { 
-                setAccessToken(appleAccessToken?.access_token) 
-                setLoading(false)
-                refresh(); 
-                // To stop the interval, use clearInterval with the interval ID
-                clearInterval(intervalId); 
-              } 
-              console.log("This code runs every 1 second.");
-            })
-            .catch((error:any)=>{
-              console.log('loadAppleAccessTokenFromStorage Error: ', error);
-            })
-          }
-          else{
-            // To stop the interval, use clearInterval with the interval ID
-            clearInterval(intervalId);
-          }
-        }, 1000);        
-      }
-      else if(appleAccessToken?.galleryRefresh){
-        storeAppleAccessToken({ access_token: appleAccessToken?.access_token, galleryRefresh: false, individualRefresh: false })
-        setAccessToken(appleAccessToken?.access_token)
-        refresh(); 
-      }
-      else if(appleAccessToken){
-        console.log("yees");
-        
-        setAccessToken(appleAccessToken?.access_token)
-      }
-    }) 
-    .catch((error:any)=>{
-      console.log('loadVerifyPaymentFromStorage Error: ', error);
-    })
-  }
+      .then(verifyPayment => {
+        // Store
+        if (
+          appleAccessToken?.access_token === undefined &&
+          verifyPayment?.one_time
+        ) {
+          setLoading(true);
+          const intervalId = setInterval(async () => {
+            // Local
+            if (accessToken.length === 0) {
+              await loadAppleAccessTokenFromStorage()
+                .then(appleAccessToken => {
+                  if (appleAccessToken?.access_token) {
+                    setAccessToken(appleAccessToken?.access_token);
+                    setLoading(false);
+                    refresh();
+                    // To stop the interval, use clearInterval with the interval ID
+                    clearInterval(intervalId);
+                  }
+                  console.log('This code runs every 1 second.');
+                })
+                .catch((error: any) => {
+                  console.log('loadAppleAccessTokenFromStorage Error: ', error);
+                });
+            } else {
+              // To stop the interval, use clearInterval with the interval ID
+              clearInterval(intervalId);
+            }
+          }, 1000);
+        } else if (appleAccessToken?.galleryRefresh) {
+          storeAppleAccessToken({
+            access_token: appleAccessToken?.access_token,
+            galleryRefresh: false,
+            individualRefresh: false,
+          });
+          setAccessToken(appleAccessToken?.access_token);
+          refresh();
+        } else if (appleAccessToken) {
+          console.log('yees');
+
+          setAccessToken(appleAccessToken?.access_token);
+        }
+      })
+      .catch((error: any) => {
+        console.log('loadVerifyPaymentFromStorage Error: ', error);
+      });
+  };
 
   useFocusEffect(
-    useCallback(()=>{
-      loadPurchaseStatus()
-      // async ()=>{
-      //   const access_token = await loadAppleAccessTokenFromStorage().catch((error:any)=>{
-      //     console.log('loadAppleAccessTokenFromStorage Error: ', error);
-      //   })
-      //   if(route?.params?.refetch){
-      //     setAccessToken(access_token)
-      //     refresh()
-      //   }
-      // }
-    },[])
-  )
-  
-  const searchInput: any = useRef()  
-  
+    useCallback(() => {
+      loadPurchaseStatus();
+    }, []),
+  );
+
+  const searchInput: any = useRef();
+
   return (
-    <SafeAreaView style= {{flex:1, backgroundColor:'#25282D' }} >
+    <SafeAreaView style={{flex: 1, backgroundColor: '#25282D'}}>
       <KeyboardAvoidingView
-        enabled={ searchInput.isFocussed ? false : true}
+        enabled={searchInput.isFocussed ? false : true}
         style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding': undefined }
-        keyboardVerticalOffset={10}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={10}>
         {/* Header */}
-        <View style={{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#000000',padding:RFValue(15) }}>
-          <View style={{flexDirection:'row', alignItems:'center', width:'48%', justifyContent:'flex-start'}} >
-            <TouchableOpacity onPress={() => navigation.navigate('CustomScreen')} style={{ backgroundColor:'#A8A9AB', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10), marginRight:RFValue(20)   }} >
-              <Text style={{color:'white', fontSize:RFValue(8), fontFamily:'Lucita-Regular' }} >CUSTOM</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            backgroundColor: '#000000',
+            padding: RFValue(15),
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              width: '48%',
+              justifyContent: 'flex-start',
+            }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('CustomScreen')}
+              style={{
+                backgroundColor: '#A8A9AB',
+                borderRadius: RFValue(20),
+                height: RFValue(22),
+                paddingTop: RFValue(7),
+                paddingHorizontal: RFValue(10),
+                marginRight: RFValue(20),
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: RFValue(8),
+                  fontFamily: 'Lucita-Regular',
+                }}>
+                CUSTOM
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor:'#3386FF', borderRadius: RFValue(20), height:RFValue(22), paddingTop:RFValue(7), paddingHorizontal:RFValue(10)  }} >
-              <Text style={{color:'white', fontSize:RFValue(8), fontFamily:'Lucita-Regular' }} >BANNER</Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#3386FF',
+                borderRadius: RFValue(20),
+                height: RFValue(22),
+                paddingTop: RFValue(7),
+                paddingHorizontal: RFValue(10),
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: RFValue(8),
+                  fontFamily: 'Lucita-Regular',
+                }}>
+                BANNER
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={{flexDirection:'row', width:'30%', justifyContent:'flex-end'}} >
-            {/* <TouchableOpacity>
-              <Suggestions width={RFValue(25)} height={RFValue(25)}/>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Download2 width={RFValue(25)} height={RFValue(25)}/>
-            </TouchableOpacity> */}
-            <TouchableOpacity onPress={()=>{navigation.navigate('SubscriptionScreen',{ returnScreen:'BannerScreen' })}} >
-              <Pro width={RFValue(25)} height={RFValue(25)}/>
+          <View
+            style={{
+              flexDirection: 'row',
+              width: '30%',
+              justifyContent: 'flex-end',
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('SubscriptionScreen', {
+                  returnScreen: 'BannerScreen',
+                });
+              }}>
+              <Pro width={RFValue(25)} height={RFValue(25)} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Navigation Menu */}      
-        <View style={{ backgroundColor:'#FF439E', padding:RFValue(10) }}>
-          { visibleSearch ?    
-          <View style={{flexDirection:'row', alignItems:'center', width:'100%', alignSelf:'center', }}>     
-            <View style={{ flexDirection:'row', alignItems:'center', alignSelf:'center', width:'80%', borderRadius:RFValue(30), backgroundColor: '#FF439E', borderWidth:1, borderColor:'#ffffff', height:RFValue(35.5)  }} >
-              <Search width={RFValue(20)} height={RFValue(20)} style={{ marginHorizontal: RFValue(10)}} />
-              <TextInput
-                ref={searchInput}
-                defaultValue={query}
-                editable={true}
-                placeholderTextColor={'#ffffff'}
-                // onChangeText={(e: any) => { setQuery(e) }}
-                placeholder={'Search'}
-                returnKeyType= {'search'}
-                  onSubmitEditing ={ (e)=>{
-                    setLoader(true)
-                    setQuery(e?.nativeEvent?.text)
-                    setVisibleSearch(false)
-                    Keyboard.dismiss()
+        {/* Navigation Menu */}
+        <View style={{backgroundColor: '#FF439E', padding: RFValue(10)}}>
+          {visibleSearch ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '100%',
+                alignSelf: 'center',
+              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  width: '80%',
+                  borderRadius: RFValue(30),
+                  backgroundColor: '#FF439E',
+                  borderWidth: 1,
+                  borderColor: '#ffffff',
+                  height: RFValue(35.5),
+                }}>
+                <Search
+                  width={RFValue(20)}
+                  height={RFValue(20)}
+                  style={{marginHorizontal: RFValue(10)}}
+                />
+                <TextInput
+                  ref={searchInput}
+                  defaultValue={query}
+                  editable={true}
+                  placeholderTextColor={'#ffffff'}
+                  placeholder={'Search'}
+                  returnKeyType={'search'}
+                  onSubmitEditing={e => {
+                    setLoader(true);
+                    setQuery(e?.nativeEvent?.text);
+                    setVisibleSearch(false);
+                    Keyboard.dismiss();
                   }}
-                style= {{ 
-                  fontSize: RFValue(15),
-                  fontFamily:'arial',
-                  width:'85%',
-                  alignSelf:'center',
-                  height: RFValue(40), 
-                  color:'#ffffff',
-                }}            
-              />
-            </View> 
-            <TouchableOpacity onPress={()=> { setVisibleSearch(false); setQuery('')}} >
-              <Text style={{fontFamily:'Lucita-Regular', color:'#ffffff', fontSize: RFValue(14), paddingLeft:RFValue(10) }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-          :
-          <View style={{ flexDirection:'row', justifyContent:'space-between',  alignItems:'center', }}>
-            <TouchableOpacity onPress={()=>setVisibleSearch(true)} style={{borderWidth:1, borderColor:"#ffffff", width:RFValue(35), height:RFValue(35), padding:RFValue(6), borderRadius:RFValue(20), marginRight:RFValue(10) }}  >
-              <Search width={RFValue(20)} height={RFValue(20)} />
-            </TouchableOpacity> 
-            <View style={{ flexDirection:'row', justifyContent:'space-between', width:'85%', paddingHorizontal:RFValue(15), alignItems:'center', backgroundColor:'#ffffff', borderRadius: RFValue(20), padding:RFValue(5)   }} >
-              <TouchableOpacity onPress={()=>{setFontModalVisible(!isFontModalVisible)}} >
-                <TextIcon width={RFValue(25)} height={RFValue(25)} style={{marginTop:RFValue(6), }} />
+                  style={{
+                    fontSize: RFValue(15),
+                    fontFamily: 'arial',
+                    width: '85%',
+                    alignSelf: 'center',
+                    height: RFValue(40),
+                    color: '#ffffff',
+                  }}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisibleSearch(false);
+                  setQuery('');
+                }}>
+                <Text
+                  style={{
+                    fontFamily: 'Lucita-Regular',
+                    color: '#ffffff',
+                    fontSize: RFValue(14),
+                    paddingLeft: RFValue(10),
+                  }}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>{setColorModalVisible(!isColorModalVisible)}} >
-                <View style={{width:RFValue(25), height:RFValue(22), backgroundColor: fontcolor, borderColor:'#000000', borderWidth:RFValue(2), borderRadius:RFValue(3), marginRight:RFValue(7) }} ></View>
-                {/* <BgColors width={RFValue(25)} height={RFValue(25)}/> */}
-              </TouchableOpacity>
-              {/* <TouchableOpacity onPress={()=>{setSText(!sText)}} >
-                {sText ? 
-                  <STextEnable width={RFValue(25)} height={RFValue(25)}/>
-                  : <STextDisable width={RFValue(25)} height={RFValue(25)}/>
-                }
-              </TouchableOpacity> */}
-              
-              { 
-              textPosition=='YellowBoxB' ?  
-                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxBB')} >
-                  <YellowBoxB width={RFValue(25)} height={RFValue(25)} />
-                </TouchableOpacity>
-              : textPosition=='YellowBoxBB' ?  
-                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxT')} >
-                  <YellowBoxBB width={RFValue(25)} height={RFValue(25)} />
-                </TouchableOpacity>
-              : textPosition=='YellowBoxT' ?  
-                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxTB')} >
-                  <YellowBoxT width={RFValue(25)} height={RFValue(25)} />
-                </TouchableOpacity>
-              : textPosition=='YellowBoxTB' ?
-                <TouchableOpacity onPress={()=> setTextPosition('YellowBoxB')} >
-                  <YellowBoxTB width={RFValue(25)} height={RFValue(25)} />
-                </TouchableOpacity>
-              : null
-              }
-            
             </View>
-          </View>
-            }
+          ) : (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={() => setVisibleSearch(true)}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ffffff',
+                  width: RFValue(35),
+                  height: RFValue(35),
+                  padding: RFValue(6),
+                  borderRadius: RFValue(20),
+                  marginRight: RFValue(10),
+                }}>
+                <Search width={RFValue(20)} height={RFValue(20)} />
+              </TouchableOpacity>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '85%',
+                  paddingHorizontal: RFValue(15),
+                  alignItems: 'center',
+                  backgroundColor: '#ffffff',
+                  borderRadius: RFValue(20),
+                  padding: RFValue(5),
+                }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFontModalVisible(!isFontModalVisible);
+                  }}>
+                  <TextIcon
+                    width={RFValue(25)}
+                    height={RFValue(25)}
+                    style={{marginTop: RFValue(6)}}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setColorModalVisible(!isColorModalVisible);
+                  }}>
+                  <View
+                    style={{
+                      width: RFValue(25),
+                      height: RFValue(22),
+                      backgroundColor: fontcolor,
+                      borderColor: '#000000',
+                      borderWidth: RFValue(2),
+                      borderRadius: RFValue(3),
+                      marginRight: RFValue(7),
+                    }}></View>
+                </TouchableOpacity>
+
+                {textPosition == 'YellowBoxB' ? (
+                  <TouchableOpacity
+                    onPress={() => setTextPosition('YellowBoxBB')}>
+                    <YellowBoxB width={RFValue(25)} height={RFValue(25)} />
+                  </TouchableOpacity>
+                ) : textPosition == 'YellowBoxBB' ? (
+                  <TouchableOpacity
+                    onPress={() => setTextPosition('YellowBoxT')}>
+                    <YellowBoxBB width={RFValue(25)} height={RFValue(25)} />
+                  </TouchableOpacity>
+                ) : textPosition == 'YellowBoxT' ? (
+                  <TouchableOpacity
+                    onPress={() => setTextPosition('YellowBoxTB')}>
+                    <YellowBoxT width={RFValue(25)} height={RFValue(25)} />
+                  </TouchableOpacity>
+                ) : textPosition == 'YellowBoxTB' ? (
+                  <TouchableOpacity
+                    onPress={() => setTextPosition('YellowBoxB')}>
+                    <YellowBoxTB width={RFValue(25)} height={RFValue(25)} />
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+          )}
         </View>
 
         {/* GridView */}
         <>
-          <AppFlatlist 
+          <AppFlatlist
             data={allGif}
-            API = { query.length!=0 ? getBannerSearch : getBannerTemplates }
-            API2 = { query.length!=0 ? getBannerSearch : getBannerTemplates }
+            API={query.length != 0 ? getBannerSearch : getBannerTemplates}
+            API2={query.length != 0 ? getBannerSearch : getBannerTemplates}
             giphy={true}
-            refresh = {refresh}
-            isLoader = {loader}
-            setLoader = {setLoader}
+            refresh={refresh}
+            isLoader={loader}
+            setLoader={setLoader}
             refreshLoader={refreshLoader}
-            allGifLength = {allGif?.length}
+            allGifLength={allGif?.length}
             appleAccessToken={accessToken}
             text={text}
-            page = {page}
-            setPage = {setPage}
-            setLimit = {setLimit}
-            textPosition={textPosition==='YellowBoxT' ? 'top' : textPosition==='YellowBoxTB'? 'top' : textPosition==='YellowBoxB' ? 'bottom': 'bottom'}
-            textBackground = {(textPosition==='YellowBoxBB' || textPosition==='YellowBoxTB') ? true :false} 
+            page={page}
+            setPage={setPage}
+            setLimit={setLimit}
+            textPosition={
+              textPosition === 'YellowBoxT'
+                ? 'top'
+                : textPosition === 'YellowBoxTB'
+                ? 'top'
+                : textPosition === 'YellowBoxB'
+                ? 'bottom'
+                : 'bottom'
+            }
+            textBackground={
+              textPosition === 'YellowBoxBB' || textPosition === 'YellowBoxTB'
+                ? true
+                : false
+            }
             textStroke={sText}
-            color = {fontcolor} 
-            font = {fontFile}
+            color={fontcolor}
+            font={fontFile}
             navigation={navigation}
           />
-          {(refreshLoader ) && 
-            <View style={{ width:40, height:40, borderRadius:20, flexDirection:'row', alignItems:'center', justifyContent:'center', alignSelf:'center', backgroundColor:'#353535', position:'absolute', top:150  }} >
+          {refreshLoader && (
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'center',
+                backgroundColor: '#353535',
+                position: 'absolute',
+                top: 150,
+              }}>
               <Image
                 source={require('../assets/gifs/loader.gif')}
-                style={{width: 20, height: 20, zIndex:1 }}
+                style={{width: 20, height: 20, zIndex: 1}}
               />
             </View>
-          } 
+          )}
         </>
-        
+
         {/* Apply Text */}
-        <View 
-          style={{ 
-          marginTop:RFValue(5), flexDirection:'row', alignItems:'center',alignSelf:'center',width:'90%', borderRadius:RFValue(30), backgroundColor: '#ffffff', height:RFValue(42)  }} >
+        <View
+          style={{
+            marginTop: RFValue(5),
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'center',
+            width: '90%',
+            borderRadius: RFValue(30),
+            backgroundColor: '#ffffff',
+            height: RFValue(42),
+          }}>
           <TextInput
             editable={true}
             multiline={true}
             placeholderTextColor={'#8d8d8d'}
-            onChangeText={(e: any) => { setText(e) }}
+            onChangeText={(e: any) => {
+              setText(e);
+            }}
             placeholder={'Type your text here'}
-            returnKeyType='next'
-            style= {{
-              width:'82%',
+            returnKeyType="next"
+            style={{
+              width: '82%',
               fontSize: RFValue(15),
-              fontFamily:'arial',
-              paddingBottom:RFValue(2),
+              fontFamily: 'arial',
+              paddingBottom: RFValue(2),
               marginLeft: RFValue(20),
-              color:'#000000',  
-            }}          
+              color: '#000000',
+            }}
           />
-          <TouchableOpacity 
-            onPress={()=> {
-              Keyboard.dismiss()
+          <TouchableOpacity
+            onPress={() => {
+              Keyboard.dismiss();
               // getBannerTemplates.refetch()
-            }} 
-          >
-            {refreshLoader ?
+            }}>
+            {refreshLoader ? (
               <ActivityIndicator size={'small'} />
-              :
+            ) : (
               <RightTick width={RFValue(20)} height={RFValue(20)} />
-            }
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-      
+
       {/* Font Family Modal */}
-      <AppModal isVisible={isFontModalVisible} setModalVisible = {setFontModalVisible} style={{justifyContent: 'flex-end', margin: 0}}  >
+      <AppModal
+        isVisible={isFontModalVisible}
+        setModalVisible={setFontModalVisible}
+        style={{justifyContent: 'flex-end', margin: 0}}>
         <AppModal.Container>
           <AppModal.Header title="Select a font style" />
           <AppModal.Body>
-            <ScrollView 
-              style={{paddingLeft:RFValue(10), height: RFValue(300)}} showsVerticalScrollIndicator={false} >
-              {staticFontsPair.map((data:any)=>{  
-                return(
-                  <TouchableOpacity 
-                    onPress={()=> 
-                      {
-                        setFontFile(data.fontFile)
-                        setTimeout(()=>setFontModalVisible(false), 500)
-                      }}
-                    style={{paddingVertical:10}} >
-                    <Text style={[{fontFamily: data.fontFamily, padding:10, fontSize: RFValue(16), color:'#ffffff', }, 
-                      fontFile.split('.')[0] === data.fontFile.split('.')[0] && {fontWeight:'bold', fontSize: RFValue(16), borderWidth:1, borderColor:"#fff"} ]}>
+            <ScrollView
+              style={{paddingLeft: RFValue(10), height: RFValue(300)}}
+              showsVerticalScrollIndicator={false}>
+              {staticFontsPair.map((data: any) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFontFile(data.fontFile);
+                      setTimeout(() => setFontModalVisible(false), 500);
+                    }}
+                    style={{paddingVertical: 10}}>
+                    <Text
+                      style={[
+                        {
+                          fontFamily: data.fontFamily,
+                          padding: 10,
+                          fontSize: RFValue(16),
+                          color: '#ffffff',
+                        },
+                        fontFile.split('.')[0] ===
+                          data.fontFile.split('.')[0] && {
+                          fontWeight: 'bold',
+                          fontSize: RFValue(16),
+                          borderWidth: 1,
+                          borderColor: '#fff',
+                        },
+                      ]}>
                       {data.fontname}
                     </Text>
                   </TouchableOpacity>
-                )}
-              )}
+                );
+              })}
             </ScrollView>
           </AppModal.Body>
-          <AppModal.Footer>
-          </AppModal.Footer>
+          <AppModal.Footer></AppModal.Footer>
         </AppModal.Container>
       </AppModal>
-      
+
       {/* Color Modal */}
-      <AppModal isVisible={isColorModalVisible} setModalVisible = {setColorModalVisible} style={{justifyContent: 'flex-end', margin: 0}} >
+      <AppModal
+        isVisible={isColorModalVisible}
+        setModalVisible={setColorModalVisible}
+        style={{justifyContent: 'flex-end', margin: 0}}>
         <AppModal.Container>
           <AppModal.Header title="Select a font color" />
           <AppModal.Body>
-             <ScrollView 
-              style={{ height: RFValue(300) }} 
-              contentContainerStyle={{flexDirection:'row', flexWrap:'wrap', justifyContent:'center', }}
-              showsVerticalScrollIndicator={false} >
-              {Colors.map((data:any)=>{  
-                return(
-                  <TouchableOpacity 
-                    onPress={()=> 
-                      {
-                        setFontcolor(data.hex)
-                        setTimeout(()=>setColorModalVisible(false), 500)
-                      }}
-                      style={{ width:RFValue(55), height:RFValue(55), justifyContent:'center', alignItems:'center'}} >
-                    <View style={{width:RFValue(35), height:RFValue(35), backgroundColor: data.hex, borderRadius:RFValue(3) }} ></View>
-                    <Text style={[{fontFamily:'arial', fontSize: RFValue(8), padding: RFValue(3), color:'#ffffff'}]}>{data.hex}</Text>
+            <ScrollView
+              style={{height: RFValue(300)}}
+              contentContainerStyle={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+              showsVerticalScrollIndicator={false}>
+              {Colors.map((data: any) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFontcolor(data.hex);
+                      setTimeout(() => setColorModalVisible(false), 500);
+                    }}
+                    style={{
+                      width: RFValue(55),
+                      height: RFValue(55),
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <View
+                      style={{
+                        width: RFValue(35),
+                        height: RFValue(35),
+                        backgroundColor: data.hex,
+                        borderRadius: RFValue(3),
+                      }}></View>
+                    <Text
+                      style={[
+                        {
+                          fontFamily: 'arial',
+                          fontSize: RFValue(8),
+                          padding: RFValue(3),
+                          color: '#ffffff',
+                        },
+                      ]}>
+                      {data.hex}
+                    </Text>
                   </TouchableOpacity>
-                )}
-              )}
-            </ScrollView>  
+                );
+              })}
+            </ScrollView>
           </AppModal.Body>
-          <AppModal.Footer>
-          </AppModal.Footer>
+          <AppModal.Footer></AppModal.Footer>
         </AppModal.Container>
       </AppModal>
 
-       {/* Payment Status Modal */}
+      {/* Payment Status Modal */}
       <AppPaymentStatusModal loading={loading} />
-
     </SafeAreaView>
   );
 };
 
-
 export default BannerScreen;
-
-
-
